@@ -6,7 +6,7 @@ import { MATCH_TYPE_LABEL, ROLE_LABEL, type MatchType, type UserRole } from "@/l
 import { Badge, ButtonLink, SectionHeading, Avatar, roleTone } from "@/components/ui";
 import { Countdown } from "./Countdown";
 import { ArrowIcon, DiscordIcon } from "./Icons";
-import { LogoMark } from "@/components/brand/Logo";
+import { LogoFull } from "@/components/brand/Logo";
 
 /* ---------------- Hero ---------------- */
 
@@ -27,9 +27,6 @@ export async function Hero() {
       <div className="bg-glow-accent ember absolute inset-0" />
       <div className="bg-grid absolute inset-0 opacity-70" />
       <div className="hero-vignette absolute inset-0" />
-      <div aria-hidden className="pointer-events-none absolute right-[-6%] top-[8%] hidden h-[560px] w-[560px] opacity-[0.16] blur-[2px] lg:block">
-        <LogoMark className="h-full w-full" />
-      </div>
 
       <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-20 pt-16 md:px-6 md:pt-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:pb-28 lg:pt-28">
         <div>
@@ -58,6 +55,7 @@ export async function Hero() {
         </div>
 
         <div className="rise rise-3">
+          <LogoFull className="mx-auto mb-8 h-64 w-64 drop-shadow-[0_0_70px_rgba(155,77,255,0.5)] md:h-80 md:w-80" />
           <div className="panel panel-accent cut relative p-6 md:p-8">
             <div className="flex items-center justify-between">
               <p className="eyebrow">Next match</p>
@@ -117,7 +115,7 @@ export function Marquee() {
   const items = ["Vstroz Alliance", "Multi-game", "Now Recruiting", "All skill levels", "Every game welcome", "Zero drama", "One banner"];
   const row = [...items, ...items];
   return (
-    <div className="overflow-hidden border-b border-line bg-[linear-gradient(90deg,#0c0a09,#141110,#0c0a09)] py-3.5">
+    <div className="overflow-hidden border-b border-line bg-[linear-gradient(90deg,#0a0910,#0f0e16,#0a0910)] py-3.5">
       <div className="marquee-track flex w-max gap-12 whitespace-nowrap">
         {row.map((t, i) => (
           <span key={i} className="font-display text-[0.72rem] font-bold uppercase tracking-[0.34em] text-gold">
@@ -139,7 +137,7 @@ export function Pillars() {
         {pillars.map((p, i) => (
           <div key={p.title} className="panel cut group relative overflow-hidden p-6 transition hover:-translate-y-1">
             <span className="display absolute right-4 top-3 text-5xl text-gold/[0.07] transition group-hover:text-gold/[0.16]">0{i + 1}</span>
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gold/40 bg-[radial-gradient(circle_at_30%_25%,rgba(230,185,90,0.25),transparent_70%)] text-xl text-gold-bright">{p.icon}</span>
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gold/40 bg-[radial-gradient(circle_at_30%_25%,rgba(155,77,255,0.25),transparent_70%)] text-xl text-gold-bright">{p.icon}</span>
             <h3 className="display mt-5 text-2xl">{p.title}</h3>
             <p className="mt-3 text-sm leading-relaxed text-muted">{p.text}</p>
           </div>
@@ -278,10 +276,10 @@ export async function Leadership() {
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {leaders.map((l) => (
-            <div key={l.id} className={`panel cut p-6 transition hover:-translate-y-1 ${l.role === "LEADER" ? "border-gold/50 shadow-[0_0_60px_-30px_rgba(230,185,90,0.6)]" : ""}`}>
+            <div key={l.id} className={`panel cut p-6 transition hover:-translate-y-1 ${l.role === "LEADER" ? "border-gold/50 shadow-[0_0_60px_-30px_rgba(155,77,255,0.6)]" : ""}`}>
               <div className="flex items-center justify-between">
                 <Avatar name={l.displayName} size="lg" tone={roleTone(l.role)} />
-                <LogoMark className="h-8 w-8 opacity-40" />
+                <span />
               </div>
               <h3 className="display mt-5 text-3xl">{l.displayName}</h3>
               <Badge tone={roleTone(l.role)} className="mt-2">

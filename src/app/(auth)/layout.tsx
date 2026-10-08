@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <Logo />
           </Link>
           <div>
-            <LogoFull className="h-64 w-64 drop-shadow-[0_0_40px_rgba(255,90,31,0.35)]" />
+            <LogoFull className="h-64 w-64 drop-shadow-[0_0_40px_rgba(155,77,255,0.35)]" />
             <h2 className="display mt-8 text-4xl xl:text-5xl">
               {site.motto.split(" ").slice(0, 2).join(" ")}
               <br />

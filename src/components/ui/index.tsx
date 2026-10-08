@@ -11,11 +11,11 @@ const base =
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-[linear-gradient(180deg,#f8e2a0_0%,#dcb24d_48%,#b48a2b_100%)] text-[#1a1207] shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_10px_28px_-12px_rgba(230,185,90,0.75)] hover:brightness-[1.07] hover:-translate-y-px",
+    "bg-[linear-gradient(180deg,#b78bff_0%,#8b3dff_48%,#5b21b6_100%)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_10px_28px_-12px_rgba(155,77,255,0.75)] hover:brightness-[1.07] hover:-translate-y-px",
   secondary:
     "bg-white/[0.03] text-text border border-gold/35 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-gold/70 hover:bg-white/[0.06] hover:-translate-y-px",
   ghost: "text-muted hover:text-text hover:bg-white/5",
-  gold: "bg-[linear-gradient(180deg,#ff8a4d,#e04a14)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_10px_28px_-12px_rgba(255,90,31,0.8)] hover:brightness-110 hover:-translate-y-px",
+  gold: "bg-[linear-gradient(180deg,#f1f2f5,#c9ccd6_55%,#9a9fab)] text-[#121018] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_10px_28px_-12px_rgba(155,77,255,0.8)] hover:brightness-110 hover:-translate-y-px",
   danger: "bg-danger/10 text-danger border border-danger/30 hover:bg-danger/20",
 };
 
@@ -50,7 +50,7 @@ type Tone = "neutral" | "accent" | "gold" | "success" | "warning" | "danger" | "
 
 const tones: Record<Tone, string> = {
   neutral: "bg-white/[0.04] text-muted border-line-strong",
-  accent: "bg-accent/12 text-[#ffb08a] border-accent/35",
+  accent: "bg-accent/12 text-[#d9c2ff] border-accent/35",
   gold: "bg-gold/12 text-gold-bright border-gold/45",
   success: "bg-success/15 text-success border-success/40",
   warning: "bg-warning/15 text-warning border-warning/40",
@@ -206,7 +206,7 @@ export function Avatar({ name, size = "md", tone = "neutral" }: { name: string; 
   const ring = tone === "gold" ? "ring-gold" : tone === "accent" ? "ring-accent" : "ring-line-strong";
   return (
     <span
-      className={`inline-flex ${sz} shrink-0 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_25%,#2c2420,#120f0e)] font-display font-bold uppercase ring-1 ${ring}`}
+      className={`inline-flex ${sz} shrink-0 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_25%,#2a2440,#0f0e16)] font-display font-bold uppercase ring-1 ${ring}`}
       aria-hidden
     >
       {name.slice(0, 2)}

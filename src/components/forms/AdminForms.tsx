@@ -47,7 +47,7 @@ export function CreateMatchForm() {
         <textarea id="description" name="description" className="input min-h-24" placeholder="Briefing, requirements, voice channel…" />
       </Field>
       <label className="flex items-center gap-3 text-sm text-muted">
-        <input type="checkbox" name="isPublic" defaultChecked className="h-4 w-4 accent-[#ff5a1f]" />
+        <input type="checkbox" name="isPublic" defaultChecked className="h-4 w-4 accent-[#9b4dff]" />
         Show on the public schedule
       </label>
       <SubmitButton pendingText="Creating…">Create match</SubmitButton>
@@ -88,7 +88,7 @@ export function AnnouncementForm() {
         <textarea id="body" name="body" className="input min-h-28" required />
       </Field>
       <label className="flex items-center gap-3 text-sm text-muted">
-        <input type="checkbox" name="pinned" className="h-4 w-4 accent-[#ff5a1f]" />
+        <input type="checkbox" name="pinned" className="h-4 w-4 accent-[#9b4dff]" />
         Pin to the top of the portal
       </label>
       <SubmitButton pendingText="Posting…">Post announcement</SubmitButton>

@@ -47,18 +47,18 @@ const esc = (s: string | null | undefined) =>
   (s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
 
 function shell(title: string, body: string, cta?: { href: string; label: string }) {
-  return `<!doctype html><html><body style="margin:0;background:#080706;font-family:Arial,Helvetica,sans-serif;color:#f3ede4">
+  return `<!doctype html><html><body style="margin:0;background:#050507;font-family:Arial,Helvetica,sans-serif;color:#f1f0f6">
   <div style="max-width:560px;margin:0 auto;padding:32px 24px">
-    <p style="margin:0 0 6px;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:#e6b95a">Vstroz Alliance</p>
+    <p style="margin:0 0 6px;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:#c9ccd6">Vstroz Alliance</p>
     <h1 style="margin:0 0 18px;font-size:22px;line-height:1.2">${esc(title)}</h1>
-    <div style="background:#121010;border:1px solid rgba(230,185,90,.25);border-radius:4px;padding:18px 20px;font-size:14px;line-height:1.6">${body}</div>
-    ${cta ? `<p style="margin:22px 0 0"><a href="${cta.href}" style="display:inline-block;background:#dcb24d;color:#1a1207;text-decoration:none;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;font-size:12px;padding:12px 20px;border-radius:2px">${esc(cta.label)}</a></p>` : ""}
-    <p style="margin:28px 0 0;font-size:11px;color:#6b645b">Sent by the Vstroz Alliance website.</p>
+    <div style="background:#0f0e16;border:1px solid rgba(155,77,255,.25);border-radius:4px;padding:18px 20px;font-size:14px;line-height:1.6">${body}</div>
+    ${cta ? `<p style="margin:22px 0 0"><a href="${cta.href}" style="display:inline-block;background:#9b4dff;color:#1a1207;text-decoration:none;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;font-size:12px;padding:12px 20px;border-radius:2px">${esc(cta.label)}</a></p>` : ""}
+    <p style="margin:28px 0 0;font-size:11px;color:#67647a">Sent by the Vstroz Alliance website.</p>
   </div></body></html>`;
 }
 
 const row = (k: string, v: string | null | undefined) =>
-  `<tr><td style="padding:4px 12px 4px 0;color:#a89f92;white-space:nowrap;vertical-align:top">${esc(k)}</td><td style="padding:4px 0">${esc(v) || "—"}</td></tr>`;
+  `<tr><td style="padding:4px 12px 4px 0;color:#a4a1b3;white-space:nowrap;vertical-align:top">${esc(k)}</td><td style="padding:4px 0">${esc(v) || "—"}</td></tr>`;
 
 function gameRows(game: string | null | undefined, json: string | null | undefined) {
   if (!game || !json) return "";
@@ -97,7 +97,7 @@ export async function notifyNewApplication(a: ApplicantEmailData) {
     ${row("Game", a.game)}${row("Class / IGN", [a.gameClass, a.ign].filter(Boolean).join(" · "))}
     ${gameRows(a.game, a.gameAnswers)}
   </table>
-  ${a.applicationNote ? `<p style="margin:14px 0 0;padding-top:12px;border-top:1px solid rgba(230,185,90,.2)"><strong>Comments</strong><br>${esc(a.applicationNote).replace(/\n/g, "<br>")}</p>` : ""}`;
+  ${a.applicationNote ? `<p style="margin:14px 0 0;padding-top:12px;border-top:1px solid rgba(155,77,255,.2)"><strong>Comments</strong><br>${esc(a.applicationNote).replace(/\n/g, "<br>")}</p>` : ""}`;
   return sendEmail({
     to: notifyEmail,
     subject: `New application: ${a.displayName} (${a.playerType ?? "player"})`,
@@ -111,9 +111,9 @@ export async function notifyDecision(a: { displayName: string; email: string }, 
   const approved = decision === "APPROVED";
   const body = approved
     ? `<p style="margin:0">Welcome to the alliance, ${esc(a.displayName)}. Your application was approved and the member portal is now unlocked: match signups, guild roles, announcements, and the full roster.</p>
-       <p style="margin:12px 0 0">If you have not already, join the Discord: <a href="${discordInvite}" style="color:#e6b95a">${discordInvite}</a></p>`
+       <p style="margin:12px 0 0">If you have not already, join the Discord: <a href="${discordInvite}" style="color:#c9ccd6">${discordInvite}</a></p>`
     : `<p style="margin:0">Thanks for applying, ${esc(a.displayName)}. An officer reviewed your application and did not approve it at this time.</p>`;
-  const noteHtml = note ? `<p style="margin:12px 0 0;padding-top:12px;border-top:1px solid rgba(230,185,90,.2)"><strong>Note from the officer</strong><br>${esc(note)}</p>` : "";
+  const noteHtml = note ? `<p style="margin:12px 0 0;padding-top:12px;border-top:1px solid rgba(155,77,255,.2)"><strong>Note from the officer</strong><br>${esc(note)}</p>` : "";
   return sendEmail({
     to: a.email,
     subject: approved ? "You're in — Vstroz Alliance" : "Your Vstroz Alliance application",

@@ -64,7 +64,7 @@ export function MediaPlayer({ items, parent }: { items: MediaItem[]; parent: str
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={thumb} alt="" className="h-full w-full object-cover" loading="lazy" />
                     ) : (
-                      <span className="flex h-full w-full items-center justify-center font-display text-xs uppercase tracking-widest text-[#a970ff]">Twitch</span>
+                      <span className="flex h-full w-full items-center justify-center font-display text-xs uppercase tracking-widest text-[#c9a8ff]">Twitch</span>
                     )}
                   </span>
                   <span className="min-w-0">

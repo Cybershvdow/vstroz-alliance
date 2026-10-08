@@ -72,7 +72,7 @@ export function RegisterForm() {
           <div className="grid gap-2 sm:grid-cols-2">
             {PLAYER_TYPES.map((t) => (
               <label key={t} className="flex cursor-pointer items-start gap-3 border border-line-strong bg-bg-2 p-3 has-[:checked]:border-accent has-[:checked]:bg-accent/10">
-                <input type="radio" name="playerType" value={t} className="mt-1 accent-[#ff5a1f]" required />
+                <input type="radio" name="playerType" value={t} className="mt-1 accent-[#9b4dff]" required />
                 <span>
                   <span className="font-display text-base font-bold uppercase tracking-wider">{t}</span>
                   <span className="block text-xs text-muted">{playerTypeHelp[t]}</span>
@@ -88,7 +88,7 @@ export function RegisterForm() {
           <div className="grid gap-2 sm:grid-cols-2">
             {INTEREST_OPTIONS.map((o) => (
               <label key={o} className="flex cursor-pointer items-center gap-3 border border-line-strong bg-bg-2 px-3 py-2.5 has-[:checked]:border-accent has-[:checked]:bg-accent/10">
-                <input type="checkbox" name="interests" value={o} className="accent-[#ff5a1f]" />
+                <input type="checkbox" name="interests" value={o} className="accent-[#9b4dff]" />
                 <span className="text-sm">{o}</span>
               </label>
             ))}

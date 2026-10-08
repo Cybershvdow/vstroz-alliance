@@ -157,7 +157,7 @@ export async function LatestContent() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={thumb} alt="" className="h-full w-full object-cover transition group-hover:scale-[1.03]" loading="lazy" />
                   ) : (
-                    <span className="flex h-full w-full items-center justify-center font-display text-sm uppercase tracking-widest text-[#a970ff]">Twitch</span>
+                    <span className="flex h-full w-full items-center justify-center font-display text-sm uppercase tracking-widest text-[#c9a8ff]">Twitch</span>
                   )}
                   {p.featured && <Badge tone="gold" className="absolute left-3 top-3">Featured</Badge>}
                 </span>
@@ -198,7 +198,7 @@ export async function Command() {
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {leaders.map((l) => (
-            <div key={l.id} className={`panel cut group relative overflow-hidden p-6 transition hover:-translate-y-1 ${l.role === "LEADER" ? "border-gold/50 shadow-[0_0_60px_-30px_rgba(230,185,90,0.6)]" : ""}`}>
+            <div key={l.id} className={`panel cut group relative overflow-hidden p-6 transition hover:-translate-y-1 ${l.role === "LEADER" ? "border-gold/50 shadow-[0_0_60px_-30px_rgba(155,77,255,0.6)]" : ""}`}>
               <div className="bg-glow-accent absolute inset-0 opacity-0 transition group-hover:opacity-60" />
               <div className="relative">
                 <div className="flex items-start justify-between">
