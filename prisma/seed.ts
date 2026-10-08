@@ -43,7 +43,7 @@ async function main() {
       playtime: "5+ years",
       playerType: "Hardcore",
       interests: "Sieges & Large-scale War, PvP, Dungeons & Raids",
-      games: "Aion 2",
+      games: "Aion",
       status: "APPROVED",
       role: "LEADER",
       tier: "ELITE",
@@ -64,7 +64,7 @@ async function main() {
       playtime: "5+ years",
       playerType: "Hardcore",
       interests: "Community & Events, PvP, Dungeons & Raids",
-      games: "Aion 2",
+      games: "Aion",
       status: "APPROVED",
       role: "LEADER",
       tier: "ELITE",
@@ -158,7 +158,7 @@ async function main() {
           playerType: ["Hardcore", "Softcore", "Casual"][["thessaly", "corvin", "elowen"].indexOf(username)] ?? "Softcore",
           interests: ["Dungeons & Raids, Sieges & Large-scale War", "PvP, Sieges & Large-scale War", "Leveling & Questing, Community & Events"][["thessaly", "corvin", "elowen"].indexOf(username)],
           games: ["Aion Classic, Lost Ark", "Throne and Liberty, Black Desert", "Final Fantasy XIV, Valorant"][["thessaly", "corvin", "elowen"].indexOf(username)],
-          game: "Aion 2",
+          game: "Aion",
           gameAnswers: JSON.stringify(
             [
               { ign: "Thessaly", mainClass: "Cleric", preferredRole: "Healer", focus: "Both equally", raidExperience: "Experienced", hoursPerWeek: "20+ hours", voice: "Yes, always", previousGuilds: "Ironveil (Aion Classic, 2 years)" },
@@ -191,7 +191,7 @@ async function main() {
   const siege = await db.match.create({
     data: {
       title: "Fortress Siege — Upper Abyss",
-      game: "Aion 2",
+      game: "Aion",
       type: "SIEGE",
       startsAt: daysFromNow(4, 19),
       description: "Full mobilization. Be in voice 15 minutes early. Tanks and healers report to Draven for formation.",
@@ -201,7 +201,7 @@ async function main() {
   const council = await db.match.create({
     data: {
       title: "Weekly War Council",
-      game: "Aion 2",
+      game: "Aion",
       type: "MEETING",
       startsAt: daysFromNow(2, 19),
       description: "Officers and class leads review the last siege and set next week's targets. Members welcome to listen.",
@@ -211,7 +211,7 @@ async function main() {
   const dungeon = await db.match.create({
     data: {
       title: "Dungeon Night: Gear Push",
-      game: "Aion 2",
+      game: "Aion",
       type: "PVE",
       startsAt: daysFromNow(3, 20),
       description: "Groups formed by role. Priority to recruits who need gear for siege eligibility.",
@@ -221,7 +221,7 @@ async function main() {
   const training = await db.match.create({
     data: {
       title: "Abyss PvP Training",
-      game: "Aion 2",
+      game: "Aion",
       type: "TRAINING",
       startsAt: daysFromNow(6, 19, 30),
       description: "Open to all ranks. Positioning, target calling, and group movement drills.",
@@ -239,7 +239,7 @@ async function main() {
   await db.match.create({
     data: {
       title: "Scrim vs. Ironveil Legion",
-      game: "Aion 2",
+      game: "Aion",
       type: "SCRIM",
       startsAt: daysFromNow(-5, 20),
       description: "24v24 practice scrim in the Abyss.",
@@ -251,7 +251,7 @@ async function main() {
   await db.match.create({
     data: {
       title: "Fortress Siege — Lower Abyss",
-      game: "Aion 2",
+      game: "Aion",
       type: "SIEGE",
       startsAt: daysFromNow(-9, 19),
       description: "Defensive siege. Held the fortress through three counter-pushes.",

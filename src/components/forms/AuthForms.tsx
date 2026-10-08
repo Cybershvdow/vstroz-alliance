@@ -97,7 +97,7 @@ export function RegisterForm() {
         </fieldset>
 
         <Field label="What other games do you play?" name="games" error={err?.games} hint="Anything else you play now or used to play seriously.">
-          <input id="games" name="games" className="input" placeholder="e.g. Aion 2, Throne and Liberty, Valorant" maxLength={300} />
+          <input id="games" name="games" className="input" placeholder="e.g. Aion, Throne and Liberty, Valorant" maxLength={300} />
         </Field>
       </section>
 

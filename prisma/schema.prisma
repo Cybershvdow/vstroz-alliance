@@ -18,7 +18,7 @@ model User {
   passwordHash    String
   displayName     String
   ign             String?   // in-game name
-  gameClass       String?   // Aion 2 class
+  gameClass       String?   // Aion class
   discord         String?
   applicationNote String?
   playtime        String?   // how long they have played MMOs
@@ -84,7 +84,7 @@ model Vote {
 model Match {
   id          String   @id @default(cuid())
   title       String
-  game        String   @default("Aion 2")
+  game        String   @default("Aion")
   type        String   @default("SIEGE") // SIEGE | SCRIM | TOURNAMENT | PVE | TRAINING | MEETING | COMMUNITY
   startsAt    DateTime
   description String   @default("")

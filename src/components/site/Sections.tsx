@@ -94,7 +94,7 @@ export async function Hero() {
         <div className="mx-auto grid max-w-7xl grid-cols-2 divide-line md:grid-cols-4 md:divide-x">
           {[
             ["Active members", `${memberCount}`],
-            ["Playing now", "Aion 2 + more"],
+            ["Playing now", "Aion"],
             ["Matches won", `${wins}`],
             ["Recruiting", "Open"],
           ].map(([label, value]) => (
@@ -152,6 +152,9 @@ export function Pillars() {
 const statusBadge = { active: "success", voting: "gold", upcoming: "neutral" } as const;
 const statusLabel = { active: "Active", voting: "Voting", upcoming: "Upcoming" } as const;
 
+/** One game = one wide featured card; two or three = columns. */
+export const gridCols = (n: number) => (n >= 3 ? "lg:grid-cols-3" : n === 2 ? "lg:grid-cols-2" : "mx-auto w-full max-w-3xl lg:grid-cols-1");
+
 export function GamesGrid({ full = false }: { full?: boolean }) {
   return (
     <section className="relative border-y border-line bg-bg-2 py-24">
@@ -165,7 +168,7 @@ export function GamesGrid({ full = false }: { full?: boolean }) {
             </ButtonLink>
           </div>
         )}
-        <div className={`${full ? "" : "mt-12"} grid gap-4 lg:grid-cols-3`}>
+        <div className={`${full ? "" : "mt-12"} grid gap-4 ${gridCols(games.length)}`}>
           {games.map((g) => (
             <article
               key={g.slug}
@@ -286,7 +289,7 @@ export async function Leadership() {
                 {ROLE_LABEL[l.role as UserRole]}
               </Badge>
               {l.title && <p className="mt-3 text-sm text-text">{l.title}</p>}
-              {l.gameClass && <p className="mt-1 text-xs text-muted">Aion 2 · {l.gameClass}</p>}
+              {l.gameClass && <p className="mt-1 text-xs text-muted">Aion · {l.gameClass}</p>}
             </div>
           ))}
         </div>

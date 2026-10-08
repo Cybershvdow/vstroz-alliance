@@ -6,7 +6,7 @@ export const site = {
   tag: "VST",
   motto: "One banner. Every world.",
   tagline:
-    "Friends who became a community. A competitive, multi-game alliance for adults who play to win and look after their own. Aion 2 is where we start.",
+    "Friends who became a community. A competitive, multi-game alliance for adults who play to win and look after their own. Aion is where we start.",
   founded: "2024",
   discordInvite: "https://discord.gg/Ydjz54qsp",
   contactEmail: "gdiazmarine@gmail.com",
@@ -76,37 +76,15 @@ export const games: {
   focus: string[];
 }[] = [
   {
-    slug: "aion-2",
-    name: "Aion 2",
+    slug: "aion",
+    name: "Aion",
     status: "active",
     badge: "First Title",
     genre: "MMORPG · NCSOFT",
     faction: "Decided at launch",
     server: "Decided at launch",
-    desc: "The first game the alliance builds its competitive brand on. Legion structure, siege rosters, dungeon groups, and class leads. Details lock in as the game rolls out.",
+    desc: "The first game the alliance officially builds a guild website for. Legion structure, siege rosters, dungeon groups, and class leads. Details lock in as the game rolls out.",
     focus: ["Fortress Sieges", "Abyss PvP", "Endgame Dungeons", "Legion Progression"],
-  },
-  {
-    slug: "second-title",
-    name: "Next title",
-    status: "voting",
-    badge: "Member Vote",
-    genre: "Decided by the alliance",
-    faction: "—",
-    server: "—",
-    desc: "Once the Aion 2 core is established, members vote on the next shared title. Nominations open in Discord.",
-    focus: ["Nominations open", "Vote at The Round Table"],
-  },
-  {
-    slug: "side-games",
-    name: "Side games",
-    status: "upcoming",
-    badge: "Community Nights",
-    genre: "Co-op · Shooters · Strategy",
-    faction: "—",
-    server: "—",
-    desc: "Off-night sessions for whatever the crew is into that week. No commitment, same people.",
-    focus: ["Weekend Sessions", "Open to all ranks"],
   },
 ];
 

@@ -35,7 +35,7 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
         <SectionHeading eyebrow="Roster" title="The alliance" text={`${members.length} ${filter ? filter + (members.length === 1 ? "" : "s") : "approved members"} on the roster.`} />
       </div>
 
-      <p className="label mt-10 mb-2">Filter by Aion 2 class</p>
+      <p className="label mt-10 mb-2">Filter by Aion class</p>
       <div className="flex flex-wrap gap-2">
         <Link href="/roster" className={`cut-sm border px-3 py-1.5 font-display text-sm font-bold uppercase tracking-[0.12em] ${!filter ? "border-accent bg-accent text-white" : "border-line-strong text-muted hover:text-text"}`}>
           All
@@ -63,7 +63,7 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
                 {m.tier === "VETERAN" && <Badge tone="accent">Veteran</Badge>}
               </div>
               <p className="truncate text-xs text-muted">
-                {m.gameClass ? `Aion 2 · ${m.gameClass}` : "Alliance member"}
+                {m.gameClass ? `Aion · ${m.gameClass}` : "Alliance member"}
                 {m.title ? ` · ${m.title}` : ""}
               </p>
               <p className="text-[0.7rem] text-dim">Since {formatDate(m.createdAt)}</p>

@@ -1,6 +1,6 @@
 # Vstroz Alliance — Guild Website & Member Portal
 
-A production-grade website and members portal for the Vstroz Alliance, a multi-game community with **Aion 2** as its flagship title.
+A production-grade website and members portal for the Vstroz Alliance, a multi-game community with **Aion** as its flagship title.
 
 - **Public site**: home, games, roster, schedule, recruitment.
 - **Applications**: visitors register and land in a pending state.
@@ -56,7 +56,7 @@ SEED_LEADER_PASSWORD="<leader password used by the seed>"
 | ---------------------------- | ------------------------------ |
 | Site name, motto, Discord link, socials | `src/lib/site.ts`  |
 | Games list, pillars, milestones, weekly rhythm, requirements | `src/lib/site.ts` |
-| Aion 2 classes, match types, positions | `src/lib/constants.ts` |
+| Aion classes, match types, positions | `src/lib/constants.ts` |
 | Colors, fonts, effects       | `src/app/globals.css` (`@theme`) |
 | Logo artwork                 | `scripts/build-logo.mjs` (run `npm run logo` to regenerate SVG/PNG exports and the inline component) |
 

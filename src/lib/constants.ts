@@ -40,7 +40,7 @@ export const GAME_CLASSES = [
   "Undecided",
 ] as const;
 
-export const GAMES = ["Aion 2", "All Games", "Side Game"] as const;
+export const GAMES = ["Aion", "All Games", "Side Game"] as const;
 
 /* Militant officer titles, per the alliance. Change here and every page updates. */
 export const ROLE_LABEL: Record<UserRole, string> = {
@@ -138,7 +138,7 @@ export type GameEntry = {
 
 /** Add a game here and it appears in the application form with the right question set. */
 export const GAME_CATALOG: readonly GameEntry[] = [
-  { name: "Aion 2", genre: "MMO", enabled: true, classes: GAME_CLASSES },
+  { name: "Aion", genre: "MMO", enabled: true, classes: GAME_CLASSES },
   // { name: "Valorant", genre: "FPS", enabled: false },
   // { name: "League of Legends", genre: "MOBA", enabled: false },
 ];

@@ -11,7 +11,7 @@ export default function GamesPage() {
         <SectionHeading
           eyebrow="Our games"
           title="Every game we play, we play together."
-          text="Aion 2 is the first title the alliance rallies around, but membership is about the people, not one game. Play what you love and bring it to the alliance."
+          text="Aion is the first title the alliance rallies around, but membership is about the people, not one game. Play what you love and bring it to the alliance."
         />
       </section>
       <GamesGrid full />

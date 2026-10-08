@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { gridCols } from "@/components/site/Sections";
 import { db } from "@/lib/db";
 import { site, games, identity } from "@/lib/site";
 import { ENABLED_GAMES, ROLE_LABEL, TIER_LABEL, type UserRole } from "@/lib/constants";
@@ -31,7 +32,7 @@ export async function TeamsGrid() {
             All games <ArrowIcon />
           </ButtonLink>
         </div>
-        <div className="mt-12 grid gap-4 lg:grid-cols-3">
+        <div className={`mt-12 grid gap-4 ${gridCols(games.length)}`}>
           {games.map((g) => {
             const c = counts.find((x) => x.name === g.name);
             const active = g.status === "active";

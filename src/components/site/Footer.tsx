@@ -81,7 +81,7 @@ export function Footer() {
           <p>
             © {new Date().getFullYear()} {site.name}. All rights reserved.
           </p>
-          <p>Aion 2 is a trademark of NCSOFT. Vstroz Alliance is an independent player community.</p>
+          <p>Aion is a trademark of NCSOFT. Vstroz Alliance is an independent player community.</p>
         </div>
       </div>
     </footer>

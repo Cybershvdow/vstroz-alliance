@@ -34,7 +34,7 @@ export default async function OpenGraphImage() {
             <span>One banner.</span>
             <span style={{ color: "#c9ccd6" }}>Every world.</span>
           </div>
-          <div style={{ fontSize: 26, color: "#a4a1b3", marginTop: 24, maxWidth: 640 }}>Competitive multi-game alliance. Adults only. Aion 2 is where we start.</div>
+          <div style={{ fontSize: 26, color: "#a4a1b3", marginTop: 24, maxWidth: 640 }}>Competitive multi-game alliance. Adults only. Aion is where we start.</div>
         </div>
       </div>
     ),
