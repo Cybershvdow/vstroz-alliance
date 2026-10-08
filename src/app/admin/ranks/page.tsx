@@ -31,7 +31,7 @@ export default async function AdminRanksPage() {
     <>
       <PageHeader
         title="Ranks & votes"
-        text={`Recruit → Member is an officer call. Veteran and Elite are decided by vote: ${VOTE_RULES.windowHours}h window, quorum ${VOTE_RULES.quorum}, ${Math.round(VOTE_RULES.passRatio * 100)}% yes to pass. ${isLeader ? "As Leader you can close early, veto, or override a rank." : ""}`}
+        text={`Recruit → Member is an officer call. Veteran and Elite are decided by vote: ${VOTE_RULES.windowHours}h window, quorum ${VOTE_RULES.quorum}, ${Math.round(VOTE_RULES.passRatio * 100)}% yes to pass. ${isLeader ? "As a General you can close early, veto, or override a rank." : ""}`}
       />
 
       <div className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
