@@ -128,6 +128,7 @@ export async function updateProfileAction(_prev: ActionState, formData: FormData
 
   const parsed = profileSchema.safeParse({
     displayName: clean(formData.get("displayName")),
+    email: clean(formData.get("email")),
     ign: clean(formData.get("ign")),
     gameClass: clean(formData.get("gameClass")),
     discord: clean(formData.get("discord")),
@@ -135,10 +136,14 @@ export async function updateProfileAction(_prev: ActionState, formData: FormData
   if (!parsed.success) return { ok: false, errors: flattenErrors(parsed.error) };
 
   const d = parsed.data;
+  const email = d.email.toLowerCase();
+  const taken = await db.user.findFirst({ where: { email, NOT: { id: me.id } }, select: { id: true } });
+  if (taken) return { ok: false, errors: { email: ["That email is already used by another account"] } };
   await db.user.update({
     where: { id: me.id },
     data: {
       displayName: d.displayName,
+      email,
       ign: d.ign || null,
       gameClass: d.gameClass || null,
       discord: d.discord || null,

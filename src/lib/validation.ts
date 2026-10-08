@@ -57,6 +57,7 @@ export const loginSchema = z.object({
 
 export const profileSchema = z.object({
   displayName: z.string().trim().min(2).max(32),
+  email: z.string().trim().email("Enter a valid email").max(120),
   ign: z.string().trim().max(32).optional().or(z.literal("")),
   gameClass: z.enum(GAME_CLASSES).optional().or(z.literal("")),
   discord: z.string().trim().max(40).optional().or(z.literal("")),

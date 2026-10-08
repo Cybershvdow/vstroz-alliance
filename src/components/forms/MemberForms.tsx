@@ -10,16 +10,21 @@ import { SubmitButton } from "./SubmitButton";
 export function ProfileForm({
   initial,
 }: {
-  initial: { displayName: string; ign: string | null; gameClass: string | null; discord: string | null };
+  initial: { displayName: string; email: string; ign: string | null; gameClass: string | null; discord: string | null };
 }) {
   const [state, action] = useActionState(updateProfileAction, undefined);
   const err = state && !state.ok ? state.errors : undefined;
   return (
     <form action={action} className="space-y-5" noValidate>
       <FormMessage state={state} />
-      <Field label="Display name" name="displayName" error={err?.displayName}>
-        <input id="displayName" name="displayName" className="input" defaultValue={initial.displayName} required />
-      </Field>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label="Display name" name="displayName" error={err?.displayName}>
+          <input id="displayName" name="displayName" className="input" defaultValue={initial.displayName} required />
+        </Field>
+        <Field label="Email" name="email" error={err?.email} hint="Used for application and decision emails.">
+          <input id="email" name="email" type="email" className="input" defaultValue={initial.email} required />
+        </Field>
+      </div>
       <div className="grid gap-5 sm:grid-cols-3">
         <Field label="In-game name" name="ign" error={err?.ign}>
           <input id="ign" name="ign" className="input" defaultValue={initial.ign ?? ""} />

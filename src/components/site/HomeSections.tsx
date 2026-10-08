@@ -27,8 +27,8 @@ export async function TeamsGrid() {
       <div className="relative mx-auto max-w-7xl px-4 md:px-6">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <SectionHeading eyebrow="Divisions" title="Ride under the banner." text="One competitive division per game. Every division has a tried-out roster, a schedule, and a seat at The Round Table." />
-          <ButtonLink href="/esports" variant="secondary">
-            Esports <ArrowIcon />
+          <ButtonLink href="/games" variant="secondary">
+            All games <ArrowIcon />
           </ButtonLink>
         </div>
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
@@ -70,8 +70,8 @@ export async function TeamsGrid() {
                     ))}
                   </ul>
                   <div className="mt-auto pt-6">
-                    <Link href={active ? "/esports" : "/games"} className="font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition group-hover:text-gold-bright">
-                      {active ? "Division page →" : "Learn more →"}
+                    <Link href="/games" className="font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition group-hover:text-gold-bright">
+                      Learn more →
                     </Link>
                   </div>
                 </div>

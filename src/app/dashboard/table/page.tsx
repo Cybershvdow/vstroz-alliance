@@ -55,7 +55,7 @@ export default async function TablePage() {
 
         <div className="space-y-6">
           <Card accent>
-            <h2 className="display text-2xl">Esports tryout</h2>
+            <h2 className="display text-2xl">Competitive tryout</h2>
             <p className="mb-4 mt-1 text-sm text-muted">Every competitive spot is tried out for. Pass the tryout, then the Elite vote.</p>
             <TryoutForm />
           </Card>

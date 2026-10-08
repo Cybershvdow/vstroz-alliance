@@ -24,7 +24,7 @@ async function main() {
   const cyber = await db.user.create({
     data: {
       username: "cybershvdow",
-      email: "leader@vstroz.gg",
+      email: "gdiazmarine@gmail.com",
       passwordHash: await bcrypt.hash(leaderPassword, 12),
       displayName: "Cybershvdow",
       ign: "Cybershvdow",

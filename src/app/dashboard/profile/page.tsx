@@ -10,7 +10,7 @@ export default async function ProfilePage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <h2 className="display mb-5 text-2xl">Details</h2>
-          <ProfileForm initial={{ displayName: me.displayName, ign: me.ign, gameClass: me.gameClass, discord: me.discord }} />
+          <ProfileForm initial={{ displayName: me.displayName, email: me.email, ign: me.ign, gameClass: me.gameClass, discord: me.discord }} />
         </Card>
         <Card>
           <h2 className="display mb-5 text-2xl">Password</h2>
@@ -21,8 +21,8 @@ export default async function ProfilePage() {
               <dd className="mt-1">{me.username}</dd>
             </div>
             <div>
-              <dt className="label">Email</dt>
-              <dd className="mt-1 truncate">{me.email}</dd>
+              <dt className="label">Role</dt>
+              <dd className="mt-1">{me.role === "LEADER" ? "General" : me.role === "OFFICER" ? "Captain" : "Member"}</dd>
             </div>
           </dl>
         </Card>

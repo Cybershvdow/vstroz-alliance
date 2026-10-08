@@ -24,7 +24,6 @@ export const site = {
 
 export const nav = [
   { href: "/", label: "Home" },
-  { href: "/esports", label: "Esports" },
   { href: "/media", label: "Media" },
   { href: "/roster", label: "Roster" },
   { href: "/schedule", label: "Schedule" },
