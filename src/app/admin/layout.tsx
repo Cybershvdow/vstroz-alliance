@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Command center" };
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireOfficer();
   const [pendingApplicants, pendingRoleApps, openVotes, openTable, pendingMedia] = await Promise.all([
-    db.user.count({ where: { status: "PENDING" } }),
+    db.user.count({ where: { status: "PENDING", appliedAt: { not: null } } }),
     db.roleApplication.count({ where: { status: "PENDING" } }),
     db.nomination.count({ where: { status: "OPEN" } }),
     db.dispute.count({ where: { status: "OPEN" } }).then(async (d) => d + (await db.tryoutRequest.count({ where: { status: "PENDING" } }))),

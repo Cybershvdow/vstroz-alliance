@@ -14,14 +14,24 @@ const GENRE_LABEL: Record<string, string> = {
 };
 
 /** Game picker + the question set for that game's genre. Answers post as q_<key>. */
-export function GameQuestions({ errors }: { errors?: Record<string, string[] | undefined> }) {
-  const [game, setGame] = useState(ENABLED_GAMES[0]?.name ?? "");
+export function GameQuestions({
+  errors,
+  initialGame,
+  initialAnswers,
+}: {
+  errors?: Record<string, string[] | undefined>;
+  initialGame?: string;
+  initialAnswers?: Record<string, string>;
+}) {
+  const [game, setGame] = useState(
+    initialGame && ENABLED_GAMES.some((g) => g.name === initialGame) ? initialGame : (ENABLED_GAMES[0]?.name ?? ""),
+  );
   const entry = GAME_CATALOG.find((g) => g.name === game);
   const questions = questionsFor(game);
 
   return (
     <div className="space-y-5">
-      <Field label="Which game are you applying for?" name="game" error={errors?.game} hint={ENABLED_GAMES.length === 1 ? "More games open as the alliance expands." : undefined}>
+      <Field label="Which game do you play?" name="game" error={errors?.game} hint={ENABLED_GAMES.length === 1 ? "More games open as the alliance expands." : undefined}>
         <select id="game" name="game" className="input" value={game} onChange={(e) => setGame(e.target.value)} required>
           {ENABLED_GAMES.map((g) => (
             <option key={g.name} value={g.name}>
@@ -46,7 +56,7 @@ export function GameQuestions({ errors }: { errors?: Record<string, string[] | u
             <div key={`${game}-${q.key}`} className={wide ? "sm:col-span-2" : ""}>
               <Field label={q.label + (q.required ? "" : " (optional)")} name={name} error={err} hint={q.hint}>
                 {q.type === "select" ? (
-                  <select id={name} name={name} className="input" defaultValue="" required={q.required} aria-invalid={!!err}>
+                  <select id={name} name={name} className="input" defaultValue={initialAnswers?.[q.key] ?? ""} required={q.required} aria-invalid={!!err}>
                     <option value="" disabled={q.required}>
                       {q.required ? "Select…" : "—"}
                     </option>
@@ -57,7 +67,7 @@ export function GameQuestions({ errors }: { errors?: Record<string, string[] | u
                     ))}
                   </select>
                 ) : (
-                  <input id={name} name={name} className="input" placeholder={q.placeholder} required={q.required} maxLength={120} aria-invalid={!!err} />
+                  <input id={name} name={name} className="input" defaultValue={initialAnswers?.[q.key] ?? ""} placeholder={q.placeholder} required={q.required} maxLength={120} aria-invalid={!!err} />
                 )}
               </Field>
             </div>

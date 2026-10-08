@@ -80,23 +80,30 @@ export async function submitMediaAction(_prev: ActionState, formData: FormData):
   if (!parsed) return { ok: false, errors: { url: ["Paste a YouTube or Twitch link (video, short, clip, or channel)"] } };
 
   const isOfficer = me.role === "OFFICER" || me.role === "LEADER";
+  // Only officers can post as the alliance; everyone else posts into their own folder.
+  const official = isOfficer && clean(formData.get("official")) === "1";
   await db.mediaPost.create({
-    data: { title, url, provider: parsed.provider, embedId: parsed.embedId, kind: parsed.kind, description, game, postedById: me.id, approved: isOfficer },
+    data: { title, url, provider: parsed.provider, embedId: parsed.embedId, kind: parsed.kind, description, game, postedById: me.id, approved: isOfficer, official },
   });
   revalidateAll();
-  return { ok: true, message: isOfficer ? "Posted to the Media page." : "Submitted. An officer will approve it before it goes public." };
+  return {
+    ok: true,
+    message: official ? "Posted to the Vstroz Alliance folder." : isOfficer ? "Posted to your folder on the Media page." : "Submitted. An officer will approve it before it appears in your folder.",
+  };
 }
 
 export async function reviewMediaAction(formData: FormData) {
   await requireOfficer();
   const id = clean(formData.get("id"));
-  const mode = clean(formData.get("mode")); // approve | unapprove | feature | unfeature | delete
+  const mode = clean(formData.get("mode")); // approve | unapprove | feature | unfeature | official | personal | delete
   if (!id) return;
   if (mode === "delete") await db.mediaPost.delete({ where: { id } });
   else if (mode === "approve") await db.mediaPost.update({ where: { id }, data: { approved: true } });
   else if (mode === "unapprove") await db.mediaPost.update({ where: { id }, data: { approved: false, featured: false } });
   else if (mode === "feature") await db.mediaPost.update({ where: { id }, data: { featured: true, approved: true } });
   else if (mode === "unfeature") await db.mediaPost.update({ where: { id }, data: { featured: false } });
+  else if (mode === "official") await db.mediaPost.update({ where: { id }, data: { official: true } });
+  else if (mode === "personal") await db.mediaPost.update({ where: { id }, data: { official: false } });
   revalidateAll();
 }
 

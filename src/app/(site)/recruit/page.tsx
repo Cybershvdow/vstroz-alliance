@@ -14,7 +14,7 @@ export default function RecruitPage() {
         <SectionHeading eyebrow="Recruitment · 18+" title="Earn the banner." text="Adults only, any time zone, English-speaking. We recruit for attitude and consistency first. Skill gets you a tryout. Character gets you a rank." />
         <div className="mt-10 flex flex-wrap gap-3">
           <ButtonLink href="/register" size="lg">
-            Start application <ArrowIcon />
+            Create an account <ArrowIcon />
           </ButtonLink>
           <a href={site.discordInvite} target="_blank" rel="noreferrer" className="cut-sm inline-flex items-center gap-2 border border-line-strong px-7 py-3.5 font-display text-base font-bold uppercase tracking-[0.12em] hover:border-text">
             <DiscordIcon /> Ask in Discord

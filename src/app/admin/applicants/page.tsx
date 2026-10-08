@@ -35,8 +35,9 @@ function GameAnswers({ game, json }: { game: string | null; json: string | null 
 
 export default async function ApplicantsPage() {
   await requireOfficer();
-  const [pending, recent] = await Promise.all([
-    db.user.findMany({ where: { status: "PENDING" }, orderBy: { createdAt: "asc" } }),
+  const [pending, notApplied, recent] = await Promise.all([
+    db.user.findMany({ where: { status: "PENDING", appliedAt: { not: null } }, orderBy: { appliedAt: "asc" } }),
+    db.user.count({ where: { status: "PENDING", appliedAt: null } }),
     db.user.findMany({
       where: { status: { in: ["APPROVED", "DENIED"] }, role: "MEMBER", reviewedAt: { not: null } },
       orderBy: { reviewedAt: "desc" },
@@ -46,10 +47,13 @@ export default async function ApplicantsPage() {
 
   return (
     <>
-      <PageHeader title="Applicants" text="Approve to unlock the member portal for them. Deny with a note so they know why." />
+      <PageHeader
+        title="Applicants"
+        text={`Approve to unlock the member portal for them. Deny with a note so they know why.${notApplied > 0 ? ` ${notApplied} ${notApplied === 1 ? "account has" : "accounts have"} been created but not filled in a player profile yet; they are not in the queue until they do.` : ""}`}
+      />
 
       {pending.length === 0 ? (
-        <EmptyState title="Queue is clear" text="New applications appear here the moment someone registers." />
+        <EmptyState title="Queue is clear" text="New applications appear here the moment someone completes their player profile." />
       ) : (
         <ul className="space-y-4">
           {pending.map((u) => (
@@ -77,7 +81,7 @@ export default async function ApplicantsPage() {
                       </div>
                       <div>
                         <dt className="label">Applied</dt>
-                        <dd>{formatDate(u.createdAt)}</dd>
+                        <dd>{formatDate(u.appliedAt ?? u.createdAt)}</dd>
                       </div>
                     </dl>
                     <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">

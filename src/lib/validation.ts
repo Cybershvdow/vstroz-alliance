@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { GAME_CLASSES, MATCH_TYPE, POSITION, PLAYTIME_OPTIONS, PLAYER_TYPES, INTEREST_OPTIONS, ENABLED_GAMES, questionsFor } from "@/lib/constants";
+import { MATCH_TYPE, POSITION, PLAYTIME_OPTIONS, PLAYER_TYPES, INTEREST_OPTIONS, ENABLED_GAMES, questionsFor } from "@/lib/constants";
 
 export const usernameSchema = z
   .string()
@@ -15,20 +15,23 @@ export const registerSchema = z
     displayName: z.string().trim().min(2, "Display name is too short").max(32),
     password: z.string().min(8, "Password must be at least 8 characters").max(128),
     confirmPassword: z.string(),
-    ign: z.string().trim().max(32).optional().or(z.literal("")),
-    gameClass: z.enum(GAME_CLASSES).optional().or(z.literal("")),
     discord: z.string().trim().max(40).optional().or(z.literal("")),
-    playtime: z.enum(PLAYTIME_OPTIONS, { message: "Tell us how long you have been playing" }),
-    playerType: z.enum(PLAYER_TYPES, { message: "Pick the type of player you are" }),
-    interests: z.array(z.enum(INTEREST_OPTIONS)).min(1, "Pick at least one thing you enjoy"),
-    games: z.string().trim().max(300).optional().or(z.literal("")),
-    game: z.string().refine((g) => ENABLED_GAMES.some((e) => e.name === g), "Pick a game"),
-    applicationNote: z.string().trim().max(1000).optional().or(z.literal("")),
+    ageConfirm: z.literal("yes", { message: "You must be 18 or older to join" }),
   })
   .refine((d) => d.password === d.confirmPassword, {
     path: ["confirmPassword"],
     message: "Passwords do not match",
   });
+
+/** The player profile. Its first submission is the membership application. */
+export const playerProfileSchema = z.object({
+  playtime: z.enum(PLAYTIME_OPTIONS, { message: "Tell us how long you have been playing" }),
+  playerType: z.enum(PLAYER_TYPES, { message: "Pick the type of player you are" }),
+  interests: z.array(z.enum(INTEREST_OPTIONS)).min(1, "Pick at least one thing you enjoy"),
+  games: z.string().trim().max(300).optional().or(z.literal("")),
+  game: z.string().refine((g) => ENABLED_GAMES.some((e) => e.name === g), "Pick a game"),
+  applicationNote: z.string().trim().max(1000).optional().or(z.literal("")),
+});
 
 /** Validate genre-specific answers for a game. Returns cleaned answers or field errors keyed q_<key>. */
 export function validateGameAnswers(game: string, formData: FormData): { answers: Record<string, string>; errors: FieldErrors } {
@@ -58,8 +61,6 @@ export const loginSchema = z.object({
 export const profileSchema = z.object({
   displayName: z.string().trim().min(2).max(32),
   email: z.string().trim().email("Enter a valid email").max(120),
-  ign: z.string().trim().max(32).optional().or(z.literal("")),
-  gameClass: z.enum(GAME_CLASSES).optional().or(z.literal("")),
   discord: z.string().trim().max(40).optional().or(z.literal("")),
 });
 

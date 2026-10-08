@@ -68,7 +68,7 @@ async function main() {
       status: "APPROVED",
       role: "LEADER",
       tier: "ELITE",
-      title: "Discord Server Leader",
+      title: "Alliance Leader & Founder",
       reviewedAt: new Date(),
       reviewedById: leader.id,
     },

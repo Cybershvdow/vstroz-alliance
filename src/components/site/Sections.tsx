@@ -333,7 +333,7 @@ export function JoinCTA() {
               Earn the <span className="display-gold">banner.</span>
             </h2>
             <p className="mt-4 max-w-xl text-muted">
-              Submit an application, get reviewed by an officer, and unlock the member portal: match signups, role
+              Create an account, fill in your player profile, get reviewed by an officer, and unlock the member portal: match signups, role
               applications, and the full roster.
             </p>
           </div>

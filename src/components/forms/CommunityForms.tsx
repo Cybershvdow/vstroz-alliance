@@ -56,12 +56,14 @@ export function TryoutForm() {
   );
 }
 
-export function MediaForm() {
+/** official = posts into the Vstroz Alliance folder (officers only, server-enforced); otherwise the poster's own folder. */
+export function MediaForm({ official = false }: { official?: boolean }) {
   const [state, action] = useActionState(submitMediaAction, undefined);
   const err = state && !state.ok ? state.errors : undefined;
   return (
     <form action={action} className="space-y-4" noValidate>
       <FormMessage state={state} />
+      {official && <input type="hidden" name="official" value="1" />}
       <Field label="Title" name="media-title" error={err?.title}>
         <input id="media-title" name="title" className="input" placeholder="Fortress siege highlights" maxLength={120} required />
       </Field>
@@ -84,7 +86,7 @@ export function MediaForm() {
       <Field label="Description (optional)" name="media-description">
         <textarea id="media-description" name="description" className="input min-h-20" maxLength={1000} />
       </Field>
-      <SubmitButton pendingText="Submitting…">Post content</SubmitButton>
+      <SubmitButton pendingText="Submitting…">{official ? "Post as Vstroz Alliance" : "Post content"}</SubmitButton>
     </form>
   );
 }

@@ -17,8 +17,8 @@ export type MediaItem = {
 };
 
 /** Featured player + playlist grid. Picks the first (featured) item by default. */
-export function MediaPlayer({ items, parent }: { items: MediaItem[]; parent: string }) {
-  const [current, setCurrent] = useState<MediaItem | null>(items[0] ?? null);
+export function MediaPlayer({ items, parent, initialId }: { items: MediaItem[]; parent: string; initialId?: string }) {
+  const [current, setCurrent] = useState<MediaItem | null>(() => items.find((i) => i.id === initialId) ?? items[0] ?? null);
   if (!current) return null;
 
   return (

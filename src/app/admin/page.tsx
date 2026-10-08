@@ -9,10 +9,10 @@ export default async function AdminOverview() {
   const now = new Date();
   const [members, pending, roleApps, upcoming, recentApplicants] = await Promise.all([
     db.user.count({ where: { status: "APPROVED" } }),
-    db.user.count({ where: { status: "PENDING" } }),
+    db.user.count({ where: { status: "PENDING", appliedAt: { not: null } } }),
     db.roleApplication.count({ where: { status: "PENDING" } }),
     db.match.findMany({ where: { startsAt: { gte: now }, status: { in: ["OPEN", "LOCKED"] } }, orderBy: { startsAt: "asc" }, take: 5, include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } }, signups: { where: { status: "PENDING" }, select: { id: true } } } }),
-    db.user.findMany({ where: { status: "PENDING" }, orderBy: { createdAt: "asc" }, take: 5 }),
+    db.user.findMany({ where: { status: "PENDING", appliedAt: { not: null } }, orderBy: { appliedAt: "asc" }, take: 5 }),
   ]);
 
   return (

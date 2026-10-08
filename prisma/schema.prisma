@@ -27,6 +27,7 @@ model User {
   games           String?   // other games they play
   game            String?   // game they applied for (GAME_CATALOG name)
   gameAnswers     String?   // JSON of genre-specific answers, keyed by question key
+  appliedAt       DateTime? // when the player profile (= membership application) was first submitted
   status          String    @default("PENDING") // PENDING | APPROVED | DENIED
   role            String    @default("MEMBER")  // MEMBER | OFFICER | LEADER
   tier            String    @default("RECRUIT") // RECRUIT | MEMBER | VETERAN | ELITE (rank ladder)
@@ -196,6 +197,7 @@ model MediaPost {
   postedById  String
   approved    Boolean  @default(false)
   featured    Boolean  @default(false)
+  official    Boolean  @default(false) // posted as Vstroz Alliance (lives in the alliance folder)
   createdAt   DateTime @default(now())
 
   postedBy User @relation(fields: [postedById], references: [id], onDelete: Cascade)

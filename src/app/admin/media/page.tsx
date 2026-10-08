@@ -37,6 +37,7 @@ export default async function AdminMediaPage() {
           <div className="mt-1 flex gap-1.5">
             <Badge tone={p.approved ? "success" : "warning"}>{p.approved ? "Live" : "Pending"}</Badge>
             {p.featured && <Badge tone="gold">Featured</Badge>}
+            <Badge tone={p.official ? "gold" : "neutral"}>{p.official ? "Vstroz Alliance folder" : `${p.postedBy.displayName}'s folder`}</Badge>
           </div>
         </div>
         <form action={reviewMediaAction} className="flex flex-wrap gap-1.5">
@@ -56,6 +57,16 @@ export default async function AdminMediaPage() {
               Unfeature
             </Button>
           )}
+          {!p.official && (
+            <Button type="submit" name="mode" value="official" size="sm" variant="secondary">
+              Move to alliance folder
+            </Button>
+          )}
+          {p.official && (
+            <Button type="submit" name="mode" value="personal" size="sm" variant="secondary">
+              Move to member folder
+            </Button>
+          )}
           {p.approved && (
             <Button type="submit" name="mode" value="unapprove" size="sm" variant="ghost">
               Hide
@@ -71,7 +82,7 @@ export default async function AdminMediaPage() {
 
   return (
     <>
-      <PageHeader title="Media" text="Approve member posts, feature the best, and post official content." actions={<ButtonLink href="/media" variant="secondary">View Media page</ButtonLink>} />
+      <PageHeader title="Media" text="Approve member posts, feature the best, and post official alliance content. Every member who posts gets their own folder on the Media page." actions={<ButtonLink href="/media" variant="secondary">View Media page</ButtonLink>} />
       <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
         <div>
           <h2 className="display mb-3 text-2xl">
@@ -84,9 +95,9 @@ export default async function AdminMediaPage() {
           {live.length === 0 ? <EmptyState title="No content live yet" /> : <ul className="space-y-2">{live.map((p) => <Row key={p.id} p={p} />)}</ul>}
         </div>
         <Card accent className="h-fit">
-          <h2 className="display mb-1 text-2xl">Post official content</h2>
-          <p className="mb-4 text-xs text-muted">Officer posts go live immediately.</p>
-          <MediaForm />
+          <h2 className="display mb-1 text-2xl">Post as Vstroz Alliance</h2>
+          <p className="mb-4 text-xs text-muted">Goes live immediately in the Vstroz Alliance folder. To post into your own folder, use the member portal.</p>
+          <MediaForm official />
         </Card>
       </div>
     </>

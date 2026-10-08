@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { site, games, identity } from "@/lib/site";
 import { ENABLED_GAMES, ROLE_LABEL, TIER_LABEL, type UserRole } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
-import { thumbnailFor } from "@/lib/media";
+import { thumbnailFor, folderHref } from "@/lib/media";
 import { Avatar, Badge, ButtonLink, SectionHeading, roleTone } from "@/components/ui";
 import { ArrowIcon, DiscordIcon } from "./Icons";
 
@@ -137,7 +137,7 @@ export async function CommunityTiles() {
 /* ---------------- Latest content (OpTic / Sentinels video feed) ---------------- */
 
 export async function LatestContent() {
-  const posts = await db.mediaPost.findMany({ where: { approved: true }, orderBy: [{ featured: "desc" }, { createdAt: "desc" }], take: 3, include: { postedBy: { select: { displayName: true } } } });
+  const posts = await db.mediaPost.findMany({ where: { approved: true }, orderBy: [{ featured: "desc" }, { createdAt: "desc" }], take: 3, include: { postedBy: { select: { displayName: true, username: true } } } });
   if (posts.length === 0) return null;
   return (
     <section className="mx-auto max-w-7xl px-4 py-24 md:px-6">
@@ -152,7 +152,7 @@ export async function LatestContent() {
           const thumb = thumbnailFor(p);
           return (
             <li key={p.id} className="panel cut group overflow-hidden transition hover:-translate-y-1">
-              <Link href="/media" className="block">
+              <Link href={folderHref(p, p.id)} className="block">
                 <span className="relative block aspect-video w-full bg-black">
                   {thumb ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -160,11 +160,15 @@ export async function LatestContent() {
                   ) : (
                     <span className="flex h-full w-full items-center justify-center font-display text-sm uppercase tracking-widest text-[#c9a8ff]">Twitch</span>
                   )}
-                  {p.featured && <Badge tone="gold" className="absolute left-3 top-3">Featured</Badge>}
+                  {(p.official || p.featured) && (
+                    <Badge tone="gold" className="absolute left-3 top-3">
+                      {p.official ? "Official" : "Featured"}
+                    </Badge>
+                  )}
                 </span>
                 <span className="block p-5">
                   <span className="text-xs text-muted">
-                    {p.postedBy.displayName} · {formatDate(p.createdAt)}
+                    {p.official ? site.name : p.postedBy.displayName} · {formatDate(p.createdAt)}
                     {p.game ? ` · ${p.game}` : ""}
                   </span>
                   <span className="display mt-2 block text-xl">{p.title}</span>

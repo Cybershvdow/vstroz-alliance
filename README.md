@@ -34,7 +34,7 @@ npm run dev          # http://localhost:3000
 | Account | Username | Password |
 | --- | --- | --- |
 | Alliance Leader | `cybershvdow` | `SEED_LEADER_PASSWORD` in `.env` |
-| Discord Server Leader | `nugget` | `SEED_NUGGET_PASSWORD` in `.env` |
+| Alliance Leader & Founder | `nugget` | `SEED_NUGGET_PASSWORD` in `.env` |
 
 Both should change their password after first sign-in (Profile → Password). Everyone else joins by applying on the site.
 

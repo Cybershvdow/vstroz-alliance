@@ -16,7 +16,7 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
 
   const members = await db.user.findMany({
     where: { status: "APPROVED", ...(filter ? { gameClass: filter } : {}) },
-    select: { id: true, displayName: true, ign: true, gameClass: true, role: true, tier: true, title: true, createdAt: true },
+    select: { id: true, username: true, displayName: true, ign: true, gameClass: true, role: true, tier: true, title: true, createdAt: true },
     orderBy: { createdAt: "asc" },
   });
   const TIER_ORDER: Record<string, number> = { ELITE: 0, VETERAN: 1, MEMBER: 2, RECRUIT: 3 };
@@ -28,6 +28,10 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
     _count: { _all: true },
   });
   const countFor = (c: string) => counts.find((x) => x.gameClass === c)?._count._all ?? 0;
+
+  // Members with public content get a link to their media folder.
+  const mediaCounts = await db.mediaPost.groupBy({ by: ["postedById"], where: { approved: true, official: false }, _count: { _all: true } });
+  const videosBy = (id: string) => mediaCounts.find((x) => x.postedById === id)?._count._all ?? 0;
 
   return (
     <section className="mx-auto max-w-7xl px-4 pb-24 pt-32 md:px-6 md:pt-40">
@@ -66,7 +70,17 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
                 {m.gameClass ? `Aion · ${m.gameClass}` : "Alliance member"}
                 {m.title ? ` · ${m.title}` : ""}
               </p>
-              <p className="text-[0.7rem] text-dim">Since {formatDate(m.createdAt)}</p>
+              <p className="text-[0.7rem] text-dim">
+                Since {formatDate(m.createdAt)}
+                {videosBy(m.id) > 0 && (
+                  <>
+                    {" · "}
+                    <Link href={`/media/members/${encodeURIComponent(m.username)}`} className="text-gold hover:text-gold-bright">
+                      {videosBy(m.id)} {videosBy(m.id) === 1 ? "video" : "videos"} →
+                    </Link>
+                  </>
+                )}
+              </p>
             </div>
           </div>
         ))}

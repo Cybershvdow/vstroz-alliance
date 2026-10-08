@@ -99,7 +99,7 @@ export const requirements = [
 ];
 
 export const membershipPath = [
-  { n: "01", title: "Apply", text: "Tell us who you are, what you play, and how you play it. Two minutes." },
+  { n: "01", title: "Apply", text: "Create an account, then fill in your player profile: your game, in-game name, and how you play. Two minutes." },
   { n: "02", title: "Review", text: "An officer reads every application and replies within 48 hours. Discord intro if needed." },
   { n: "03", title: "Recruit", text: "You are in the community. Portal unlocked: events, roles, media, and The Round Table." },
   { n: "04", title: "Member", text: "Show up consistently and an officer promotes you. Members hold roles that keep the alliance running." },

@@ -57,3 +57,9 @@ export function thumbnailFor(m: { provider: string; embedId: string }) {
   if (m.provider === "YOUTUBE") return `https://i.ytimg.com/vi/${m.embedId}/hqdefault.jpg`;
   return null;
 }
+
+/** Where a post lives on the public Media page: the alliance folder or the poster's own folder. */
+export function folderHref(p: { official: boolean; postedBy: { username: string } }, videoId?: string) {
+  const base = p.official ? "/media/alliance" : `/media/members/${encodeURIComponent(p.postedBy.username)}`;
+  return videoId ? `${base}?v=${encodeURIComponent(videoId)}` : base;
+}

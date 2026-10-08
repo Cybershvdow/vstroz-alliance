@@ -3,14 +3,14 @@
 import { useActionState } from "react";
 import { updateProfileAction, changePasswordAction } from "@/lib/actions/auth";
 import { signupForMatchAction, applyForRoleAction } from "@/lib/actions/member";
-import { GAME_CLASSES, POSITION } from "@/lib/constants";
+import { POSITION } from "@/lib/constants";
 import { Field, FormMessage } from "@/components/ui";
 import { SubmitButton } from "./SubmitButton";
 
 export function ProfileForm({
   initial,
 }: {
-  initial: { displayName: string; email: string; ign: string | null; gameClass: string | null; discord: string | null };
+  initial: { displayName: string; email: string; discord: string | null };
 }) {
   const [state, action] = useActionState(updateProfileAction, undefined);
   const err = state && !state.ok ? state.errors : undefined;
@@ -25,24 +25,9 @@ export function ProfileForm({
           <input id="email" name="email" type="email" className="input" defaultValue={initial.email} required />
         </Field>
       </div>
-      <div className="grid gap-5 sm:grid-cols-3">
-        <Field label="In-game name" name="ign" error={err?.ign}>
-          <input id="ign" name="ign" className="input" defaultValue={initial.ign ?? ""} />
-        </Field>
-        <Field label="Main class" name="gameClass" error={err?.gameClass}>
-          <select id="gameClass" name="gameClass" className="input" defaultValue={initial.gameClass ?? ""}>
-            <option value="">Select…</option>
-            {GAME_CLASSES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Discord" name="discord" error={err?.discord}>
-          <input id="discord" name="discord" className="input" defaultValue={initial.discord ?? ""} />
-        </Field>
-      </div>
+      <Field label="Discord username" name="discord" error={err?.discord} hint="So officers can reach you.">
+        <input id="discord" name="discord" className="input" defaultValue={initial.discord ?? ""} />
+      </Field>
       <SubmitButton pendingText="Saving…">Save profile</SubmitButton>
     </form>
   );

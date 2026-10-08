@@ -10,10 +10,24 @@ import { ConfirmSubmit } from "@/components/forms/SubmitButton";
 export default async function MyMediaPage() {
   const me = await requireApproved();
   const mine = await db.mediaPost.findMany({ where: { postedById: me.id }, orderBy: { createdAt: "desc" } });
+  const { username } = (await db.user.findUnique({ where: { id: me.id }, select: { username: true } })) ?? { username: "" };
 
   return (
     <>
-      <PageHeader title="Post content" text="Share YouTube or Twitch links. Officers approve posts before they appear on the public Media page." actions={<ButtonLink href="/media" variant="secondary">View Media page</ButtonLink>} />
+      <PageHeader
+        title="Post content"
+        text="Share YouTube or Twitch links. Officers approve posts before they appear in your folder on the public Media page."
+        actions={
+          <>
+            <ButtonLink href={`/media/members/${encodeURIComponent(username)}`} variant="secondary">
+              Your folder
+            </ButtonLink>
+            <ButtonLink href="/media" variant="ghost">
+              All folders
+            </ButtonLink>
+          </>
+        }
+      />
       <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
         <Card accent className="h-fit">
           <MediaForm />
@@ -45,6 +59,7 @@ export default async function MyMediaPage() {
                       <div className="mt-1 flex gap-1.5">
                         <Badge tone={p.approved ? "success" : "warning"}>{p.approved ? "Live" : "Awaiting approval"}</Badge>
                         {p.featured && <Badge tone="gold">Featured</Badge>}
+                        {p.official && <Badge tone="gold">Vstroz Alliance folder</Badge>}
                       </div>
                     </div>
                     <form action={deleteOwnMediaAction}>

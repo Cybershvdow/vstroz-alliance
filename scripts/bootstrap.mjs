@@ -19,6 +19,9 @@ try {
     db.mediaPost.updateMany({ where: { game: "Aion 2" }, data: { game: "Aion" } }),
     db.tryoutRequest.updateMany({ where: { game: "Aion 2" }, data: { game: "Aion" } }),
   ]);
+  // Command roster fix (2026-10-08): Nugget is Alliance Leader & Founder and does not play Aion. Matches only while the old title is present.
+  const nugget = await db.user.updateMany({ where: { username: "nugget", title: "Discord Server Leader" }, data: { title: "Alliance Leader & Founder", game: null, gameClass: null } });
+  if (nugget.count) console.log("[bootstrap] updated Nugget title");
   const n = renamed.reduce((t, r) => t + r.count, 0);
   if (n) console.log(`[bootstrap] renamed Aion 2 → Aion on ${n} rows`);
 } finally {
