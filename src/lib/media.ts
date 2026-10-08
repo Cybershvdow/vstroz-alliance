@@ -42,13 +42,14 @@ export function parseMediaUrl(input: string): ParsedMedia | null {
 }
 
 /** Build the iframe src. `parent` is the site hostname, required by Twitch embeds. */
-export function embedSrc(m: { provider: string; embedId: string }, parent: string, autoplay = false) {
+export function embedSrc(m: { provider: string; embedId: string; kind?: string }, parent: string, autoplay = false) {
   if (m.provider === "YOUTUBE") {
     return `https://www.youtube-nocookie.com/embed/${m.embedId}?rel=0&modestbranding=1${autoplay ? "&autoplay=1" : ""}`;
   }
   const p = `parent=${encodeURIComponent(parent)}&autoplay=${autoplay ? "true" : "false"}`;
-  if (/^\d+$/.test(m.embedId)) return `https://player.twitch.tv/?video=${m.embedId}&${p}`;
-  if (m.embedId.length > 25 || /[A-Z]/.test(m.embedId) || m.embedId.includes("-")) return `https://clips.twitch.tv/embed?clip=${m.embedId}&${p}`;
+  const kind = m.kind ?? (/^\d+$/.test(m.embedId) ? "video" : m.embedId.length > 25 || m.embedId.includes("-") ? "clip" : "channel");
+  if (kind === "video") return `https://player.twitch.tv/?video=${m.embedId}&${p}`;
+  if (kind === "clip") return `https://clips.twitch.tv/embed?clip=${m.embedId}&${p}`;
   return `https://player.twitch.tv/?channel=${m.embedId}&${p}`;
 }
 

@@ -41,7 +41,7 @@ export default async function AdminMatchDetail({ params }: { params: Promise<{ i
         <div>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h2 className="display text-2xl">
-              Signups <span className="text-muted">({match.signups.length}{match.maxPlayers ? `/${match.maxPlayers}` : ""})</span>
+              Signups <span className="text-muted">({match.signups.filter((s) => s.status !== "DECLINED").length}{match.maxPlayers ? `/${match.maxPlayers}` : ""} active)</span>
             </h2>
             <div className="flex gap-3 text-xs text-muted">
               {byPos.map(({ p, n }) => (

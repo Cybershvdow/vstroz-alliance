@@ -10,7 +10,7 @@ export default async function AdminMatchesPage() {
   await requireOfficer();
   const matches = await db.match.findMany({
     orderBy: { startsAt: "desc" },
-    include: { _count: { select: { signups: true } }, signups: { where: { status: "PENDING" }, select: { id: true } } },
+    include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } }, signups: { where: { status: "PENDING" }, select: { id: true } } },
   });
   const now = new Date();
   const upcoming = matches.filter((m) => m.startsAt >= now && !["COMPLETED", "CANCELLED"].includes(m.status)).reverse();

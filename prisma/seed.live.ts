@@ -5,12 +5,19 @@
 
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 
 const db = new PrismaClient();
 
 async function main() {
-  const leaderPassword = process.env.SEED_LEADER_PASSWORD || "change-me";
-  const nuggetPassword = process.env.SEED_NUGGET_PASSWORD || "change-me";
+  const strong = (name: string, v: string | undefined) => {
+    if (v && v !== "change-me" && v.length >= 8) return v;
+    const gen = "Vstroz-" + crypto.randomBytes(9).toString("base64url");
+    console.warn(`[seed] ${name} missing or weak — generated a random password instead: ${gen}  (change it after first sign-in)`);
+    return gen;
+  };
+  const leaderPassword = strong("SEED_LEADER_PASSWORD", process.env.SEED_LEADER_PASSWORD);
+  const nuggetPassword = strong("SEED_NUGGET_PASSWORD", process.env.SEED_NUGGET_PASSWORD);
 
   await db.announcement.deleteMany();
   await db.vote.deleteMany();

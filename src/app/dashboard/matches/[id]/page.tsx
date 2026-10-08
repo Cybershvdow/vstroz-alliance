@@ -30,7 +30,8 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
 
   const mine = match.signups.find((s) => s.userId === me.id);
   const open = match.status === "OPEN" && match.startsAt > new Date();
-  const full = !!match.maxPlayers && match.signups.length >= match.maxPlayers;
+  const activeCount = match.signups.filter((s) => s.status !== "DECLINED").length;
+  const full = !!match.maxPlayers && activeCount >= match.maxPlayers;
   const confirmed = match.signups.filter((s) => s.status === "CONFIRMED");
   const byPosition = POSITION.map((p) => ({ p, n: confirmed.filter((s) => s.position === p).length }));
 
@@ -56,7 +57,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
             <div className="flex flex-wrap items-center justify-between gap-4">
               <Countdown iso={match.startsAt.toISOString()} compact />
               <div className="text-right text-sm text-muted">
-                <span className="display text-3xl text-text">{match.signups.length}</span>
+                <span className="display text-3xl text-text">{activeCount}</span>
                 {match.maxPlayers ? ` / ${match.maxPlayers}` : ""} signed up
               </div>
             </div>
@@ -110,7 +111,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
             {open ? (
               <>
                 {!mine && full ? (
-                  <p className="mt-3 text-sm text-muted">This match is full. Ask an officer in Discord to be added to the bench.</p>
+                  <p className="mt-3 text-sm text-muted">This match is full. If a slot opens up, you can sign up then.</p>
                 ) : (
                   <div className="mt-4">
                     <MatchSignupForm matchId={match.id} existing={mine ? { position: mine.position, note: mine.note } : null} defaultPosition={defaultPositionFor(me.gameClass)} />

@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { VOTE_RULES } from "@/lib/constants";
+import { VOTE_RULES, TIERS, tierRank } from "@/lib/constants";
 
 /** Tally a nomination's votes and decide whether it passes under VOTE_RULES. */
 export function tally(votes: { choice: string }[]) {
@@ -21,7 +21,7 @@ export async function closeExpiredNominations() {
     const status = t.passing ? "PASSED" : "FAILED";
     await db.$transaction([
       db.nomination.update({ where: { id: nom.id }, data: { status, decidedAt: new Date() } }),
-      ...(t.passing ? [db.user.update({ where: { id: nom.userId }, data: { tier: nom.tier } })] : []),
+      ...(t.passing ? [db.user.updateMany({ where: { id: nom.userId, tier: { in: TIERS.slice(0, tierRank(nom.tier)) as string[] } }, data: { tier: nom.tier } })] : []),
     ]);
   }
   return expired.length;

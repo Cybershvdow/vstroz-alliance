@@ -8,6 +8,7 @@ export type MediaItem = {
   title: string;
   provider: string;
   embedId: string;
+  kind: string;
   description: string;
   game: string | null;
   postedBy: string;

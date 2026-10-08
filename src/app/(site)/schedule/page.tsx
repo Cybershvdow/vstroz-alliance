@@ -15,7 +15,7 @@ export default async function SchedulePage() {
     db.match.findMany({
       where: { isPublic: true, startsAt: { gte: now }, status: { in: ["OPEN", "LOCKED"] } },
       orderBy: { startsAt: "asc" },
-      include: { _count: { select: { signups: true } } },
+      include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } } },
     }),
     db.match.findMany({
       where: { isPublic: true, status: "COMPLETED" },

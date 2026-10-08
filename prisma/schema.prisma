@@ -190,6 +190,7 @@ model MediaPost {
   url         String
   provider    String   // YOUTUBE | TWITCH
   embedId     String   // video id or twitch channel/video id
+  kind        String   @default("video") // video | clip | channel
   description String   @default("")
   game        String?
   postedById  String

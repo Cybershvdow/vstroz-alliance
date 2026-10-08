@@ -21,7 +21,7 @@ export async function signupForMatchAction(_prev: ActionState, formData: FormDat
   if (!parsed.success) return { ok: false, errors: flattenErrors(parsed.error) };
 
   const { matchId, position, note } = parsed.data;
-  const match = await db.match.findUnique({ where: { id: matchId }, include: { _count: { select: { signups: true } } } });
+  const match = await db.match.findUnique({ where: { id: matchId }, include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } } } });
   if (!match) return { ok: false, message: "Match not found." };
   if (match.status !== "OPEN") return { ok: false, message: "Signups are closed for this match." };
   if (match.startsAt < new Date()) return { ok: false, message: "This match has already started." };
@@ -31,7 +31,7 @@ export async function signupForMatchAction(_prev: ActionState, formData: FormDat
     await db.matchSignup.update({ where: { id: existing.id }, data: { position, note: note || null } });
   } else {
     if (match.maxPlayers && match._count.signups >= match.maxPlayers) {
-      return { ok: false, message: "This match is full. Ask an officer to be added to the bench." };
+      return { ok: false, message: "This match is full. If a slot opens up, you can sign up then." };
     }
     await db.matchSignup.create({ data: { matchId, userId: me.id, position, note: note || null } });
   }
@@ -46,6 +46,9 @@ export async function signupForMatchAction(_prev: ActionState, formData: FormDat
 export async function withdrawSignupAction(formData: FormData) {
   const me = await requireApproved();
   const matchId = clean(formData.get("matchId"));
+  const match = await db.match.findUnique({ where: { id: matchId }, select: { status: true, startsAt: true } });
+  // Withdrawals are only allowed while the roster is open and the match has not started.
+  if (!match || match.status !== "OPEN" || match.startsAt <= new Date()) return;
   await db.matchSignup.deleteMany({ where: { matchId, userId: me.id } });
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/matches");

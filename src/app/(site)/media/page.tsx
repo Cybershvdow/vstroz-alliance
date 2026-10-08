@@ -23,6 +23,7 @@ export default async function MediaPage() {
     title: p.title,
     provider: p.provider,
     embedId: p.embedId,
+    kind: p.kind,
     description: p.description,
     game: p.game,
     postedBy: p.postedBy.displayName,
@@ -54,7 +55,7 @@ export default async function MediaPage() {
           <p className="eyebrow mb-3">Live channel</p>
           <div className="panel cut p-2">
             <div className="relative aspect-video w-full bg-black">
-              <iframe src={embedSrc({ provider: "TWITCH", embedId: site.twitchChannel }, parent)} title="Live stream" className="absolute inset-0 h-full w-full" allowFullScreen />
+              <iframe src={embedSrc({ provider: "TWITCH", embedId: site.twitchChannel, kind: "channel" }, parent)} title="Live stream" className="absolute inset-0 h-full w-full" allowFullScreen />
             </div>
           </div>
         </section>

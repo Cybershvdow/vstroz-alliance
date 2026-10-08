@@ -21,8 +21,15 @@ export async function setTierAction(formData: FormData) {
   const userId = clean(formData.get("userId"));
   const tier = clean(formData.get("tier"));
   if (!userId || !(TIERS as readonly string[]).includes(tier)) return;
-  // Officers may only set tiers that are not vote-gated (Recruit, Member). Leaders may override anything.
-  if ((VOTED_TIERS as readonly string[]).includes(tier) && officer.role !== "LEADER") return;
+  const target = await db.user.findUnique({ where: { id: userId }, select: { id: true, role: true, tier: true } });
+  if (!target) return;
+  // Generals are peers: only they can change their own tier.
+  if (target.role === "LEADER" && target.id !== officer.id) return;
+  if (officer.role !== "LEADER") {
+    // Captains: only Recruit ⇄ Member, only for plain members, never touching a voted rank.
+    const isVoted = (t: string) => (VOTED_TIERS as readonly string[]).includes(t);
+    if (target.role !== "MEMBER" || isVoted(tier) || isVoted(target.tier)) return;
+  }
   await db.user.update({ where: { id: userId }, data: { tier } });
   revalidateAll();
 }
@@ -111,7 +118,7 @@ export async function finalizeNominationAction(formData: FormData) {
   const status = t.passing ? "PASSED" : "FAILED";
   await db.$transaction([
     db.nomination.update({ where: { id: nominationId }, data: { status, decidedAt: new Date(), decidedById: officer.id } }),
-    ...(t.passing ? [db.user.update({ where: { id: nom.userId }, data: { tier: nom.tier } })] : []),
+    ...(t.passing ? [db.user.updateMany({ where: { id: nom.userId, tier: { in: TIERS.slice(0, tierRank(nom.tier)) as string[] } }, data: { tier: nom.tier } })] : []),
   ]);
   revalidateAll();
 }

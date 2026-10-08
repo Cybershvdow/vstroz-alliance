@@ -3,6 +3,7 @@ import { requireOfficer } from "@/lib/auth";
 import { setMemberRoleAction, setMemberTitleAction, removeMemberAction } from "@/lib/actions/admin";
 import { formatDate } from "@/lib/format";
 import { Avatar, Badge, Button, PageHeader, roleTone } from "@/components/ui";
+import { ROLE_LABEL, type UserRole } from "@/lib/constants";
 import { ConfirmSubmit } from "@/components/forms/SubmitButton";
 
 const ROLE_ORDER: Record<string, number> = { LEADER: 0, OFFICER: 1, MEMBER: 2 };
@@ -15,7 +16,7 @@ export default async function MembersPage() {
 
   return (
     <>
-      <PageHeader title="Members" text={`${members.length} approved members. ${isLeader ? "As Leader you can promote and demote officers." : "Only the Leader can change ranks."}`} />
+      <PageHeader title="Members" text={`${members.length} approved members. ${isLeader ? "As a General you can promote and demote Captains." : "Only a General can promote or demote Captains. Ranks are managed on the Ranks page."}`} />
 
       <ul className="panel divide-y divide-line">
         {members.map((u) => {
@@ -28,7 +29,7 @@ export default async function MembersPage() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="display text-xl">{u.displayName}</p>
-                    <Badge tone={roleTone(u.role)}>{u.role}</Badge>
+                    <Badge tone={roleTone(u.role)}>{ROLE_LABEL[u.role as UserRole]}</Badge>
                     {self && <Badge tone="neutral">You</Badge>}
                   </div>
                   <p className="text-xs text-muted">
@@ -58,7 +59,7 @@ export default async function MembersPage() {
                 {!self && !protectedTarget && u.role !== "LEADER" && (
                   <form action={removeMemberAction}>
                     <input type="hidden" name="userId" value={u.id} />
-                    <ConfirmSubmit size="sm" variant="danger" message={`Remove ${u.displayName} from the alliance? This deletes their account.`}>
+                    <ConfirmSubmit size="sm" variant="danger" message={`Remove ${u.displayName} from the alliance? Their account is deleted. Announcements, votes, disputes and videos they created are kept and re-attributed to you.`}>
                       Remove
                     </ConfirmSubmit>
                   </form>

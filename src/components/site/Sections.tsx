@@ -14,9 +14,9 @@ export async function Hero() {
   const [memberCount, nextMatch, wins] = await Promise.all([
     db.user.count({ where: { status: "APPROVED" } }),
     db.match.findFirst({
-      where: { isPublic: true, status: "OPEN", startsAt: { gte: new Date() } },
+      where: { isPublic: true, status: { in: ["OPEN", "LOCKED"] }, startsAt: { gte: new Date() } },
       orderBy: { startsAt: "asc" },
-      include: { _count: { select: { signups: true } } },
+      include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } } },
     }),
     db.match.count({ where: { status: "COMPLETED", result: { contains: "Victory" } } }),
   ]);
@@ -213,7 +213,7 @@ export async function UpcomingMatches() {
     where: { isPublic: true, startsAt: { gte: new Date() }, status: { in: ["OPEN", "LOCKED"] } },
     orderBy: { startsAt: "asc" },
     take: 4,
-    include: { _count: { select: { signups: true } } },
+    include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } } },
   });
 
   return (

@@ -23,7 +23,7 @@ A production-grade website and members portal for the Vstroz Alliance, a multi-g
 ```bash
 npm install
 npm run db:push      # create the SQLite database
-npm run db:seed      # leader, officers, members, matches, roles, announcements
+npm run db:seed      # the two General accounts + role definitions (use db:seed:demo for fake data)
 npm run dev          # http://localhost:3000
 ```
 
@@ -35,7 +35,6 @@ npm run dev          # http://localhost:3000
 | --- | --- | --- |
 | Alliance Leader | `cybershvdow` | `SEED_LEADER_PASSWORD` in `.env` |
 | Discord Server Leader | `nugget` | `SEED_NUGGET_PASSWORD` in `.env` |
-| General (Round Table) | `sybreeds` | `SEED_SYBREEDS_PASSWORD` in `.env` |
 
 Both should change their password after first sign-in (Profile → Password). Everyone else joins by applying on the site.
 
@@ -97,10 +96,10 @@ The application asks which game the person is applying for, then shows questions
 
 Answers are stored with the application and shown to officers in the Applicants queue and in the notification email.
 
-## The Round Table, Esports & Media
+## The Round Table & Media
 
 - **The Round Table** (`/dashboard/table`, `/admin/table`): command (Generals and Captains) settles disputes and reviews tryouts here. Members bring disputes with a subject and details; officers record a decision (Resolved / Dismissed) that the member can see. Rank votes are linked from the same place.
-- **Esports** (`/esports`): public page with the competitive roster (Elite rank) per game, upcoming competitive matches, and results. Members request tryouts from The Round Table; officers mark them Scheduled / Passed / Failed, then open an Elite vote on the Ranks page.
+- **Tryouts**: members request a tryout from The Round Table; officers mark them Scheduled / Passed / Failed, then open an Elite vote on the Ranks page.
 - **Media** (`/media`): public video hub with a player and playlist. Members post YouTube or Twitch links from `/dashboard/media`; officers approve, feature, hide, or delete at `/admin/media`. Officer posts go live immediately. Set `site.twitchChannel` in `src/lib/site.ts` to show a live Twitch player. Social links live in `site.social`.
 - **Rules** (`/rules`): code of conduct, chain of command, and rank ladder, all from `rules` in `src/lib/site.ts`. Officer titles come from `ROLE_LABEL` in `src/lib/constants.ts` (General, Captain).
 

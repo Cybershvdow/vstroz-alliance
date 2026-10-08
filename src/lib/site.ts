@@ -9,7 +9,7 @@ export const site = {
     "Friends who became a community. A competitive, multi-game alliance for adults who play to win and look after their own. Aion 2 is where we start.",
   founded: "2026",
   discordInvite: "https://discord.gg/Ydjz54qsp",
-  contactEmail: "contact@vstroz.gg",
+  contactEmail: "gdiazmarine@gmail.com",
   /* Social links — leave empty to hide. Add handles when they exist. */
   social: {
     youtube: "",

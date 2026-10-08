@@ -13,7 +13,7 @@ export default async function MatchesPage() {
     db.match.findMany({
       where: { startsAt: { gte: now }, status: { in: ["OPEN", "LOCKED"] } },
       orderBy: { startsAt: "asc" },
-      include: { _count: { select: { signups: true } }, signups: { where: { userId: me.id } } },
+      include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } }, signups: { where: { userId: me.id } } },
     }),
     db.match.findMany({
       where: { OR: [{ startsAt: { lt: now } }, { status: { in: ["COMPLETED", "CANCELLED"] } }] },

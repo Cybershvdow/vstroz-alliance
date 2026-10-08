@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
 import { resolveDisputeAction, reviewTryoutAction } from "@/lib/actions/community";
 import { rules } from "@/lib/site";
+import { TIER_LABEL, type Tier } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import { Avatar, Badge, Button, ButtonLink, EmptyState, PageHeader, statusTone } from "@/components/ui";
 
@@ -79,7 +80,7 @@ export default async function AdminTablePage() {
                     <Badge tone={statusTone(t.status)}>{t.status}</Badge>
                   </div>
                   <p className="text-xs text-muted">
-                    {t.user.tier} · {t.user.gameClass ?? "—"} · {t.user.discord ?? "no discord"} · {formatDate(t.createdAt)}
+                    {TIER_LABEL[t.user.tier as Tier] ?? t.user.tier} · {t.user.gameClass ?? "—"} · {t.user.discord ?? "no discord"} · {formatDate(t.createdAt)}
                   </p>
                   <p className="mt-2 text-sm text-muted">{t.message}</p>
                 </div>

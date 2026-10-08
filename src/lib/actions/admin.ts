@@ -35,7 +35,8 @@ export async function reviewApplicantAction(formData: FormData) {
 
   const target = await db.user.findUnique({ where: { id: userId } });
   if (!target || target.id === officer.id) return;
-  // Officers cannot deny/reset other officers or the leader.
+  // Generals are peers: nobody reviews a General's status. Captains cannot touch other Captains.
+  if (target.role === "LEADER") return;
   if (target.role !== "MEMBER" && officer.role !== "LEADER") return;
 
   await db.user.update({
@@ -59,6 +60,8 @@ export async function setMemberRoleAction(formData: FormData) {
   const role = clean(formData.get("role"));
   if (!userId || userId === leader.id) return;
   if (!(USER_ROLE as readonly string[]).includes(role) || role === "LEADER") return;
+  const target = await db.user.findUnique({ where: { id: userId }, select: { role: true } });
+  if (!target || target.role === "LEADER") return; // Generals cannot demote each other
   await db.user.update({ where: { id: userId }, data: { role } });
   revalidateAll();
 }
@@ -77,8 +80,17 @@ export async function removeMemberAction(formData: FormData) {
   const userId = clean(formData.get("userId"));
   const target = await db.user.findUnique({ where: { id: userId } });
   if (!target || target.id === officer.id) return;
+  if (target.role === "LEADER") return; // Generals cannot be removed here
   if (target.role !== "MEMBER" && officer.role !== "LEADER") return;
-  await db.user.delete({ where: { id: userId } });
+  // Keep alliance content the member authored (announcements, votes they opened, disputes, media)
+  // by re-attributing it to the acting officer, then delete the account.
+  await db.$transaction([
+    db.announcement.updateMany({ where: { authorId: userId }, data: { authorId: officer.id } }),
+    db.nomination.updateMany({ where: { nominatedById: userId }, data: { nominatedById: officer.id } }),
+    db.dispute.updateMany({ where: { raisedById: userId }, data: { raisedById: officer.id } }),
+    db.mediaPost.updateMany({ where: { postedById: userId }, data: { postedById: officer.id } }),
+    db.user.delete({ where: { id: userId } }),
+  ]);
   revalidateAll();
 }
 

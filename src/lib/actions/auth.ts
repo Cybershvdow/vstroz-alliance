@@ -114,7 +114,9 @@ export async function loginAction(_prev: ActionState, formData: FormData): Promi
   }
 
   await createSession(user.id);
-  redirect(user.status === "APPROVED" && (user.role === "OFFICER" || user.role === "LEADER") ? "/admin" : "/dashboard");
+  const next = clean(formData.get("next"));
+  const safeNext = /^\/(?!\/)[^\s]*$/.test(next) && !next.startsWith("/api") ? next : null;
+  redirect(safeNext ?? (user.status === "APPROVED" && (user.role === "OFFICER" || user.role === "LEADER") ? "/admin" : "/dashboard"));
 }
 
 export async function logoutAction() {

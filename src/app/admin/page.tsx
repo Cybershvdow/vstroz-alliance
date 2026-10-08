@@ -11,7 +11,7 @@ export default async function AdminOverview() {
     db.user.count({ where: { status: "APPROVED" } }),
     db.user.count({ where: { status: "PENDING" } }),
     db.roleApplication.count({ where: { status: "PENDING" } }),
-    db.match.findMany({ where: { startsAt: { gte: now }, status: { in: ["OPEN", "LOCKED"] } }, orderBy: { startsAt: "asc" }, take: 5, include: { _count: { select: { signups: true } }, signups: { where: { status: "PENDING" }, select: { id: true } } } }),
+    db.match.findMany({ where: { startsAt: { gte: now }, status: { in: ["OPEN", "LOCKED"] } }, orderBy: { startsAt: "asc" }, take: 5, include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } }, signups: { where: { status: "PENDING" }, select: { id: true } } } }),
     db.user.findMany({ where: { status: "PENDING" }, orderBy: { createdAt: "asc" }, take: 5 }),
   ]);
 

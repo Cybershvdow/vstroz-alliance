@@ -87,7 +87,7 @@ export function VoteCard({
         {nom.votes.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-1.5">
             {nom.votes.map((v) => (
-              <li key={v.id} title={v.comment ?? undefined}>
+              <li key={v.id} title={officerControls ? (v.comment ?? undefined) : undefined}>
                 <Badge tone={v.choice === "YES" ? "success" : v.choice === "NO" ? "danger" : "neutral"}>
                   {v.voter.displayName}
                 </Badge>

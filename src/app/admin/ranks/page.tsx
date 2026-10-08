@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
 import { closeExpiredNominations } from "@/lib/ranks";
 import { setTierAction } from "@/lib/actions/ranks";
-import { TIERS, TIER_LABEL, VOTED_TIERS, VOTE_RULES, canVoteOn, type Tier } from "@/lib/constants";
+import { TIERS, TIER_LABEL, VOTED_TIERS, VOTE_RULES, ROLE_LABEL, canVoteOn, type Tier, type UserRole } from "@/lib/constants";
 import { Avatar, Badge, Button, Card, EmptyState, PageHeader, roleTone } from "@/components/ui";
 import { VoteCard } from "@/components/portal/VoteCard";
 import { NominateForm } from "@/components/forms/RankForms";
@@ -68,14 +68,14 @@ export default async function AdminRanksPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="display text-lg">{m.displayName}</p>
                       <Badge tone={m.tier === "ELITE" ? "gold" : m.tier === "VETERAN" ? "accent" : "neutral"}>{TIER_LABEL[m.tier as Tier]}</Badge>
-                      {m.role !== "MEMBER" && <Badge tone={roleTone(m.role)}>{m.role}</Badge>}
+                      {m.role !== "MEMBER" && <Badge tone={roleTone(m.role)}>{ROLE_LABEL[m.role as UserRole]}</Badge>}
                     </div>
                     <p className="text-xs text-muted">{m.gameClass ?? "—"}</p>
                   </div>
                 </div>
                 <form action={setTierAction} className="flex flex-wrap gap-1.5 md:justify-end">
                   <input type="hidden" name="userId" value={m.id} />
-                  {TIERS.filter((t) => t !== m.tier && (isLeader || !(VOTED_TIERS as readonly string[]).includes(t))).map((t) => (
+                  {TIERS.filter((t) => t !== m.tier && (isLeader ? m.role !== "LEADER" || m.id === me.id : m.role === "MEMBER" && !(VOTED_TIERS as readonly string[]).includes(t) && !(VOTED_TIERS as readonly string[]).includes(m.tier))).map((t) => (
                     <Button key={t} type="submit" name="tier" value={t} size="sm" variant={(VOTED_TIERS as readonly string[]).includes(t) ? "gold" : "secondary"}>
                       {(VOTED_TIERS as readonly string[]).includes(t) ? `Override → ${TIER_LABEL[t]}` : `Set ${TIER_LABEL[t]}`}
                     </Button>

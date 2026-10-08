@@ -81,7 +81,7 @@ export async function submitMediaAction(_prev: ActionState, formData: FormData):
 
   const isOfficer = me.role === "OFFICER" || me.role === "LEADER";
   await db.mediaPost.create({
-    data: { title, url, provider: parsed.provider, embedId: parsed.embedId, description, game, postedById: me.id, approved: isOfficer },
+    data: { title, url, provider: parsed.provider, embedId: parsed.embedId, kind: parsed.kind, description, game, postedById: me.id, approved: isOfficer },
   });
   revalidateAll();
   return { ok: true, message: isOfficer ? "Posted to the Media page." : "Submitted. An officer will approve it before it goes public." };

@@ -39,7 +39,7 @@ export function TryoutForm() {
   return (
     <form action={action} className="space-y-4" noValidate>
       <FormMessage state={state} />
-      <Field label="Game" name="game" error={err?.game}>
+      <Field label="Game" name="tryout-game" error={err?.game}>
         <select id="tryout-game" name="game" className="input" defaultValue={ENABLED_GAMES[0]?.name ?? ""}>
           {ENABLED_GAMES.map((g) => (
             <option key={g.name} value={g.name}>
@@ -48,7 +48,7 @@ export function TryoutForm() {
           ))}
         </select>
       </Field>
-      <Field label="Why you" name="message" error={err?.message} hint="Role, rank, what you bring. Mic is required for competitive play.">
+      <Field label="Why you" name="tryout-message" error={err?.message} hint="Role, rank, what you bring. Mic is required for competitive play.">
         <textarea id="tryout-message" name="message" className="input min-h-24" maxLength={1000} required />
       </Field>
       <SubmitButton pendingText="Requesting…">Request a tryout</SubmitButton>
@@ -62,14 +62,14 @@ export function MediaForm() {
   return (
     <form action={action} className="space-y-4" noValidate>
       <FormMessage state={state} />
-      <Field label="Title" name="title" error={err?.title}>
+      <Field label="Title" name="media-title" error={err?.title}>
         <input id="media-title" name="title" className="input" placeholder="Fortress siege highlights" maxLength={120} required />
       </Field>
-      <Field label="YouTube or Twitch link" name="url" error={err?.url} hint="Videos, Shorts, Twitch VODs, clips, or a channel.">
+      <Field label="YouTube or Twitch link" name="media-url" error={err?.url} hint="Videos, Shorts, Twitch VODs, clips, or a channel.">
         <input id="media-url" name="url" className="input" placeholder="https://youtube.com/watch?v=…" required />
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Game (optional)" name="game">
+        <Field label="Game (optional)" name="media-game">
           <select id="media-game" name="game" className="input" defaultValue="">
             <option value="">—</option>
             {ENABLED_GAMES.map((g) => (
@@ -81,7 +81,7 @@ export function MediaForm() {
           </select>
         </Field>
       </div>
-      <Field label="Description (optional)" name="description">
+      <Field label="Description (optional)" name="media-description">
         <textarea id="media-description" name="description" className="input min-h-20" maxLength={1000} />
       </Field>
       <SubmitButton pendingText="Submitting…">Post content</SubmitButton>

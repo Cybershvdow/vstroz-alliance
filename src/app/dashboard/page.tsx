@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   const [announcements, upcoming, mySignups, myRoleApps, memberCount] = await Promise.all([
     db.announcement.findMany({ orderBy: [{ pinned: "desc" }, { createdAt: "desc" }], take: 5, include: { author: { select: { displayName: true } } } }),
-    db.match.findMany({ where: { startsAt: { gte: now }, status: { in: ["OPEN", "LOCKED"] } }, orderBy: { startsAt: "asc" }, take: 5, include: { _count: { select: { signups: true } } } }),
+    db.match.findMany({ where: { startsAt: { gte: now }, status: { in: ["OPEN", "LOCKED"] } }, orderBy: { startsAt: "asc" }, take: 5, include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } } } }),
     db.matchSignup.findMany({ where: { userId: me.id, match: { startsAt: { gte: now } } }, include: { match: true }, orderBy: { match: { startsAt: "asc" } } }),
     db.roleApplication.findMany({ where: { userId: me.id }, include: { role: true }, orderBy: { createdAt: "desc" } }),
     db.user.count({ where: { status: "APPROVED" } }),
