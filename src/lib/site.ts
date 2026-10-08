@@ -181,5 +181,5 @@ export const weeklySchedule = [
 export const milestones = [
   { date: "July 2024", title: "The Discord opens", text: "A group of friends who wanted to get together and play start a Discord server. No roster, no ranks. Just a crew and a voice channel." },
   { date: "2024 – 2026", title: "The community grows", text: "Friends bring friends. The server builds slowly, one group at a time, into a community that shows up for each other in every game it plays." },
-  { date: "Aion 2", title: "The first guild website", text: "Aion 2 is the first game the alliance officially builds a guild website for. Recruitment is open, and the alliance grows from here." },
+  { date: "Aion", title: "The first guild website", text: "Aion is the first game the alliance officially builds a guild website for. Recruitment is open, and the alliance grows from here." },
 ];
