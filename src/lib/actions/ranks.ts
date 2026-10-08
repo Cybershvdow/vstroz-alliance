@@ -70,6 +70,7 @@ export async function nominateAction(_prev: ActionState, formData: FormData): Pr
 
 export async function castVoteAction(formData: FormData) {
   const me = await requireUser();
+  if (me.status === "DENIED") return; // declined legion applicants do not vote
   const nominationId = clean(formData.get("nominationId"));
   const choice = clean(formData.get("choice"));
   const comment = clean(formData.get("comment")).trim().slice(0, 300);

@@ -12,9 +12,9 @@ try {
   } else {
     console.log(`[bootstrap] database ready (${users} users)`);
   }
-  // Accounts created before the legion flow: anyone already reviewed, or who filled in a profile, counts as applied.
+  // Accounts reviewed before the legion flow existed count as applied. Never touches unreviewed accounts.
   const backfilled = await db.$executeRawUnsafe(
-    'UPDATE "User" SET "appliedAt" = COALESCE("reviewedAt", "createdAt") WHERE "appliedAt" IS NULL AND ("status" <> \'PENDING\' OR "playtime" IS NOT NULL)',
+    'UPDATE "User" SET "appliedAt" = COALESCE("reviewedAt", "createdAt") WHERE "appliedAt" IS NULL AND "reviewedAt" IS NOT NULL',
   );
   if (backfilled) console.log(`[bootstrap] backfilled appliedAt on ${backfilled} rows`);
   // One-time rename: the game is listed as "Aion" (was "Aion 2"). Safe to run on every start.
