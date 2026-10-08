@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="90 50 844 520" role="img" aria-label="Vstroz Alliance">
+
+  <defs>
+    <linearGradient id="wingBronze" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8a5a2f"/>
+      <stop offset="0.45" stop-color="#4a2e18"/>
+      <stop offset="1" stop-color="#1a1009"/>
+    </linearGradient>
+    <linearGradient id="wingUnder" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a2e18"/>
+      <stop offset="1" stop-color="#120b07"/>
+    </linearGradient>
+    <linearGradient id="wingMembrane" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a2212"/>
+      <stop offset="1" stop-color="#0c0806"/>
+    </linearGradient>
+    <linearGradient id="wingEdge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e0a45c"/>
+      <stop offset="1" stop-color="#5a3a1e"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3a3037"/>
+      <stop offset="0.5" stop-color="#9a8f8a"/>
+      <stop offset="1" stop-color="#2b2226"/>
+    </linearGradient>
+    <linearGradient id="steelDark" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#241c1f"/>
+      <stop offset="0.5" stop-color="#6d615d"/>
+      <stop offset="1" stop-color="#1b1417"/>
+    </linearGradient>
+    <radialGradient id="emberGlow">
+      <stop offset="0" stop-color="#ff9a3c" stop-opacity="0.95"/>
+      <stop offset="0.5" stop-color="#ff5a1f" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ff5a1f" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="emberCore">
+      <stop offset="0" stop-color="#ffe9b0"/>
+      <stop offset="0.6" stop-color="#ff8a2a"/>
+      <stop offset="1" stop-color="#c8380c"/>
+    </radialGradient>
+    <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.45" stop-color="#dcdcdc"/>
+      <stop offset="0.5" stop-color="#9c9c9c"/>
+      <stop offset="1" stop-color="#e8e8e8"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe08a"/>
+      <stop offset="1" stop-color="#b98a1e"/>
+    </linearGradient>
+    <radialGradient id="tile" cx="0.5" cy="0.42" r="0.7">
+      <stop offset="0" stop-color="#231611"/>
+      <stop offset="0.6" stop-color="#0e0b0c"/>
+      <stop offset="1" stop-color="#060506"/>
+    </radialGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <filter id="glowWide" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="60"/>
+    </filter>
+    <filter id="glowSmall" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="3"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="textShadow" x="-10%" y="-30%" width="120%" height="170%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity="0.8"/>
+    </filter>
+  </defs>
+  
+  <g>
+  <path d="M462,468 C442,378 390,208 350,128 Q336.4,221.5 252,176 Q267,271.4 172,256 Q217.1,340.1 124,352 Q196,416.5 118,452 Q210.1,489.8 160,540 Q342,538 462,502 Z" fill="url(#wingMembrane)" stroke="#8a5a2b" stroke-width="2" stroke-linejoin="round"/>
+  <g fill="url(#wingUnder)" stroke="#3a2414" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M512.7,454.1 Q420.9,337.4 300,200 Q372.1,367 427.3,505.9 Z"/>
+    <path d="M500.7,435.6 Q372.7,370.6 210,300 Q337.6,421.2 439.3,524.4 Z"/>
+    <path d="M481.9,431.4 Q338.1,414.7 160,404 Q324.5,470.1 458.1,528.6 Z"/>
+    <path d="M467.1,438.1 Q335.9,462.2 176,500 Q339.1,510 472.9,521.9 Z"/>
+  </g>
+  <g fill="url(#wingBronze)" stroke="#1a100a" stroke-width="2" stroke-linejoin="round">
+    <path d="M518,449.5 Q454.2,301 350,128 Q383.6,324.2 406,486.5 Z"/>
+    <path d="M515.6,429.5 Q408.2,307.3 252,176 Q340.7,355.9 408.4,506.5 Z"/>
+    <path d="M502.1,413.1 Q362,330.9 172,256 Q311.4,400 421.9,522.9 Z"/>
+    <path d="M482.8,407.5 Q325.7,369.8 124,352 Q299.5,446.1 441.2,528.5 Z"/>
+    <path d="M464.7,410.1 Q309.2,416.8 118,452 Q305.9,489.8 459.3,525.9 Z"/>
+    <path d="M450.9,421.3 Q317.6,464.9 160,540 Q331.7,523.7 473.1,514.7 Z"/>
+  </g>
+  <g stroke="url(#wingEdge)" stroke-width="2" fill="none" opacity="0.8" stroke-linecap="round">
+    <path d="M462,468 Q382,274 354.5,141.6"/>
+    <path d="M462,468 Q333,298 260.4,187.7"/>
+    <path d="M462,468 Q293,338 183.6,264.5"/>
+    <path d="M462,468 Q269,386 137.5,356.6"/>
+    <path d="M462,468 Q266,436 131.8,452.6"/>
+    <path d="M462,468 Q287,480 172.1,537.1"/>
+  </g>
+  <!-- ember light catching the inner wing -->
+  <path d="M518,449.5 Q454.2,301 350,128 Q383.6,324.2 406,486.5 Z" fill="url(#emberGlow)" opacity="0.45"/>
+  <path d="M515.6,429.5 Q408.2,307.3 252,176 Q340.7,355.9 408.4,506.5 Z" fill="url(#emberGlow)" opacity="0.2"/></g>
+  <g transform="translate(1024,0) scale(-1,1)">
+  <path d="M462,468 C442,378 390,208 350,128 Q336.4,221.5 252,176 Q267,271.4 172,256 Q217.1,340.1 124,352 Q196,416.5 118,452 Q210.1,489.8 160,540 Q342,538 462,502 Z" fill="url(#wingMembrane)" stroke="#8a5a2b" stroke-width="2" stroke-linejoin="round"/>
+  <g fill="url(#wingUnder)" stroke="#3a2414" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M512.7,454.1 Q420.9,337.4 300,200 Q372.1,367 427.3,505.9 Z"/>
+    <path d="M500.7,435.6 Q372.7,370.6 210,300 Q337.6,421.2 439.3,524.4 Z"/>
+    <path d="M481.9,431.4 Q338.1,414.7 160,404 Q324.5,470.1 458.1,528.6 Z"/>
+    <path d="M467.1,438.1 Q335.9,462.2 176,500 Q339.1,510 472.9,521.9 Z"/>
+  </g>
+  <g fill="url(#wingBronze)" stroke="#1a100a" stroke-width="2" stroke-linejoin="round">
+    <path d="M518,449.5 Q454.2,301 350,128 Q383.6,324.2 406,486.5 Z"/>
+    <path d="M515.6,429.5 Q408.2,307.3 252,176 Q340.7,355.9 408.4,506.5 Z"/>
+    <path d="M502.1,413.1 Q362,330.9 172,256 Q311.4,400 421.9,522.9 Z"/>
+    <path d="M482.8,407.5 Q325.7,369.8 124,352 Q299.5,446.1 441.2,528.5 Z"/>
+    <path d="M464.7,410.1 Q309.2,416.8 118,452 Q305.9,489.8 459.3,525.9 Z"/>
+    <path d="M450.9,421.3 Q317.6,464.9 160,540 Q331.7,523.7 473.1,514.7 Z"/>
+  </g>
+  <g stroke="url(#wingEdge)" stroke-width="2" fill="none" opacity="0.8" stroke-linecap="round">
+    <path d="M462,468 Q382,274 354.5,141.6"/>
+    <path d="M462,468 Q333,298 260.4,187.7"/>
+    <path d="M462,468 Q293,338 183.6,264.5"/>
+    <path d="M462,468 Q269,386 137.5,356.6"/>
+    <path d="M462,468 Q266,436 131.8,452.6"/>
+    <path d="M462,468 Q287,480 172.1,537.1"/>
+  </g>
+  <!-- ember light catching the inner wing -->
+  <path d="M518,449.5 Q454.2,301 350,128 Q383.6,324.2 406,486.5 Z" fill="url(#emberGlow)" opacity="0.45"/>
+  <path d="M515.6,429.5 Q408.2,307.3 252,176 Q340.7,355.9 408.4,506.5 Z" fill="url(#emberGlow)" opacity="0.2"/></g>
+  
+  <!-- warm aura behind the crest -->
+  <circle cx="512" cy="380" r="190" fill="url(#emberGlow)" opacity="0.55" filter="url(#glowWide)"/>
+  <!-- horns -->
+  <path d="M512,310 C468,262 426,226 372,96 C382,200 440,250 512,310 Z" fill="url(#steel)" stroke="#5a4a3a" stroke-width="2"/>
+  <path d="M512,310 C556,262 598,226 652,96 C642,200 584,250 512,310 Z" fill="url(#steel)" stroke="#5a4a3a" stroke-width="2"/>
+  <!-- crossguard -->
+  <path d="M430,318 L594,318 L580,342 L444,342 Z" fill="url(#steelDark)" stroke="#6b5a48" stroke-width="2"/>
+  <!-- central spire -->
+  <path d="M512,70 L544,240 L540,480 L512,540 L484,480 L480,240 Z" fill="url(#steel)" stroke="#6b5a48" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M512,70 L512,540" stroke="#d9c7a8" stroke-width="2" opacity="0.6"/>
+  <!-- eyes -->
+  <g filter="url(#glowSmall)">
+    <path d="M462,262 L490,270 L470,282 Z" fill="#ffd166"/>
+    <path d="M562,262 L534,270 L554,282 Z" fill="#ffd166"/>
+  </g>
+  <!-- ember core -->
+  <circle cx="512" cy="372" r="90" fill="url(#emberGlow)" filter="url(#glow)"/>
+  <circle cx="512" cy="372" r="26" fill="url(#emberCore)"/>
+  <circle cx="512" cy="366" r="10" fill="#fff1c9"/>
+  
+</svg>

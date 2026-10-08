@@ -1,0 +1,201 @@
+// Vstroz Alliance — database schema
+// SQLite for local/dev. Switch `provider` to "postgresql" and update DATABASE_URL for production.
+// SQLite has no enums, so status/role fields are strings validated in src/lib/constants.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  username        String    @unique
+  email           String    @unique
+  passwordHash    String
+  displayName     String
+  ign             String?   // in-game name
+  gameClass       String?   // Aion 2 class
+  discord         String?
+  applicationNote String?
+  playtime        String?   // how long they have played MMOs
+  playerType      String?   // Casual / Softcore / Hardcore / Competitive
+  interests       String?   // comma-separated: Dungeons, PvP, Sieges...
+  games           String?   // other games they play
+  game            String?   // game they applied for (GAME_CATALOG name)
+  gameAnswers     String?   // JSON of genre-specific answers, keyed by question key
+  status          String    @default("PENDING") // PENDING | APPROVED | DENIED
+  role            String    @default("MEMBER")  // MEMBER | OFFICER | LEADER
+  tier            String    @default("RECRUIT") // RECRUIT | MEMBER | VETERAN | ELITE (rank ladder)
+  title           String?   // optional display title, e.g. "Siege Lead"
+  reviewedAt      DateTime?
+  reviewedById    String?
+  reviewNote      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  signups          MatchSignup[]
+  roleApplications RoleApplication[]
+  announcements    Announcement[]
+  disputesRaised   Dispute[]      @relation("DisputeRaisedBy")
+  disputesAgainst  Dispute[]      @relation("DisputeAgainst")
+  tryouts          TryoutRequest[]
+  mediaPosts       MediaPost[]
+  nominations      Nomination[] @relation("Nominee")
+  nominationsMade  Nomination[] @relation("Nominator")
+  votes            Vote[]
+}
+
+// A proposal to promote a member into a voted rank (Veteran / Elite).
+model Nomination {
+  id            String    @id @default(cuid())
+  userId        String
+  tier          String    // target tier
+  nominatedById String
+  reason        String    @default("")
+  status        String    @default("OPEN") // OPEN | PASSED | FAILED | VETOED | WITHDRAWN
+  closesAt      DateTime
+  decidedAt     DateTime?
+  decidedById   String?
+  createdAt     DateTime  @default(now())
+
+  user        User   @relation("Nominee", fields: [userId], references: [id], onDelete: Cascade)
+  nominatedBy User   @relation("Nominator", fields: [nominatedById], references: [id], onDelete: Cascade)
+  votes       Vote[]
+}
+
+model Vote {
+  id           String   @id @default(cuid())
+  nominationId String
+  voterId      String
+  choice       String   // YES | NO | ABSTAIN
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  nomination Nomination @relation(fields: [nominationId], references: [id], onDelete: Cascade)
+  voter      User       @relation(fields: [voterId], references: [id], onDelete: Cascade)
+
+  @@unique([nominationId, voterId])
+}
+
+model Match {
+  id          String   @id @default(cuid())
+  title       String
+  game        String   @default("Aion 2")
+  type        String   @default("SIEGE") // SIEGE | SCRIM | TOURNAMENT | PVE | TRAINING | MEETING | COMMUNITY
+  startsAt    DateTime
+  description String   @default("")
+  maxPlayers  Int?
+  status      String   @default("OPEN") // OPEN | LOCKED | COMPLETED | CANCELLED
+  result      String?  // e.g. "Victory — Fortress held"
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  signups MatchSignup[]
+}
+
+model MatchSignup {
+  id        String   @id @default(cuid())
+  matchId   String
+  userId    String
+  position  String   // TANK | HEALER | DPS | SUPPORT
+  note      String?
+  status    String   @default("PENDING") // PENDING | CONFIRMED | BENCH | DECLINED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, userId])
+}
+
+model GuildRole {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  slots       Int      @default(1)
+  isOpen      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  applications RoleApplication[]
+}
+
+model RoleApplication {
+  id         String    @id @default(cuid())
+  roleId     String
+  userId     String
+  message    String    @default("")
+  status     String    @default("PENDING") // PENDING | APPROVED | DENIED
+  reviewNote String?
+  createdAt  DateTime  @default(now())
+  reviewedAt DateTime?
+
+  role GuildRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, userId])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  pinned    Boolean  @default(false)
+  authorId  String
+  createdAt DateTime @default(now())
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+// "The Table": disputes brought by members and settled by officers/leaders.
+model Dispute {
+  id            String    @id @default(cuid())
+  raisedById    String
+  againstUserId String?
+  subject       String
+  details       String
+  status        String    @default("OPEN") // OPEN | RESOLVED | DISMISSED
+  resolution    String?
+  resolvedById  String?
+  resolvedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  raisedBy User  @relation("DisputeRaisedBy", fields: [raisedById], references: [id], onDelete: Cascade)
+  against  User? @relation("DisputeAgainst", fields: [againstUserId], references: [id], onDelete: SetNull)
+}
+
+// Esports section: members request a tryout for a competitive team.
+model TryoutRequest {
+  id         String    @id @default(cuid())
+  userId     String
+  game       String
+  message    String    @default("")
+  status     String    @default("PENDING") // PENDING | SCHEDULED | PASSED | FAILED
+  note       String?
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Media hub: videos (YouTube / Twitch) posted by members, approved by officers.
+model MediaPost {
+  id          String   @id @default(cuid())
+  title       String
+  url         String
+  provider    String   // YOUTUBE | TWITCH
+  embedId     String   // video id or twitch channel/video id
+  description String   @default("")
+  game        String?
+  postedById  String
+  approved    Boolean  @default(false)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  postedBy User @relation(fields: [postedById], references: [id], onDelete: Cascade)
+}
