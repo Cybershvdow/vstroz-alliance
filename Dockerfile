@@ -18,4 +18,4 @@ ENV PORT=3000
 EXPOSE 3000
 
 # Create/upgrade tables on boot, then serve
-CMD ["sh", "-c", "mkdir -p /data && npx prisma db push --skip-generate && npm run start"]
+CMD ["sh", "-c", "mkdir -p /data && npx prisma db push --skip-generate && node scripts/bootstrap.mjs && npm run start"]
