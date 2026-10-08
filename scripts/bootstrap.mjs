@@ -12,6 +12,11 @@ try {
   } else {
     console.log(`[bootstrap] database ready (${users} users)`);
   }
+  // Accounts created before the legion flow: anyone already reviewed, or who filled in a profile, counts as applied.
+  const backfilled = await db.$executeRawUnsafe(
+    'UPDATE "User" SET "appliedAt" = COALESCE("reviewedAt", "createdAt") WHERE "appliedAt" IS NULL AND ("status" <> \'PENDING\' OR "playtime" IS NOT NULL)',
+  );
+  if (backfilled) console.log(`[bootstrap] backfilled appliedAt on ${backfilled} rows`);
   // One-time rename: the game is listed as "Aion" (was "Aion 2"). Safe to run on every start.
   const renamed = await Promise.all([
     db.user.updateMany({ where: { game: "Aion 2" }, data: { game: "Aion" } }),

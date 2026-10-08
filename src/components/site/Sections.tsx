@@ -41,7 +41,7 @@ export async function Hero() {
           <p className="rise rise-3 mt-7 max-w-xl text-base leading-relaxed text-muted md:text-lg">{site.tagline}</p>
           <div className="rise rise-4 mt-9 flex flex-wrap gap-3">
             <ButtonLink href="/register" size="lg">
-              Apply to join <ArrowIcon />
+              Join the alliance <ArrowIcon />
             </ButtonLink>
             <a
               href={site.discordInvite}
@@ -93,7 +93,7 @@ export async function Hero() {
       <div className="relative border-y border-line bg-bg-2/80 backdrop-blur">
         <div className="mx-auto grid max-w-7xl grid-cols-2 divide-line md:grid-cols-4 md:divide-x">
           {[
-            ["Active members", `${memberCount}`],
+            ["Legion members", `${memberCount}`],
             ["Playing now", "Aion"],
             ["Matches won", `${wins}`],
             ["Recruiting", "Open"],
@@ -333,13 +333,13 @@ export function JoinCTA() {
               Earn the <span className="display-gold">banner.</span>
             </h2>
             <p className="mt-4 max-w-xl text-muted">
-              Create an account, fill in your player profile, get reviewed by an officer, and unlock the member portal: match signups, role
-              applications, and the full roster.
+              Create an account and you are in the community: post content, vote, bring disputes, build your profile. Apply to the Aion
+              legion from inside your account; an officer reviews it and unlocks match signups, roles, and the roster.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <ButtonLink href="/register" size="lg">
-              Apply now <ArrowIcon />
+              Create account <ArrowIcon />
             </ButtonLink>
             <ButtonLink href="/recruit" size="lg" variant="secondary">
               Requirements

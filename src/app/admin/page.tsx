@@ -20,8 +20,8 @@ export default async function AdminOverview() {
       <PageHeader title="Command center" text={`Signed in as ${me.displayName}. Everything that needs an officer decision lands here.`} actions={<ButtonLink href="/admin/matches">New match</ButtonLink>} />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Approved members" value={members} tone="gold" />
-        <Stat label="Pending applicants" value={pending} tone={pending ? "accent" : "text"} />
+        <Stat label="Legion members" value={members} tone="gold" />
+        <Stat label="Legion applications" value={pending} tone={pending ? "accent" : "text"} />
         <Stat label="Role applications" value={roleApps} tone={roleApps ? "accent" : "text"} />
         <Stat label="Upcoming matches" value={upcoming.length} />
       </div>
@@ -29,7 +29,7 @@ export default async function AdminOverview() {
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <Card accent>
           <div className="flex items-center justify-between">
-            <h2 className="display text-2xl">Applicant queue</h2>
+            <h2 className="display text-2xl">Legion applications</h2>
             <Link href="/admin/applicants" className="label hover:text-text">
               Review all →
             </Link>
@@ -44,7 +44,7 @@ export default async function AdminOverview() {
                   <div className="min-w-0 flex-1">
                     <p className="display truncate text-lg">{u.displayName}</p>
                     <p className="text-xs text-muted">
-                      {u.gameClass ?? "No class"} · applied {formatDate(u.createdAt)}
+                      {u.gameClass ?? "No class"} · applied {formatDate(u.appliedAt ?? u.createdAt)}
                     </p>
                   </div>
                   <Badge tone="warning">Pending</Badge>

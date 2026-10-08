@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { requireApproved } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
+import { site } from "@/lib/site";
 import { formatDateTime, formatDate } from "@/lib/format";
 import { MATCH_TYPE_LABEL, type MatchType } from "@/lib/constants";
 import { Badge, ButtonLink, Card, EmptyState, PageHeader, Stat, statusTone } from "@/components/ui";
 import { Countdown } from "@/components/site/Countdown";
 
 export default async function DashboardPage() {
-  const me = await requireApproved();
+  const me = await requireUser();
+  const inLegion = me.status === "APPROVED";
   const now = new Date();
 
   const [announcements, upcoming, mySignups, myRoleApps, memberCount] = await Promise.all([
@@ -25,9 +27,32 @@ export default async function DashboardPage() {
     <>
       <PageHeader
         title={<>Welcome back, <span className="text-accent">{me.displayName}</span></>}
-        text={[me.playerType, me.gameClass ? `Aion · ${me.gameClass}` : null, `Member since ${formatDate(me.createdAt)}`].filter(Boolean).join(" · ")}
-        actions={<ButtonLink href="/dashboard/matches">Match signups</ButtonLink>}
+        text={[me.playerType, me.gameClass ? `Aion · ${me.gameClass}` : null, `With the alliance since ${formatDate(me.createdAt)}`].filter(Boolean).join(" · ")}
+        actions={inLegion ? <ButtonLink href="/dashboard/matches">Match signups</ButtonLink> : <ButtonLink href="/dashboard/legion">{me.appliedAt ? "Your legion application" : "Join the legion"}</ButtonLink>}
       />
+
+      {!inLegion && (
+        <Card accent className="mb-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="eyebrow">{site.legionName}</p>
+              <h2 className="display mt-2 text-2xl">
+                {me.status === "DENIED" ? "Legion application declined" : me.appliedAt ? "Legion application under review" : "You're in the community. Want in the legion?"}
+              </h2>
+              <p className="mt-2 max-w-xl text-sm text-muted">
+                {me.status === "DENIED"
+                  ? "You are still part of the community: post content, bring disputes, vote, and keep your profile."
+                  : me.appliedAt
+                    ? "An officer reviews it within 48 hours. Match signups, roles, and the roster unlock when you are approved."
+                    : "Fill in your player profile (game, in-game name, how you play) and apply. Officers review within 48 hours."}
+              </p>
+            </div>
+            <ButtonLink href="/dashboard/legion" variant={me.appliedAt ? "secondary" : "primary"}>
+              {me.status === "DENIED" ? "Details" : me.appliedAt ? "View application" : "Apply to the legion"}
+            </ButtonLink>
+          </div>
+        </Card>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label="Upcoming matches" value={upcoming.length} />

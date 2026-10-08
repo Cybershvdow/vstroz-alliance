@@ -42,6 +42,7 @@ async function main() {
       tier: "ELITE",
       title: "Alliance Leader & Founder",
       reviewedAt: new Date(),
+      appliedAt: new Date(),
     },
   });
 
@@ -59,6 +60,7 @@ async function main() {
       tier: "ELITE",
       title: "Alliance Leader & Founder",
       reviewedAt: new Date(),
+      appliedAt: new Date(),
       reviewedById: cyber.id,
     },
   });

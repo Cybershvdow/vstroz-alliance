@@ -1,12 +1,12 @@
 import { db } from "@/lib/db";
-import { requireApproved } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
 import { closeExpiredNominations } from "@/lib/ranks";
 import { TIERS, TIER_LABEL, TIER_BLURB, VOTED_TIERS, VOTE_RULES, canVoteOn, type Tier } from "@/lib/constants";
 import { Badge, EmptyState, PageHeader } from "@/components/ui";
 import { VoteCard } from "@/components/portal/VoteCard";
 
 export default async function VotesPage() {
-  const me = await requireApproved();
+  const me = await requireUser();
   await closeExpiredNominations();
 
   const meFull = await db.user.findUnique({ where: { id: me.id }, select: { role: true, tier: true } });
@@ -26,7 +26,7 @@ export default async function VotesPage() {
     <>
       <PageHeader
         title="Rank votes"
-        text={`You are ${TIER_LABEL[myTier as Tier] ?? myTier}. Promotions into Veteran and Elite are decided by the players already at that rank, plus officers.`}
+        text={`You are ${TIER_LABEL[myTier as Tier] ?? myTier}. Every community member votes on promotions into Veteran and Elite. Officers can veto or override.`}
       />
 
       <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

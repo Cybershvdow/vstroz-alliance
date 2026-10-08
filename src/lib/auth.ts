@@ -25,6 +25,7 @@ export const getCurrentUser = cache(async () => {
       gameAnswers: true,
       applicationNote: true,
       appliedAt: true,
+      socials: true,
       discord: true,
       status: true,
       role: true,
@@ -51,10 +52,10 @@ export async function requireUser() {
   return user;
 }
 
-/** Signed in AND approved by an officer. */
+/** Signed in AND in the legion (status APPROVED). Community-only accounts are sent to the legion page. */
 export async function requireApproved() {
   const user = await requireUser();
-  if (user.status !== "APPROVED") redirect("/dashboard");
+  if (user.status !== "APPROVED") redirect("/dashboard/legion");
   return user;
 }
 

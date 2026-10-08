@@ -3,7 +3,7 @@ import { requireOfficer } from "@/lib/auth";
 import { reviewApplicantAction } from "@/lib/actions/admin";
 import { formatDate } from "@/lib/format";
 import { Avatar, Badge, Button, EmptyState, PageHeader, statusTone } from "@/components/ui";
-import { questionsFor } from "@/lib/constants";
+import { questionsFor, STATUS_LABEL } from "@/lib/constants";
 
 function GameAnswers({ game, json }: { game: string | null; json: string | null }) {
   if (!game) return null;
@@ -37,7 +37,7 @@ export default async function ApplicantsPage() {
   await requireOfficer();
   const [pending, notApplied, recent] = await Promise.all([
     db.user.findMany({ where: { status: "PENDING", appliedAt: { not: null } }, orderBy: { appliedAt: "asc" } }),
-    db.user.count({ where: { status: "PENDING", appliedAt: null } }),
+    db.user.findMany({ where: { status: "PENDING", appliedAt: null }, select: { id: true, displayName: true, username: true, createdAt: true }, orderBy: { createdAt: "desc" } }),
     db.user.findMany({
       where: { status: { in: ["APPROVED", "DENIED"] }, role: "MEMBER", reviewedAt: { not: null } },
       orderBy: { reviewedAt: "desc" },
@@ -47,13 +47,10 @@ export default async function ApplicantsPage() {
 
   return (
     <>
-      <PageHeader
-        title="Applicants"
-        text={`Approve to unlock the member portal for them. Deny with a note so they know why.${notApplied > 0 ? ` ${notApplied} ${notApplied === 1 ? "account has" : "accounts have"} been created but not filled in a player profile yet; they are not in the queue until they do.` : ""}`}
-      />
+      <PageHeader title="Legion applications" text="Approve to add them to the legion: match signups, roles, rank votes, and the roster. Deny with a note so they know why." />
 
       {pending.length === 0 ? (
-        <EmptyState title="Queue is clear" text="New applications appear here the moment someone completes their player profile." />
+        <EmptyState title="Queue is clear" text="Legion applications appear here the moment a community member applies." />
       ) : (
         <ul className="space-y-4">
           {pending.map((u) => (
@@ -131,6 +128,30 @@ export default async function ApplicantsPage() {
         </ul>
       )}
 
+      {notApplied.length > 0 && (
+        <>
+          <h2 className="display mb-3 mt-12 text-2xl">
+            Community accounts not in the legion <span className="text-muted">({notApplied.length})</span>
+          </h2>
+          <p className="mb-3 text-sm text-muted">
+            They have an account but have not applied to the legion. They can post content, vote, and use The Round Table; they enter the queue when they apply.
+          </p>
+          <ul className="panel divide-y divide-line">
+            {notApplied.map((u) => (
+              <li key={u.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="display truncate text-lg">{u.displayName}</p>
+                  <p className="text-xs text-muted">
+                    @{u.username} · joined {formatDate(u.createdAt)}
+                  </p>
+                </div>
+                <Badge tone="neutral">Community</Badge>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
       {recent.length > 0 && (
         <>
           <h2 className="display mb-3 mt-12 text-2xl">Recent decisions</h2>
@@ -144,9 +165,9 @@ export default async function ApplicantsPage() {
                 <span className="text-xs text-dim">{u.reviewedAt ? formatDate(u.reviewedAt) : ""}</span>
                 <form action={reviewApplicantAction} className="flex items-center gap-2">
                   <input type="hidden" name="userId" value={u.id} />
-                  <Badge tone={statusTone(u.status)}>{u.status}</Badge>
+                  <Badge tone={statusTone(u.status)}>{STATUS_LABEL[u.status] ?? u.status}</Badge>
                   <Button type="submit" name="decision" value={u.status === "APPROVED" ? "DENIED" : "APPROVED"} size="sm" variant="ghost">
-                    {u.status === "APPROVED" ? "Revoke" : "Approve"}
+                    {u.status === "APPROVED" ? "Remove from legion" : "Add to legion"}
                   </Button>
                 </form>
               </li>

@@ -100,8 +100,8 @@ export async function notifyNewApplication(a: ApplicantEmailData) {
   ${a.applicationNote ? `<p style="margin:14px 0 0;padding-top:12px;border-top:1px solid rgba(155,77,255,.2)"><strong>Comments</strong><br>${esc(a.applicationNote).replace(/\n/g, "<br>")}</p>` : ""}`;
   return sendEmail({
     to: notifyEmail,
-    subject: `New application: ${a.displayName} (${a.playerType ?? "player"})`,
-    html: shell(`${a.displayName} applied to join`, body, { href: `${appUrl}/admin/applicants`, label: "Review in Command Center" }),
+    subject: `New legion application: ${a.displayName} (${a.playerType ?? "player"})`,
+    html: shell(`${a.displayName} applied to the legion`, body, { href: `${appUrl}/admin/applicants`, label: "Review in Command Center" }),
     text: `${a.displayName} (@${a.username}, ${a.email}) applied. Review: ${appUrl}/admin/applicants`,
   });
 }
@@ -110,14 +110,14 @@ export async function notifyNewApplication(a: ApplicantEmailData) {
 export async function notifyDecision(a: { displayName: string; email: string }, decision: "APPROVED" | "DENIED", note: string | null, discordInvite: string) {
   const approved = decision === "APPROVED";
   const body = approved
-    ? `<p style="margin:0">Welcome to the alliance, ${esc(a.displayName)}. Your application was approved and the member portal is now unlocked: match signups, guild roles, announcements, and the full roster.</p>
+    ? `<p style="margin:0">You're in the legion, ${esc(a.displayName)}. An officer approved your application. Match signups, guild roles, rank votes, and the roster are now unlocked in your portal.</p>
        <p style="margin:12px 0 0">If you have not already, join the Discord: <a href="${discordInvite}" style="color:#c9ccd6">${discordInvite}</a></p>`
-    : `<p style="margin:0">Thanks for applying, ${esc(a.displayName)}. An officer reviewed your application and did not approve it at this time.</p>`;
+    : `<p style="margin:0">Thanks for applying, ${esc(a.displayName)}. An officer reviewed your application and did not approve it for the legion at this time. You are still part of the Vstroz Alliance community: Discord, media, and The Round Table stay open to you.</p>`;
   const noteHtml = note ? `<p style="margin:12px 0 0;padding-top:12px;border-top:1px solid rgba(155,77,255,.2)"><strong>Note from the officer</strong><br>${esc(note)}</p>` : "";
   return sendEmail({
     to: a.email,
-    subject: approved ? "You're in — Vstroz Alliance" : "Your Vstroz Alliance application",
-    html: shell(approved ? "Application approved" : "Application update", body + noteHtml, approved ? { href: `${appUrl}/dashboard`, label: "Open the member portal" } : undefined),
+    subject: approved ? "You're in the legion — Vstroz Alliance" : "Your Vstroz Alliance legion application",
+    html: shell(approved ? "Legion application approved" : "Legion application update", body + noteHtml, approved ? { href: `${appUrl}/dashboard`, label: "Open the member portal" } : undefined),
   });
 }
 

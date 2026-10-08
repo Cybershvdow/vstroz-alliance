@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { requireApproved } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
 import { closeExpiredNominations } from "@/lib/ranks";
 import { rules } from "@/lib/site";
 import { formatDate } from "@/lib/format";
@@ -8,12 +8,12 @@ import { Badge, ButtonLink, Card, EmptyState, PageHeader, statusTone } from "@/c
 import { DisputeForm, TryoutForm } from "@/components/forms/CommunityForms";
 
 export default async function TablePage() {
-  const me = await requireApproved();
+  const me = await requireUser();
   await closeExpiredNominations();
 
   const [openVotes, members, myDisputes, myTryouts] = await Promise.all([
     db.nomination.count({ where: { status: "OPEN" } }),
-    db.user.findMany({ where: { status: "APPROVED", NOT: { id: me.id } }, select: { id: true, displayName: true }, orderBy: { displayName: "asc" } }),
+    db.user.findMany({ where: { NOT: { id: me.id } }, select: { id: true, displayName: true }, orderBy: { displayName: "asc" } }),
     db.dispute.findMany({ where: { raisedById: me.id }, orderBy: { createdAt: "desc" }, take: 10, include: { against: { select: { displayName: true } } } }),
     db.tryoutRequest.findMany({ where: { userId: me.id }, orderBy: { createdAt: "desc" }, take: 10 }),
   ]);
@@ -57,7 +57,16 @@ export default async function TablePage() {
           <Card accent>
             <h2 className="display text-2xl">Competitive tryout</h2>
             <p className="mb-4 mt-1 text-sm text-muted">Every competitive spot is tried out for. Pass the tryout, then the Elite vote.</p>
-            <TryoutForm />
+            {me.status === "APPROVED" ? (
+              <TryoutForm />
+            ) : (
+              <p className="text-sm text-muted">
+                Tryouts are for legion members.{" "}
+                <Link href="/dashboard/legion" className="text-gold hover:underline">
+                  Apply to the legion →
+                </Link>
+              </p>
+            )}
           </Card>
           <div>
             <h3 className="display mb-3 text-xl">Your tryouts</h3>

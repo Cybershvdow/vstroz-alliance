@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { requireApproved } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
 import { deleteOwnMediaAction } from "@/lib/actions/community";
 import { thumbnailFor } from "@/lib/media";
 import { formatDate } from "@/lib/format";
@@ -8,7 +8,7 @@ import { MediaForm } from "@/components/forms/CommunityForms";
 import { ConfirmSubmit } from "@/components/forms/SubmitButton";
 
 export default async function MyMediaPage() {
-  const me = await requireApproved();
+  const me = await requireUser();
   const mine = await db.mediaPost.findMany({ where: { postedById: me.id }, orderBy: { createdAt: "desc" } });
   const { username } = (await db.user.findUnique({ where: { id: me.id }, select: { username: true } })) ?? { username: "" };
 
@@ -16,11 +16,11 @@ export default async function MyMediaPage() {
     <>
       <PageHeader
         title="Post content"
-        text="Share YouTube or Twitch links. Officers approve posts before they appear in your folder on the public Media page."
+        text="Share YouTube or Twitch links. Officers approve posts before they appear on your public profile and in your Media folder."
         actions={
           <>
-            <ButtonLink href={`/media/members/${encodeURIComponent(username)}`} variant="secondary">
-              Your folder
+            <ButtonLink href={`/members/${encodeURIComponent(username)}`} variant="secondary">
+              Your profile
             </ButtonLink>
             <ButtonLink href="/media" variant="ghost">
               All folders
@@ -62,12 +62,14 @@ export default async function MyMediaPage() {
                         {p.official && <Badge tone="gold">Vstroz Alliance folder</Badge>}
                       </div>
                     </div>
-                    <form action={deleteOwnMediaAction}>
-                      <input type="hidden" name="id" value={p.id} />
-                      <ConfirmSubmit size="sm" variant="ghost" message="Remove this post?">
-                        Remove
-                      </ConfirmSubmit>
-                    </form>
+                    {!p.official && (
+                      <form action={deleteOwnMediaAction}>
+                        <input type="hidden" name="id" value={p.id} />
+                        <ConfirmSubmit size="sm" variant="ghost" message="Remove this post?">
+                          Remove
+                        </ConfirmSubmit>
+                      </form>
+                    )}
                   </li>
                 );
               })}

@@ -49,7 +49,7 @@ export function Footer() {
             ))}
             <li>
               <Link href="/register" className="text-sm text-muted transition hover:text-text">
-                Apply to join
+                Join the alliance
               </Link>
             </li>
           </ul>

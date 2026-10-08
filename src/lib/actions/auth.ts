@@ -16,7 +16,9 @@ import {
   profileSchema,
   flattenErrors,
   type ActionState,
+  type FieldErrors,
 } from "@/lib/validation";
+import { normalizeSocial, SOCIAL_PLATFORMS, type SocialKey } from "@/lib/social";
 
 function clean(v: FormDataEntryValue | null) {
   return typeof v === "string" ? v : "";
@@ -65,19 +67,26 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
   });
 
   await createSession(user.id);
-  redirect("/dashboard");
+  // The account alone makes them a community member; the legion page is where they apply.
+  redirect("/dashboard/legion?welcome=1");
 }
 
 /**
- * Step 2 (and later edits): the player profile. The first submission is the membership application:
- * it stamps appliedAt and notifies the officers. Approved members use the same action from their profile page.
+ * The player profile (game, in-game name, class, how they play). intent="save" just stores it.
+ * intent="apply" also submits it as the legion application: stamps appliedAt once and notifies the officers.
  */
 export async function savePlayerProfileAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const me = await getCurrentUser();
   if (!me) redirect("/login");
-  if (me.status === "DENIED") {
-    return { ok: false, message: "Your application was declined. Reach out in Discord if you think that was a mistake." };
-  }
+  const intent = clean(formData.get("intent")) === "apply" ? "apply" : "save";
+
+  // Echo what was typed so a validation error does not wipe the form.
+  const echo = (): Record<string, string | string[]> =>
+    Object.fromEntries(
+      [...new Set(formData.keys())]
+        .filter((k) => k !== "intent")
+        .map((k) => [k, k === "interests" ? formData.getAll(k).filter((x): x is string => typeof x === "string") : clean(formData.get(k))]),
+    );
 
   const parsed = playerProfileSchema.safeParse({
     playtime: clean(formData.get("playtime")),
@@ -87,41 +96,49 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
     game: clean(formData.get("game")),
     applicationNote: clean(formData.get("applicationNote")),
   });
-  const gameCheck = parsed.success ? validateGameAnswers(parsed.data.game, formData) : { answers: {}, errors: {} };
-  if (!parsed.success || Object.keys(gameCheck.errors).length) {
-    return {
-      ok: false,
-      errors: { ...(parsed.success ? {} : flattenErrors(parsed.error)), ...gameCheck.errors },
-      message: "Fix the highlighted fields.",
-    };
-  }
-
+  if (!parsed.success) return { ok: false, errors: flattenErrors(parsed.error), values: echo(), message: "Fix the highlighted fields." };
   const d = parsed.data;
+  const gameCheck = d.game ? validateGameAnswers(d.game, formData) : { answers: {} as Record<string, string>, errors: {} as FieldErrors };
+  const errors: FieldErrors = { ...gameCheck.errors };
+  if (intent === "apply" && !d.game) errors.game = ["Pick the game you are applying with"];
+  if (Object.keys(errors).length) return { ok: false, errors, values: echo(), message: "Fix the highlighted fields." };
+
   const answers = gameCheck.answers;
-  const firstTime = !me.appliedAt;
-  const user = await db.user.update({
+  await db.user.update({
     where: { id: me.id },
     data: {
-      game: d.game,
+      game: d.game || null,
       gameAnswers: JSON.stringify(answers),
-      ign: answers.ign || null,
-      gameClass: answers.mainClass || null,
+      // Only touch the in-game name/class when a game was picked; "No listed game" keeps what is stored.
+      ...(d.game ? { ign: answers.ign || null, gameClass: answers.mainClass || null } : {}),
       playtime: d.playtime,
       playerType: d.playerType,
       interests: d.interests.join(", "),
       games: d.games || null,
       applicationNote: d.applicationNote || null,
-      ...(firstTime ? { appliedAt: new Date() } : {}),
     },
   });
 
-  if (firstTime) {
-    // Notify the officers' inbox once the response has been sent.
-    after(() => notifyNewApplication(user));
+  if (intent === "apply") {
+    if (me.status === "DENIED") {
+      return { ok: false, message: "Your legion application was declined. Reach out to an officer in Discord if you think that was a mistake." };
+    }
+    if (me.status === "APPROVED") {
+      revalidatePath("/", "layout");
+      return { ok: true, message: "Player profile saved. You are already in the legion." };
+    }
+    // Atomic: only the first apply stamps appliedAt and notifies the officers, even under double submits.
+    const stamped = await db.user.updateMany({ where: { id: me.id, status: "PENDING", appliedAt: null }, data: { appliedAt: new Date() } });
+    if (stamped.count === 1) {
+      const user = await db.user.findUniqueOrThrow({ where: { id: me.id } });
+      after(() => notifyNewApplication(user));
+    }
+    revalidatePath("/", "layout");
+    redirect("/dashboard/legion?submitted=1");
   }
+
   revalidatePath("/", "layout");
-  if (firstTime) redirect("/dashboard");
-  return { ok: true, message: me.status === "APPROVED" ? "Player profile saved." : "Application updated." };
+  return { ok: true, message: me.status === "APPROVED" ? "Player profile saved." : me.appliedAt ? "Application updated." : "Player profile saved." };
 }
 
 export async function loginAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -165,6 +182,11 @@ export async function updateProfileAction(_prev: ActionState, formData: FormData
     displayName: clean(formData.get("displayName")),
     email: clean(formData.get("email")),
     discord: clean(formData.get("discord")),
+    socialYoutube: clean(formData.get("socialYoutube")),
+    socialTwitch: clean(formData.get("socialTwitch")),
+    socialTiktok: clean(formData.get("socialTiktok")),
+    socialX: clean(formData.get("socialX")),
+    socialInstagram: clean(formData.get("socialInstagram")),
   });
   if (!parsed.success) return { ok: false, errors: flattenErrors(parsed.error) };
 
@@ -172,14 +194,28 @@ export async function updateProfileAction(_prev: ActionState, formData: FormData
   const email = d.email.toLowerCase();
   const taken = await db.user.findFirst({ where: { email, NOT: { id: me.id } }, select: { id: true } });
   if (taken) return { ok: false, errors: { email: ["That email is already used by another account"] } };
+
+  // Social links: handle or URL in, normalized https URL out.
+  const fieldFor: Record<SocialKey, keyof typeof d> = { youtube: "socialYoutube", twitch: "socialTwitch", tiktok: "socialTiktok", x: "socialX", instagram: "socialInstagram" };
+  const socials: Partial<Record<SocialKey, string>> = {};
+  const errors: FieldErrors = {};
+  for (const p of SOCIAL_PLATFORMS) {
+    const r = normalizeSocial(p.key, String(d[fieldFor[p.key]] ?? ""));
+    if (r.error) errors[fieldFor[p.key]] = [r.error];
+    else if (r.url) socials[p.key] = r.url;
+  }
+  if (Object.keys(errors).length) return { ok: false, errors, message: "Check your social links." };
+
   await db.user.update({
     where: { id: me.id },
     data: {
       displayName: d.displayName,
       email,
       discord: d.discord || null,
+      socials: Object.keys(socials).length ? JSON.stringify(socials) : null,
     },
   });
+  revalidatePath("/", "layout");
   return { ok: true, message: "Profile saved." };
 }
 

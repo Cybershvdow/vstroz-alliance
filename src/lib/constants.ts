@@ -42,6 +42,9 @@ export const GAME_CLASSES = [
 
 export const GAMES = ["Aion", "All Games", "Side Game"] as const;
 
+/** Legion status labels (User.status). An account is always a community member; APPROVED means in the legion. */
+export const STATUS_LABEL: Record<string, string> = { PENDING: "Pending", APPROVED: "In the legion", DENIED: "Declined" };
+
 /* Militant officer titles, per the alliance. Change here and every page updates. */
 export const ROLE_LABEL: Record<UserRole, string> = {
   LEADER: "General",
@@ -120,8 +123,9 @@ export function tierRank(t: string) {
 }
 
 /** Can this user vote on a nomination to the given tier? */
+/** Every community member votes on rank promotions (alliance rule, 2026-10-08). Officers keep veto and override. */
 export function canVoteOn(user: { role: string; tier: string }, targetTier: string) {
-  return isOfficer(user.role) || tierRank(user.tier) >= tierRank(targetTier);
+  return !!user && !!targetTier; // any signed-in member, any voted tier
 }
 
 /* ---------- Game catalog & genre-specific application questions ---------- */

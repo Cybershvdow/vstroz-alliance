@@ -2,6 +2,7 @@
 
 export const site = {
   name: "Vstroz Alliance",
+  legionName: "Aion legion", // the in-game guild members apply to; an account alone makes someone a community member
   shortName: "Vstroz",
   tag: "VST",
   motto: "One banner. Every world.",
@@ -99,9 +100,9 @@ export const requirements = [
 ];
 
 export const membershipPath = [
-  { n: "01", title: "Apply", text: "Create an account, then fill in your player profile: your game, in-game name, and how you play. Two minutes." },
-  { n: "02", title: "Review", text: "An officer reads every application and replies within 48 hours. Discord intro if needed." },
-  { n: "03", title: "Recruit", text: "You are in the community. Portal unlocked: events, roles, media, and The Round Table." },
+  { n: "01", title: "Account", text: "Create your Vstroz Alliance account. You are in the community from that moment: Discord, media, votes, The Round Table, and a public profile." },
+  { n: "02", title: "Apply", text: "Fill in your player profile (game, in-game name, how you play) and apply to the Aion legion. An officer replies within 48 hours." },
+  { n: "03", title: "Recruit", text: "Approved. You are in the legion: match signups, guild roles, and a place on the roster." },
   { n: "04", title: "Member", text: "Show up consistently and an officer promotes you. Members hold roles that keep the alliance running." },
   { n: "05", title: "Veteran & Elite", text: "Voted in by the players already at that rank. Elite is the competitive roster. Everything competitive is tried out for." },
 ];

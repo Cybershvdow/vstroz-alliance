@@ -88,7 +88,8 @@ export async function removeMemberAction(formData: FormData) {
     db.announcement.updateMany({ where: { authorId: userId }, data: { authorId: officer.id } }),
     db.nomination.updateMany({ where: { nominatedById: userId }, data: { nominatedById: officer.id } }),
     db.dispute.updateMany({ where: { raisedById: userId }, data: { raisedById: officer.id } }),
-    db.mediaPost.updateMany({ where: { postedById: userId }, data: { postedById: officer.id } }),
+    // Their videos stay public but move into the alliance folder rather than the officer's own.
+    db.mediaPost.updateMany({ where: { postedById: userId }, data: { postedById: officer.id, official: true } }),
     db.user.delete({ where: { id: userId } }),
   ]);
   revalidateAll();

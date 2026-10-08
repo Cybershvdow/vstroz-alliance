@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { requireApproved, requireOfficer } from "@/lib/auth";
+import { requireUser, requireApproved, requireOfficer } from "@/lib/auth";
 import { ENABLED_GAMES } from "@/lib/constants";
 import { parseMediaUrl } from "@/lib/media";
 import type { ActionState } from "@/lib/validation";
@@ -17,7 +17,7 @@ function revalidateAll() {
 /* ---------------- The Round Table: disputes ---------------- */
 
 export async function raiseDisputeAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const me = await requireApproved();
+  const me = await requireUser();
   const subject = clean(formData.get("subject")).trim().slice(0, 120);
   const details = clean(formData.get("details")).trim().slice(0, 3000);
   const againstUserId = clean(formData.get("againstUserId")).trim() || null;
@@ -70,7 +70,7 @@ export async function reviewTryoutAction(formData: FormData) {
 /* ---------------- Media hub ---------------- */
 
 export async function submitMediaAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const me = await requireApproved();
+  const me = await requireUser();
   const title = clean(formData.get("title")).trim().slice(0, 120);
   const url = clean(formData.get("url")).trim();
   const description = clean(formData.get("description")).trim().slice(0, 1000);
@@ -108,8 +108,9 @@ export async function reviewMediaAction(formData: FormData) {
 }
 
 export async function deleteOwnMediaAction(formData: FormData) {
-  const me = await requireApproved();
+  const me = await requireUser();
   const id = clean(formData.get("id"));
-  await db.mediaPost.deleteMany({ where: { id, postedById: me.id } });
+  // Posts moved into the alliance folder are the command's to remove.
+  await db.mediaPost.deleteMany({ where: { id, postedById: me.id, official: false } });
   revalidateAll();
 }

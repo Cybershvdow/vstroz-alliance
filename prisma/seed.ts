@@ -382,6 +382,9 @@ async function main() {
   });
 
   console.log("Seed complete.");
+  // Demo data: everyone with a status already applied to the legion.
+  await db.user.updateMany({ where: { appliedAt: null }, data: { appliedAt: new Date() } });
+
   console.log(`Leader login: cybershvdow / ${leaderPassword}`);
   console.log(`Discord leader login: nugget / ${DEMO_PASSWORD}`);
   console.log(`Officer logins: kaelith, draven, seraphi / ${DEMO_PASSWORD}`);

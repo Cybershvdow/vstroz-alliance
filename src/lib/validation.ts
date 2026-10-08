@@ -29,7 +29,7 @@ export const playerProfileSchema = z.object({
   playerType: z.enum(PLAYER_TYPES, { message: "Pick the type of player you are" }),
   interests: z.array(z.enum(INTEREST_OPTIONS)).min(1, "Pick at least one thing you enjoy"),
   games: z.string().trim().max(300).optional().or(z.literal("")),
-  game: z.string().refine((g) => ENABLED_GAMES.some((e) => e.name === g), "Pick a game"),
+  game: z.string().refine((g) => g === "" || ENABLED_GAMES.some((e) => e.name === g), "Pick a game"),
   applicationNote: z.string().trim().max(1000).optional().or(z.literal("")),
 });
 
@@ -62,6 +62,11 @@ export const profileSchema = z.object({
   displayName: z.string().trim().min(2).max(32),
   email: z.string().trim().email("Enter a valid email").max(120),
   discord: z.string().trim().max(40).optional().or(z.literal("")),
+  socialYoutube: z.string().trim().max(200).optional().or(z.literal("")),
+  socialTwitch: z.string().trim().max(200).optional().or(z.literal("")),
+  socialTiktok: z.string().trim().max(200).optional().or(z.literal("")),
+  socialX: z.string().trim().max(200).optional().or(z.literal("")),
+  socialInstagram: z.string().trim().max(200).optional().or(z.literal("")),
 });
 
 export const matchSchema = z.object({
@@ -101,7 +106,7 @@ export type FieldErrors = Record<string, string[] | undefined>;
 
 export type ActionState =
   | { ok: true; message?: string }
-  | { ok: false; message?: string; errors?: FieldErrors }
+  | { ok: false; message?: string; errors?: FieldErrors; values?: Record<string, string | string[]> }
   | undefined;
 
 export function flattenErrors(error: z.ZodError): FieldErrors {

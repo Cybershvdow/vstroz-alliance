@@ -96,7 +96,7 @@ export default async function SchedulePage() {
             ))}
           </ul>
           <ButtonLink href="/register" className="mt-6 w-full">
-            Apply to join
+            Join the alliance
           </ButtonLink>
         </aside>
       </div>

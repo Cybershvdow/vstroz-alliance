@@ -16,7 +16,7 @@ export default async function MembersPage() {
 
   return (
     <>
-      <PageHeader title="Members" text={`${members.length} approved members. ${isLeader ? "As a General you can promote and demote Captains." : "Only a General can promote or demote Captains. Ranks are managed on the Ranks page."}`} />
+      <PageHeader title="Legion members" text={`${members.length} in the legion. ${isLeader ? "As a General you can promote and demote Captains." : "Only a General can promote or demote Captains. Ranks are managed on the Ranks page."}`} />
 
       <ul className="panel divide-y divide-line">
         {members.map((u) => {
@@ -59,7 +59,7 @@ export default async function MembersPage() {
                 {!self && !protectedTarget && u.role !== "LEADER" && (
                   <form action={removeMemberAction}>
                     <input type="hidden" name="userId" value={u.id} />
-                    <ConfirmSubmit size="sm" variant="danger" message={`Remove ${u.displayName} from the alliance? Their account is deleted. Announcements, votes, disputes and videos they created are kept and re-attributed to you.`}>
+                    <ConfirmSubmit size="sm" variant="danger" message={`Remove ${u.displayName} from the alliance? Their account is deleted. Announcements, votes and disputes they created are re-attributed to you; their videos move to the Vstroz Alliance folder.`}>
                       Remove
                     </ConfirmSubmit>
                   </form>

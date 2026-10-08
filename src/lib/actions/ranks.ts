@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { requireApproved, requireOfficer, requireLeader } from "@/lib/auth";
+import { requireUser, requireOfficer, requireLeader } from "@/lib/auth";
 import { TIERS, VOTED_TIERS, VOTE_RULES, VOTE_CHOICES, canVoteOn, tierRank, type Tier } from "@/lib/constants";
 import { tally } from "@/lib/ranks";
 import type { ActionState } from "@/lib/validation";
@@ -69,7 +69,7 @@ export async function nominateAction(_prev: ActionState, formData: FormData): Pr
 /* ---------------- Member: cast a vote ---------------- */
 
 export async function castVoteAction(formData: FormData) {
-  const me = await requireApproved();
+  const me = await requireUser();
   const nominationId = clean(formData.get("nominationId"));
   const choice = clean(formData.get("choice"));
   const comment = clean(formData.get("comment")).trim().slice(0, 300);

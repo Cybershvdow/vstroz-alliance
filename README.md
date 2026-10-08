@@ -3,8 +3,8 @@
 A production-grade website and members portal for the Vstroz Alliance, a multi-game community with **Aion** as its flagship title.
 
 - **Public site**: home, games, roster, schedule, recruitment.
-- **Applications**: visitors register and land in a pending state.
-- **Officer approval**: officers approve or deny applicants with a note.
+- **Accounts**: anyone can create an account and is part of the community right away: portal, media, rank votes, The Round Table, and a public profile at `/members/<username>` with social links.
+- **Legion applications**: members fill in a player profile and apply to the Aion legion from `/dashboard/legion`; officers approve or deny with a note. Approval unlocks match signups, guild roles, and the roster.
 - **Member portal** (unlocked on approval): match signups, guild-role applications, announcements, profile.
 - **Command center** (officers/leader): applicant queue, member management, match creation and roster confirmation, guild roles, announcements.
 
@@ -100,7 +100,7 @@ Answers are stored with the application and shown to officers in the Applicants 
 
 - **The Round Table** (`/dashboard/table`, `/admin/table`): command (Generals and Captains) settles disputes and reviews tryouts here. Members bring disputes with a subject and details; officers record a decision (Resolved / Dismissed) that the member can see. Rank votes are linked from the same place.
 - **Tryouts**: members request a tryout from The Round Table; officers mark them Scheduled / Passed / Failed, then open an Elite vote on the Ranks page.
-- **Media** (`/media`): public video hub with a player and playlist. Members post YouTube or Twitch links from `/dashboard/media`; officers approve, feature, hide, or delete at `/admin/media`. Officer posts go live immediately. Set `site.twitchChannel` in `src/lib/site.ts` to show a live Twitch player. Social links live in `site.social`.
+- **Media** (`/media`): folder overview. A Vstroz Alliance folder (`/media/alliance`) holds posts flagged official; every member who posts gets a folder on their public profile (`/members/<username>`, `?v=<postId>` opens a video). Members post YouTube or Twitch links from `/dashboard/media`; officers approve, feature, hide, delete, or move posts between folders at `/admin/media`, and "Post as Vstroz Alliance" goes live immediately. Set `site.twitchChannel` in `src/lib/site.ts` to show a live Twitch player. Alliance social links live in `site.social`; members add their own on their profile.
 - **Rules** (`/rules`): code of conduct, chain of command, and rank ladder, all from `rules` in `src/lib/site.ts`. Officer titles come from `ROLE_LABEL` in `src/lib/constants.ts` (General, Captain).
 
 ## Ranks & voting

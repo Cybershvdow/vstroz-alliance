@@ -57,7 +57,14 @@ export function MediaPlayer({ items, parent, initialId }: { items: MediaItem[]; 
               <li key={it.id}>
                 <button
                   type="button"
-                  onClick={() => setCurrent(it)}
+                  onClick={() => {
+                    setCurrent(it);
+                    try {
+                      window.history.replaceState(null, "", `?v=${encodeURIComponent(it.id)}`);
+                    } catch {
+                      /* URL update is cosmetic */
+                    }
+                  }}
                   className={`flex w-full items-center gap-3 border p-2 text-left transition ${active ? "border-gold/60 bg-gold/10" : "border-line hover:border-line-strong hover:bg-white/[0.03]"}`}
                 >
                   <span className="relative aspect-video w-28 shrink-0 overflow-hidden bg-black">

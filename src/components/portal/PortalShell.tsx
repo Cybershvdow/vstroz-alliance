@@ -36,7 +36,10 @@ export function PortalShell({
             <Avatar name={user.displayName} tone={roleTone(user.role)} />
             <div className="min-w-0">
               <p className="truncate font-display text-lg font-bold uppercase leading-tight">{user.displayName}</p>
-              <Badge tone={roleTone(user.role)}>{ROLE_LABEL[user.role as UserRole] ?? user.role}</Badge>
+              <div className="flex flex-wrap gap-1">
+                {user.status === "APPROVED" && user.role !== "MEMBER" && <Badge tone={roleTone(user.role)}>{ROLE_LABEL[user.role as UserRole] ?? user.role}</Badge>}
+                <Badge tone={user.status === "APPROVED" ? "success" : "neutral"}>{user.status === "APPROVED" ? "Legion" : "Community"}</Badge>
+              </div>
             </div>
           </div>
           <div className="mt-4 flex gap-2">

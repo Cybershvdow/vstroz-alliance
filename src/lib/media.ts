@@ -60,6 +60,6 @@ export function thumbnailFor(m: { provider: string; embedId: string }) {
 
 /** Where a post lives on the public Media page: the alliance folder or the poster's own folder. */
 export function folderHref(p: { official: boolean; postedBy: { username: string } }, videoId?: string) {
-  const base = p.official ? "/media/alliance" : `/media/members/${encodeURIComponent(p.postedBy.username)}`;
+  const base = p.official ? "/media/alliance" : `/members/${encodeURIComponent(p.postedBy.username)}`;
   return videoId ? `${base}?v=${encodeURIComponent(videoId)}` : base;
 }

@@ -46,7 +46,7 @@ export default async function MediaPage() {
           <SectionHeading
             eyebrow="Media"
             title="Highlights, streams, and guides."
-            text="Official Vstroz Alliance content in its own folder. Every member who posts gets a folder of their own."
+            text="Official Vstroz Alliance content in its own folder. Every member who posts gets a folder of their own on their profile."
           />
           <div className="flex flex-wrap gap-2">
             {socials.map(([k, url]) => (
@@ -99,7 +99,7 @@ export default async function MediaPage() {
             <FolderCard
               key={user.id}
               kind="member"
-              href={`/media/members/${encodeURIComponent(user.username)}`}
+              href={`/members/${encodeURIComponent(user.username)}`}
               name={user.displayName}
               subtitle={`@${user.username}${user.role !== "MEMBER" ? ` · ${ROLE_LABEL[user.role as UserRole]}` : ""}`}
               count={theirs.length}

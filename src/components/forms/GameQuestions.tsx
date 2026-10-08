@@ -18,13 +18,16 @@ export function GameQuestions({
   errors,
   initialGame,
   initialAnswers,
+  allowNone = false,
 }: {
   errors?: Record<string, string[] | undefined>;
   initialGame?: string;
   initialAnswers?: Record<string, string>;
+  /** Offer "No listed game" (profile editing). Applying always needs a game. */
+  allowNone?: boolean;
 }) {
   const [game, setGame] = useState(
-    initialGame && ENABLED_GAMES.some((g) => g.name === initialGame) ? initialGame : (ENABLED_GAMES[0]?.name ?? ""),
+    initialGame && ENABLED_GAMES.some((g) => g.name === initialGame) ? initialGame : allowNone ? "" : (ENABLED_GAMES[0]?.name ?? ""),
   );
   const entry = GAME_CATALOG.find((g) => g.name === game);
   const questions = questionsFor(game);
@@ -33,6 +36,7 @@ export function GameQuestions({
     <div className="space-y-5">
       <Field label="Which game do you play?" name="game" error={errors?.game} hint={ENABLED_GAMES.length === 1 ? "More games open as the alliance expands." : undefined}>
         <select id="game" name="game" className="input" value={game} onChange={(e) => setGame(e.target.value)} required>
+          {allowNone && <option value="">No listed game</option>}
           {ENABLED_GAMES.map((g) => (
             <option key={g.name} value={g.name}>
               {g.name}
