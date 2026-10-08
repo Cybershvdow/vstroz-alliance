@@ -179,7 +179,7 @@ export const weeklySchedule = [
 ];
 
 export const milestones = [
-  { date: "2026", title: "Friends become a crew", text: "A group of friends who kept landing in the same lobbies decide to make it official." },
-  { date: "2026", title: "Vstroz Alliance is founded", text: "Leadership, ranks, and The Round Table are set up. Recruitment opens to adults who play to win." },
-  { date: "Aion 2 launch", title: "First competitive title", text: "The alliance builds its first competitive roster on Aion 2. Server and faction decided at launch." },
+  { date: "July 2024", title: "The Discord opens", text: "A group of friends who wanted to get together and play start a Discord server. No roster, no ranks. Just a crew and a voice channel." },
+  { date: "2024 – 2026", title: "The community grows", text: "Friends bring friends. The server builds slowly, one group at a time, into a community that shows up for each other in every game it plays." },
+  { date: "Aion 2", title: "The first guild website", text: "Aion 2 is the first game the alliance officially builds a guild website for. Recruitment is open, and the alliance grows from here." },
 ];
