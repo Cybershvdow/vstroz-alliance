@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser, requireApproved, requireOfficer } from "@/lib/auth";
-import { ENABLED_GAMES } from "@/lib/constants";
+import { LEGION_GAMES } from "@/lib/constants";
 import { parseMediaUrl } from "@/lib/media";
 import type { ActionState } from "@/lib/validation";
 
@@ -48,7 +48,7 @@ export async function requestTryoutAction(_prev: ActionState, formData: FormData
   const me = await requireApproved();
   const game = clean(formData.get("game"));
   const message = clean(formData.get("message")).trim().slice(0, 1000);
-  if (!ENABLED_GAMES.some((g) => g.name === game)) return { ok: false, errors: { game: ["Pick a game"] } };
+  if (!LEGION_GAMES.some((g) => g.name === game)) return { ok: false, errors: { game: ["Pick a game"] } };
   if (message.length < 10) return { ok: false, errors: { message: ["Tell the coaches why (10+ characters)"] } };
   const open = await db.tryoutRequest.findFirst({ where: { userId: me.id, game, status: { in: ["PENDING", "SCHEDULED"] } } });
   if (open) return { ok: false, message: "You already have a tryout request open for this game." };

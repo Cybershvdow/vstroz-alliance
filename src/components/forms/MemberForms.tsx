@@ -6,6 +6,8 @@ import { updateProfileAction, changePasswordAction } from "@/lib/actions/auth";
 import { signupForMatchAction, applyForRoleAction } from "@/lib/actions/member";
 import { POSITION } from "@/lib/constants";
 import { Field, FormMessage } from "@/components/ui";
+import { useFormDraft } from "@/lib/formDraft";
+import { DraftNotice } from "./DraftNotice";
 import { SubmitButton } from "./SubmitButton";
 
 export function ProfileForm({
@@ -14,20 +16,22 @@ export function ProfileForm({
   initial: { displayName: string; email: string; discord: string | null; socials: Socials };
 }) {
   const [state, action] = useActionState(updateProfileAction, undefined);
+  const [formRef, draft] = useFormDraft("account", state);
   const err = state && !state.ok ? state.errors : undefined;
   const fieldFor: Record<string, string> = { youtube: "socialYoutube", twitch: "socialTwitch", tiktok: "socialTiktok", x: "socialX", instagram: "socialInstagram" };
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <form ref={formRef} action={action} className="space-y-5" noValidate>
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Display name" name="displayName" error={err?.displayName}>
+        <Field label="Display name (what people see)" name="displayName" error={err?.displayName} hint="Shown on the roster, your profile, and your posts. Your gamer tag or the name people call you.">
           <input id="displayName" name="displayName" className="input" defaultValue={initial.displayName} required />
         </Field>
-        <Field label="Email" name="email" error={err?.email} hint="Used for alliance emails. Never shown publicly.">
+        <Field label="Email" name="email" error={err?.email} hint="You can sign in with it, and alliance emails go here. Never shown to other members.">
           <input id="email" name="email" type="email" className="input" defaultValue={initial.email} required />
         </Field>
       </div>
-      <Field label="Discord username" name="discord" error={err?.discord} hint="Shown on your profile so members can find you.">
+      <Field label="Discord username" name="discord" error={err?.discord} hint="Your handle in Discord (Settings, My Account). Shown on your profile so members can find you.">
         <input id="discord" name="discord" className="input" defaultValue={initial.discord ?? ""} />
       </Field>
 
@@ -85,9 +89,11 @@ export function MatchSignupForm({
   defaultPosition?: string;
 }) {
   const [state, action] = useActionState(signupForMatchAction, undefined);
+  const [formRef, draft] = useFormDraft(`signup:${matchId}`, state);
   const err = state && !state.ok ? state.errors : undefined;
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form ref={formRef} action={action} className="space-y-4" noValidate>
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <input type="hidden" name="matchId" value={matchId} />
       <Field label="Position" name="position" error={err?.position}>
@@ -109,9 +115,11 @@ export function MatchSignupForm({
 
 export function RoleApplyForm({ roleId }: { roleId: string }) {
   const [state, action] = useActionState(applyForRoleAction, undefined);
+  const [formRef, draft] = useFormDraft(`role:${roleId}`, state);
   const err = state && !state.ok ? state.errors : undefined;
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form ref={formRef} action={action} className="space-y-4" noValidate>
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <input type="hidden" name="roleId" value={roleId} />
       <Field label="Why you?" name={`message-${roleId}`} error={err?.message}>

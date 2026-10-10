@@ -5,6 +5,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { Avatar, Badge, Button, ButtonLink, Card, EmptyState, PageHeader, Stat } from "@/components/ui";
 import { syncDiscordAction } from "@/lib/actions/discord";
 import { discordConfigured, discordSyncConfigured, lastDiscordSync } from "@/lib/discord";
+import { ENABLED_GAMES, playedGamesOf } from "@/lib/constants";
 
 export default async function AdminOverview({ searchParams }: { searchParams: Promise<{ discord?: string; removed?: string; restored?: string }> }) {
   const me = await requireOfficer();
@@ -17,13 +18,21 @@ export default async function AdminOverview({ searchParams }: { searchParams: Pr
     : discordConfigured()
       ? "Members can sign in with Discord. Add DISCORD_BOT_TOKEN in Railway to enable automatic removal when someone leaves the server."
       : "Add DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_GUILD_ID and DISCORD_BOT_TOKEN in Railway to turn on Discord sign-in and membership sync.";
-  const gamesPlayed = await db.user.groupBy({
-    by: ["game"],
-    where: { game: { not: null }, discordLeftAt: null },
-    _count: { _all: true },
-    orderBy: { _count: { game: "desc" } },
-    take: 12,
-  });
+  // Game tags per profile, plus what members typed under "other games" (candidates to add to the site next).
+  const profiles = await db.user.findMany({ where: { discordLeftAt: null }, select: { playedGames: true, game: true, games: true } });
+  const tagCounts = new Map<string, number>();
+  const otherCounts = new Map<string, { label: string; n: number }>();
+  for (const p of profiles) {
+    for (const t of playedGamesOf(p)) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+    for (const raw of (p.games ?? "").split(/[,;/\n]/)) {
+      const label = raw.trim();
+      const k = label.toLowerCase();
+      if (label.length < 2 || label.length > 40 || ENABLED_GAMES.some((g) => g.name.toLowerCase() === k)) continue;
+      otherCounts.set(k, { label: otherCounts.get(k)?.label ?? label, n: (otherCounts.get(k)?.n ?? 0) + 1 });
+    }
+  }
+  const gamesPlayed = ENABLED_GAMES.map((g) => ({ game: g.name, n: tagCounts.get(g.name) ?? 0 }));
+  const otherGames = [...otherCounts.values()].sort((a, b) => b.n - a.n).slice(0, 12);
   const discordMsg =
     discord === "synced" ? `Sync done: ${removed ?? 0} removed, ${restored ?? 0} restored.` : discord === "error" ? "Sync failed. Check the server logs." : discord === "off" ? "Discord sync is not configured." : undefined;
   const now = new Date();
@@ -68,20 +77,28 @@ export default async function AdminOverview({ searchParams }: { searchParams: Pr
         <div className="flex items-center justify-between">
           <div>
             <p className="eyebrow">Games members play</p>
-            <p className="mt-1 text-sm text-muted">From every profile. When a game catches on, add it to the site (one line in src/lib/constants.ts and src/lib/site.ts).</p>
+            <p className="mt-1 text-sm text-muted">How many members ticked each game on their profile.</p>
           </div>
         </div>
-        {gamesPlayed.length === 0 ? (
-          <p className="mt-4 text-sm text-muted">No games on profiles yet.</p>
-        ) : (
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {gamesPlayed.map((g) => (
-              <li key={g.game ?? ""} className="cut-sm inline-flex items-center gap-2 border border-line-strong bg-white/[0.02] px-3 py-1.5 text-sm">
-                <span className="font-display font-bold uppercase tracking-wider">{g.game}</span>
-                <span className="text-muted">{g._count._all}</span>
-              </li>
-            ))}
-          </ul>
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {gamesPlayed.map((g) => (
+            <li key={g.game} className="cut-sm inline-flex items-center gap-2 border border-line-strong bg-white/[0.02] px-3 py-1.5 text-sm">
+              <span className="font-display font-bold uppercase tracking-wider">{g.game}</span>
+              <span className={g.n ? "text-gold" : "text-muted"}>{g.n}</span>
+            </li>
+          ))}
+        </ul>
+        {otherGames.length > 0 && (
+          <>
+            <p className="label mt-5">Also mentioned (not on the site yet)</p>
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {otherGames.map((g) => (
+                <li key={g.label} className="inline-flex items-center gap-2 border border-line px-2.5 py-1 text-xs text-muted">
+                  {g.label} <span className="text-text">{g.n}</span>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
       </Card>
 

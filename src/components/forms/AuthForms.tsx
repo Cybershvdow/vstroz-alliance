@@ -4,15 +4,19 @@ import Link from "next/link";
 import { startTransition, useActionState } from "react";
 import { registerAction, loginAction } from "@/lib/actions/auth";
 import { Button, Field, FormMessage } from "@/components/ui";
+import { useFormDraft } from "@/lib/formDraft";
+import { DraftNotice } from "./DraftNotice";
 import { SubmitButton } from "./SubmitButton";
 
 /** Creates the account. That alone makes someone a community member; the legion is applied for from inside the account. */
 export function RegisterForm() {
   const [state, formAction, pending] = useActionState(registerAction, undefined);
+  const [formRef, draft] = useFormDraft("register", state);
   const err = state && !state.ok ? state.errors : undefined;
 
   return (
     <form
+      ref={formRef}
       action={formAction}
       // Submitting through startTransition keeps what was typed if validation fails.
       onSubmit={(e) => {
@@ -23,28 +27,44 @@ export function RegisterForm() {
       className="space-y-5"
       noValidate
     >
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Username" name="username" error={err?.username} hint="Letters, numbers, underscores.">
-          <input id="username" name="username" className="input" autoComplete="username" required aria-invalid={!!err?.username} />
+        <Field
+          label="Username (for signing in)"
+          name="username"
+          error={err?.username}
+          hint="A new name you make up for this website. You sign in with it and it becomes your profile link (vstrozalliance.com/members/yourname). 3 to 20 letters, numbers, or underscores, no spaces. It does not have to match your Discord."
+        >
+          <input id="username" name="username" className="input" autoComplete="username" placeholder="e.g. nightraven_07" required aria-invalid={!!err?.username} />
         </Field>
-        <Field label="Display name" name="displayName" error={err?.displayName} hint="Shown on the roster and your profile.">
-          <input id="displayName" name="displayName" className="input" required aria-invalid={!!err?.displayName} />
+        <Field
+          label="Display name (what people see)"
+          name="displayName"
+          error={err?.displayName}
+          hint="The name shown on the roster, your profile, and your posts. Use your gamer tag or the name people call you in Discord. Spaces and capitals are fine, and you can change it later."
+        >
+          <input id="displayName" name="displayName" className="input" placeholder="e.g. Night Raven" required aria-invalid={!!err?.displayName} />
         </Field>
       </div>
-      <Field label="Email" name="email" error={err?.email}>
-        <input id="email" name="email" type="email" className="input" autoComplete="email" required aria-invalid={!!err?.email} />
+      <Field label="Email" name="email" error={err?.email} hint="Your own email address. You can also sign in with it. It is never shown to other members.">
+        <input id="email" name="email" type="email" className="input" autoComplete="email" placeholder="you@example.com" required aria-invalid={!!err?.email} />
       </Field>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Password" name="password" error={err?.password} hint="At least 8 characters.">
+        <Field label="Password" name="password" error={err?.password} hint="Make a new password just for this website, at least 8 characters. Not your Discord password.">
           <input id="password" name="password" type="password" className="input" autoComplete="new-password" required aria-invalid={!!err?.password} />
         </Field>
-        <Field label="Confirm password" name="confirmPassword" error={err?.confirmPassword}>
+        <Field label="Confirm password" name="confirmPassword" error={err?.confirmPassword} hint="Type the same password again.">
           <input id="confirmPassword" name="confirmPassword" type="password" className="input" autoComplete="new-password" required aria-invalid={!!err?.confirmPassword} />
         </Field>
       </div>
-      <Field label="Discord username (optional)" name="discord" error={err?.discord} hint="Shown on your profile so people can find you.">
-        <input id="discord" name="discord" className="input" placeholder="yourname" />
+      <Field
+        label="Discord username (optional)"
+        name="discord"
+        error={err?.discord}
+        hint="Your handle in Discord, the one under your name in Discord's Settings, My Account. Shown on your profile so members can find you."
+      >
+        <input id="discord" name="discord" className="input" placeholder="e.g. nightraven" />
       </Field>
 
       <div>
@@ -82,7 +102,7 @@ export function RegisterForm() {
       </Button>
 
       <p className="text-center text-xs text-muted">
-        Your account makes you part of the community. Joining the Aion legion is a separate step from inside your account.
+        Your account makes you part of the alliance. You pick your games next. The Vstroz Legion (our Aion guild) is a separate application.
       </p>
       <p className="text-center text-sm text-muted">
         Already have an account?{" "}

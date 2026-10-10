@@ -5,17 +5,17 @@ import { DiscordButton } from "@/components/site/DiscordButton";
 import { discordConfigured } from "@/lib/discord";
 import { site } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Join the community" };
+export const metadata: Metadata = { title: "Join the alliance" };
 
 export default function RegisterPage() {
   if (discordConfigured()) {
     return (
       <div>
         <p className="eyebrow">Recruitment · Your account</p>
-        <h1 className="display mt-3 text-4xl">Join the community</h1>
+        <h1 className="display mt-3 text-4xl">Join the alliance</h1>
         <p className="mt-3 text-muted">
-          The Vstroz Alliance community lives in Discord. Everyone in the server is part of it, and your website account comes from
-          your Discord. Joining the Aion legion is a separate step from inside your account.
+          The Vstroz Alliance lives in Discord. Everyone in the server is part of it, whatever they play, and your website account comes
+          from your Discord. The {site.legionName} is our {site.legionGame} guild; applying to it is a separate step from inside your account.
         </p>
         <ol className="mt-8 space-y-4">
           <li className="panel cut p-5">
@@ -31,17 +31,17 @@ export default function RegisterPage() {
           <li className="panel cut p-5">
             <p className="label">Step 2</p>
             <p className="display mt-1 text-2xl">Continue with Discord</p>
-            <p className="mt-1 text-sm text-muted">One click. We check you are in the server and create your community account.</p>
+            <p className="mt-1 text-sm text-muted">One click. We check you are in the server and create your alliance account.</p>
             <div className="mt-4">
               <DiscordButton href="/api/discord/login">Continue with Discord</DiscordButton>
             </div>
           </li>
           <li className="panel cut p-5">
             <p className="label">Then</p>
-            <p className="display mt-1 text-2xl">Apply to the legion</p>
+            <p className="display mt-1 text-2xl">Pick your games</p>
             <p className="mt-1 text-sm text-muted">
-              Join the Vstroz Alliance legion in Aion, fill in your player profile in your account, and apply. An officer reviews it within
-              48 hours.
+              Tick the games you play and they show as tags on your profile. Play {site.legionGame}? Join the {site.legionName} in-game and apply
+              from your account. An officer reviews it within 48 hours.
             </p>
           </li>
         </ol>
@@ -58,10 +58,10 @@ export default function RegisterPage() {
   return (
     <div>
       <p className="eyebrow">Recruitment · Your account</p>
-      <h1 className="display mt-3 text-4xl">Join the community</h1>
+      <h1 className="display mt-3 text-4xl">Join the alliance</h1>
       <p className="mt-3 text-muted">
-        Create your Vstroz Alliance account and you are in the community. Joining the Aion legion is a separate step from inside
-        your account: fill in your player profile and apply.
+        Create your Vstroz Alliance account and you are in the alliance, whatever you play. Next you pick your games and they show as tags
+        on your profile. The {site.legionName} is our {site.legionGame} guild; applying to it is a separate step from inside your account.
       </p>
       <div className="mt-8">
         <RegisterForm />

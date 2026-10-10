@@ -4,13 +4,17 @@ import { useActionState } from "react";
 import { createMatchAction, createGuildRoleAction, createAnnouncementAction } from "@/lib/actions/admin";
 import { GAMES, MATCH_TYPE, MATCH_TYPE_LABEL } from "@/lib/constants";
 import { Field, FormMessage } from "@/components/ui";
+import { useFormDraft } from "@/lib/formDraft";
+import { DraftNotice } from "./DraftNotice";
 import { SubmitButton } from "./SubmitButton";
 
 export function CreateMatchForm() {
   const [state, action] = useActionState(createMatchAction, undefined);
+  const [formRef, draft] = useFormDraft("admin-match", state);
   const err = state && !state.ok ? state.errors : undefined;
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form ref={formRef} action={action} className="space-y-4" noValidate>
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <Field label="Title" name="title" error={err?.title}>
         <input id="title" name="title" className="input" placeholder="Fortress Siege — Upper Abyss" required />
@@ -57,9 +61,11 @@ export function CreateMatchForm() {
 
 export function CreateRoleForm() {
   const [state, action] = useActionState(createGuildRoleAction, undefined);
+  const [formRef, draft] = useFormDraft("admin-role", state);
   const err = state && !state.ok ? state.errors : undefined;
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form ref={formRef} action={action} className="space-y-4" noValidate>
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <Field label="Role name" name="name" error={err?.name}>
         <input id="name" name="name" className="input" placeholder="Class Lead — Templar" required />
@@ -77,9 +83,11 @@ export function CreateRoleForm() {
 
 export function AnnouncementForm() {
   const [state, action] = useActionState(createAnnouncementAction, undefined);
+  const [formRef, draft] = useFormDraft("admin-announcement", state);
   const err = state && !state.ok ? state.errors : undefined;
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form ref={formRef} action={action} className="space-y-4" noValidate>
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <Field label="Title" name="annTitle" error={err?.title}>
         <input id="annTitle" name="title" className="input" required />

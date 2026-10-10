@@ -2,15 +2,19 @@
 
 import { useActionState } from "react";
 import { raiseDisputeAction, requestTryoutAction, submitMediaAction } from "@/lib/actions/community";
-import { ENABLED_GAMES } from "@/lib/constants";
+import { ENABLED_GAMES, LEGION_GAMES } from "@/lib/constants";
 import { Field, FormMessage } from "@/components/ui";
+import { useFormDraft } from "@/lib/formDraft";
+import { DraftNotice } from "./DraftNotice";
 import { SubmitButton } from "./SubmitButton";
 
 export function DisputeForm({ members }: { members: { id: string; displayName: string }[] }) {
   const [state, action] = useActionState(raiseDisputeAction, undefined);
+  const [formRef, draft] = useFormDraft("dispute", state);
   const err = state && !state.ok ? state.errors : undefined;
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form ref={formRef} action={action} className="space-y-4" noValidate>
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <Field label="Subject" name="subject" error={err?.subject}>
         <input id="subject" name="subject" className="input" placeholder="e.g. No-show on Saturday siege" maxLength={120} required />
@@ -35,13 +39,15 @@ export function DisputeForm({ members }: { members: { id: string; displayName: s
 
 export function TryoutForm() {
   const [state, action] = useActionState(requestTryoutAction, undefined);
+  const [formRef, draft] = useFormDraft("tryout", state);
   const err = state && !state.ok ? state.errors : undefined;
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form ref={formRef} action={action} className="space-y-4" noValidate>
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <Field label="Game" name="tryout-game" error={err?.game}>
-        <select id="tryout-game" name="game" className="input" defaultValue={ENABLED_GAMES[0]?.name ?? ""}>
-          {ENABLED_GAMES.map((g) => (
+        <select id="tryout-game" name="game" className="input" defaultValue={LEGION_GAMES[0]?.name ?? ""}>
+          {LEGION_GAMES.map((g) => (
             <option key={g.name} value={g.name}>
               {g.name}
             </option>
@@ -59,9 +65,11 @@ export function TryoutForm() {
 /** official = posts into the Vstroz Alliance folder (officers only, server-enforced); otherwise the poster's own folder. */
 export function MediaForm({ official = false }: { official?: boolean }) {
   const [state, action] = useActionState(submitMediaAction, undefined);
+  const [formRef, draft] = useFormDraft(official ? "media-official" : "media", state);
   const err = state && !state.ok ? state.errors : undefined;
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form ref={formRef} action={action} className="space-y-4" noValidate>
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       {official && <input type="hidden" name="official" value="1" />}
       <Field label="Title" name="media-title" error={err?.title}>

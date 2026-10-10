@@ -184,3 +184,10 @@ With the first three set, `/login` and `/register` offer **Continue with Discord
 | `APEX_API_KEY` | https://apexlegendsapi.com → My API Access. Enables live Apex rank, RP, level, kills, K/D and online state looked up by the member's EA name (PC) or PSN/Xbox name. Third-party service; EA has no public API. |
 
 Members set these on `/dashboard/profile` ("Game accounts"). Stats are cached on the user row and refreshed when someone views the profile (Apex every 15 min, Steam every 30 min). Aion has no public stats API.
+
+## Games, tags, and saved drafts
+
+- **Listed games** live in  () and  (). Members tick the ones they play on their profile; they are stored in  and shown as icon tags () on profiles and the roster. "Other games" is free text and is not a tag. Command center shows how many members ticked each game and which unlisted games get mentioned.
+- **Alliance vs legion**: an account makes someone an alliance member. The Vstroz Legion is the guild in the game flagged  (Aion); its application is the only place the game-specific questions are required.
+- **Game icons** are original glyphs. To use official artwork, put a square image in  and map it in  inside .
+- **Saved drafts**: forms keep what was typed in the browser (), so a refresh or a validation error does not wipe it. Drafts are per form and per member, expire after 7 days, clear on a successful save, and never include passwords.

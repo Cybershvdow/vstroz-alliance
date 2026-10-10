@@ -26,7 +26,7 @@ export default async function VotesPage() {
     <>
       <PageHeader
         title="Rank votes"
-        text={`You are ${TIER_LABEL[myTier as Tier] ?? myTier}. Every community member votes on promotions into Veteran and Elite. Officers can veto or override.`}
+        text={`You are ${TIER_LABEL[myTier as Tier] ?? myTier}. Every alliance member votes on promotions into Veteran and Elite. Officers can veto or override.`}
       />
 
       <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

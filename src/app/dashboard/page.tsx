@@ -3,9 +3,10 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { formatDateTime, formatDate } from "@/lib/format";
-import { MATCH_TYPE_LABEL, type MatchType } from "@/lib/constants";
+import { MATCH_TYPE_LABEL, playedGamesOf, type MatchType } from "@/lib/constants";
 import { Badge, ButtonLink, Card, EmptyState, PageHeader, Stat, statusTone } from "@/components/ui";
 import { Countdown } from "@/components/site/Countdown";
+import { GameTag } from "@/components/site/GameTag";
 
 export default async function DashboardPage() {
   const me = await requireUser();
@@ -17,7 +18,7 @@ export default async function DashboardPage() {
     db.match.findMany({ where: { startsAt: { gte: now }, status: { in: ["OPEN", "LOCKED"] } }, orderBy: { startsAt: "asc" }, take: 5, include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } } } }),
     db.matchSignup.findMany({ where: { userId: me.id, match: { startsAt: { gte: now } } }, include: { match: true }, orderBy: { match: { startsAt: "asc" } } }),
     db.roleApplication.findMany({ where: { userId: me.id }, include: { role: true }, orderBy: { createdAt: "desc" } }),
-    db.user.count({ where: { status: "APPROVED" } }),
+    db.user.count({ where: { discordLeftAt: null } }),
   ]);
 
   const next = upcoming[0];
@@ -27,7 +28,7 @@ export default async function DashboardPage() {
     <>
       <PageHeader
         title={<>Welcome back, <span className="text-accent">{me.displayName}</span></>}
-        text={[me.playerType, me.game ? [me.game, me.gameClass].filter(Boolean).join(" · ") : null, `With the alliance since ${formatDate(me.createdAt)}`].filter(Boolean).join(" · ")}
+        text={[me.playerType, playedGamesOf(me).join(" · ") || null, `With the alliance since ${formatDate(me.createdAt)}`].filter(Boolean).join(" · ")}
         actions={inLegion ? <ButtonLink href="/dashboard/matches">Match signups</ButtonLink> : <ButtonLink href="/dashboard/legion">{me.appliedAt ? "Your legion application" : "Join the legion"}</ButtonLink>}
       />
 
@@ -37,11 +38,11 @@ export default async function DashboardPage() {
             <div>
               <p className="eyebrow">{site.legionName}</p>
               <h2 className="display mt-2 text-2xl">
-                {me.status === "DENIED" ? "Legion application declined" : me.appliedAt ? "Legion application under review" : "You're in the community. Want in the legion?"}
+                {me.status === "DENIED" ? "Legion application declined" : me.appliedAt ? "Legion application under review" : "You're in the alliance. Play Aion? Join the Vstroz Legion."}
               </h2>
               <p className="mt-2 max-w-xl text-sm text-muted">
                 {me.status === "DENIED"
-                  ? "You are still part of the community: post content, bring disputes, vote, and keep your profile."
+                  ? "You are still part of the alliance: post content, bring disputes, vote, and keep your profile."
                   : me.appliedAt
                     ? "An officer reviews it within 48 hours. Match signups, roles, and the roster unlock when you are approved."
                     : "Fill in your player profile (game, in-game name, how you play) and apply. Officers review within 48 hours."}
@@ -111,7 +112,27 @@ export default async function DashboardPage() {
         </div>
 
         <div className="space-y-6">
-          <div>
+          {!inLegion && (
+            <Card>
+              <p className="eyebrow">Your games</p>
+              {playedGamesOf(me).length > 0 ? (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {playedGamesOf(me).map((t) => (
+                    <GameTag key={t} game={t} />
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-2 text-sm text-muted">No games picked yet. Tick the ones you play and they show as tags on your profile.</p>
+              )}
+              <div className="mt-4">
+                <ButtonLink href="/dashboard/profile#player-profile" size="sm" variant="secondary">
+                  {playedGamesOf(me).length > 0 ? "Change your games" : "Pick your games"}
+                </ButtonLink>
+              </div>
+            </Card>
+          )}
+          {/* Match signups and guild roles belong to the legion. */}
+          <div className={inLegion ? "" : "hidden"}>
             <h2 className="display mb-3 text-2xl">My signups</h2>
             {mySignups.length === 0 ? (
               <EmptyState title="No signups yet" action={<ButtonLink href="/dashboard/matches" size="sm">Browse matches</ButtonLink>} />
@@ -134,7 +155,7 @@ export default async function DashboardPage() {
             )}
           </div>
 
-          <div>
+          <div className={inLegion ? "" : "hidden"}>
             <h2 className="display mb-3 text-2xl">My role applications</h2>
             {myRoleApps.length === 0 ? (
               <EmptyState title="No applications" action={<ButtonLink href="/dashboard/roles" size="sm" variant="secondary">See open roles</ButtonLink>} />

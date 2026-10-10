@@ -72,6 +72,6 @@ export async function GET(req: NextRequest) {
   }
 
   await createSession(user.id);
-  const dest = fresh ? "/dashboard/legion?welcome=1" : user.status === "APPROVED" && isOfficer(user.role) ? "/admin" : "/dashboard";
+  const dest = fresh ? "/dashboard/profile?welcome=1" : user.status === "APPROVED" && isOfficer(user.role) ? "/admin" : "/dashboard";
   return NextResponse.redirect(new URL(dest, base));
 }

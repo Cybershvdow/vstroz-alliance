@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { site, pillars, games, milestones } from "@/lib/site";
+import { site, pillars, games, milestones, playingNow } from "@/lib/site";
 import { formatDateTime } from "@/lib/format";
 import { MATCH_TYPE_LABEL, ROLE_LABEL, type MatchType, type UserRole } from "@/lib/constants";
 import { Badge, ButtonLink, SectionHeading, Avatar, roleTone } from "@/components/ui";
 import { Countdown } from "./Countdown";
 import { ArrowIcon, DiscordIcon } from "./Icons";
+import { GameIcon } from "./GameTag";
 import { LogoFull } from "@/components/brand/Logo";
 
 /* ---------------- Hero ---------------- */
@@ -94,7 +95,7 @@ export async function Hero() {
         <div className="mx-auto grid max-w-7xl grid-cols-2 divide-line md:grid-cols-4 md:divide-x">
           {[
             ["Legion members", `${memberCount}`],
-            ["Playing now", games.filter((g) => g.status === "active").map((g) => g.short ?? g.name).join(" + ")],
+            ["Playing now", playingNow],
             ["Matches won", `${wins}`],
             ["Recruiting", "Open"],
           ].map(([label, value]) => (
@@ -180,7 +181,8 @@ export function GamesGrid({ full = false }: { full?: boolean }) {
                   <Badge tone={statusBadge[g.status]}>{statusLabel[g.status]}</Badge>
                   <span className="label">{g.badge}</span>
                 </div>
-                <h3 className="display mt-6 text-4xl md:text-5xl">{g.name}</h3>
+                <GameIcon game={g.name} className="mt-6 h-11 w-11" />
+                <h3 className="display mt-3 text-4xl md:text-5xl">{g.name}</h3>
                 <p className="mt-1 text-sm text-muted">{g.genre}</p>
                 <p className="mt-5 text-sm leading-relaxed text-muted">{g.desc}</p>
                 <dl className="mt-6 grid grid-cols-2 gap-3 border-t border-line pt-4 text-sm">
@@ -331,8 +333,8 @@ export function JoinCTA() {
               Earn the <span className="display-gold">banner.</span>
             </h2>
             <p className="mt-4 max-w-xl text-muted">
-              Create an account and you are in the community: post content, vote, bring disputes, build your profile. Apply to the Aion
-              legion from inside your account; an officer reviews it and unlocks match signups, roles, and the roster.
+              Create an account and you are in the alliance: pick your games, post content, vote, build your profile. Play Aion? Apply to
+              the Vstroz Legion from inside your account; an officer reviews it and unlocks match signups, roles, and the legion roster.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">

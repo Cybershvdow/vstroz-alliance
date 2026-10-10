@@ -25,7 +25,8 @@ model User {
   playerType      String?   // Casual / Softcore / Hardcore / Competitive
   interests       String?   // comma-separated: Dungeons, PvP, Sieges...
   games           String?   // other games they play
-  game            String?   // game they applied for (GAME_CATALOG name)
+  game            String?   // the legion game their answers are about (Aion); other games live in playedGames
+  playedGames     String?   // JSON array of listed games they play (profile tags)
   gameAnswers     String?   // JSON of genre-specific answers, keyed by question key
   appliedAt       DateTime? // when they first applied to the legion (status tracks that application)
   socials         String?   // JSON { youtube, twitch, tiktok, x, instagram } of normalized profile URLs

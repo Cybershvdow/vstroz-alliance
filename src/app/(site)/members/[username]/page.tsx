@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { formatDate } from "@/lib/format";
-import { ROLE_LABEL, TIER_LABEL, type Tier, type UserRole } from "@/lib/constants";
+import { ROLE_LABEL, TIER_LABEL, playedGamesOf, type Tier, type UserRole } from "@/lib/constants";
 import { folderHref } from "@/lib/media";
 import { SOCIAL_PLATFORMS, parseSocials } from "@/lib/social";
 import { Avatar, Badge, ButtonLink, roleTone } from "@/components/ui";
@@ -13,6 +13,7 @@ import { ArrowIcon, DiscordIcon } from "@/components/site/Icons";
 import { MediaPlayer } from "@/components/site/MediaPlayer";
 import { toItems } from "@/components/site/MediaFolders";
 import { GameStats } from "@/components/site/GameStats";
+import { GameTag } from "@/components/site/GameTag";
 import { refreshApexStats } from "@/lib/apex";
 import { refreshSteamStats } from "@/lib/steam";
 
@@ -42,6 +43,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
         status: true,
         title: true,
         game: true,
+        playedGames: true,
         ign: true,
         gameClass: true,
         playerType: true,
@@ -93,12 +95,13 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
     .map((s) => s.trim())
     .filter(Boolean);
 
+  const tags = playedGamesOf(user);
   const facts: [string, string][] = [
-    ["Game", user.game ?? "—"],
+    ["Games", tags.length ? tags.join(", ") : "—"],
     ["In-game name", user.ign ?? "—"],
     ["Class", user.gameClass ?? "—"],
     ["Player type", user.playerType ?? "—"],
-    ["Playing MMOs", user.playtime ?? "—"],
+    ["Gaming for", user.playtime ?? "—"],
     ["Other games", user.games ?? "—"],
   ];
 
@@ -112,7 +115,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
           <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
             <Avatar name={user.displayName} size="lg" tone={roleTone(user.role)} />
             <div className="min-w-0 flex-1">
-              <p className="eyebrow">{inLegion ? `${site.legionName} member` : "Community member"}</p>
+              <p className="eyebrow">{inLegion ? `${site.legionName} · ${site.legionGame}` : "Alliance member"}</p>
               <h1 className="display mt-3 break-words text-3xl sm:text-4xl md:text-6xl">{user.displayName}</h1>
               <p className="mt-2 break-words text-sm text-muted">
                 @{user.username}
@@ -121,8 +124,10 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {inLegion && user.role !== "MEMBER" && <Badge tone={roleTone(user.role)}>{ROLE_LABEL[user.role as UserRole]}</Badge>}
                 {inLegion && <Badge tone={user.tier === "ELITE" ? "gold" : user.tier === "VETERAN" ? "accent" : "neutral"}>{TIER_LABEL[user.tier as Tier] ?? user.tier}</Badge>}
-                <Badge tone={inLegion ? "success" : "neutral"}>{inLegion ? "Legion" : "Community"}</Badge>
-                {user.game && <Badge tone="accent">{user.game}</Badge>}
+                <Badge tone={inLegion ? "success" : "neutral"}>{inLegion ? "Legion" : "Alliance"}</Badge>
+                {tags.map((t) => (
+                  <GameTag key={t} game={t} />
+                ))}
               </div>
             </div>
           </div>

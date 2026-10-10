@@ -7,14 +7,15 @@ import { ROLE_LABEL, STATUS_LABEL, type UserRole } from "@/lib/constants";
 import { ProfileForm, PasswordForm } from "@/components/forms/MemberForms";
 import { PlayerProfileForm } from "@/components/forms/PlayerProfileForm";
 import { DiscordButton } from "@/components/site/DiscordButton";
+import { ClearDraft } from "@/components/forms/DraftNotice";
 import { ApexAccountForm } from "@/components/forms/ApexAccountForm";
 import { unlinkSteamAction } from "@/lib/actions/accounts";
 import { steamConfigured } from "@/lib/steam";
 import { apexConfigured } from "@/lib/apex";
 
-export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ discord?: string; steam?: string }> }) {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ discord?: string; steam?: string; welcome?: string }> }) {
   const me = await requireUser();
-  const { discord, steam } = await searchParams;
+  const { discord, steam, welcome } = await searchParams;
   const steamMsg =
     steam === "linked"
       ? "Steam connected."
@@ -34,9 +35,28 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
     <>
       <PageHeader
         title="Profile"
-        text="What members see on your public profile: your game, in-game name, how you play, and your links."
+        text="What members see on your public profile: the games you play, how you play, and your links. Everything you type here is kept if the page refreshes."
         actions={<ButtonLink href={`/members/${encodeURIComponent(me.username)}`} variant="secondary">View public profile</ButtonLink>}
       />
+      {welcome && (
+        <>
+          <ClearDraft names={["register"]} />
+          <div className="panel mb-6 flex flex-col gap-3 border-accent/50 p-4 text-sm md:flex-row md:items-center md:justify-between">
+            <p>
+              <span className="font-semibold">Welcome to the alliance, {me.displayName}.</span> Tick the games you play and they show as tags on your profile. Play{" "}
+              {site.legionGame}? The {site.legionName} is our guild there, with its own application.
+            </p>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <ButtonLink href="#player-profile" size="sm">
+                Pick your games
+              </ButtonLink>
+              <ButtonLink href="/dashboard/legion" size="sm" variant="secondary">
+                {site.legionName}
+              </ButtonLink>
+            </div>
+          </div>
+        </>
+      )}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <h2 className="display mb-5 text-2xl">Account & links</h2>
@@ -128,14 +148,17 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           </Card>
         </div>
       </div>
+      <div id="player-profile" className="scroll-mt-8">
       <Card className="mt-6">
         <h2 className="display mb-1 text-2xl">Player profile</h2>
-        <p className="mb-6 text-sm text-muted">Which game you play, your in-game name, your class, and how you play. Shown on your public profile and used by officers for rosters.</p>
+        <p className="mb-6 text-sm text-muted">The games you tick show as tags on your public profile. Officers use the rest to get to know you and build rosters.</p>
         <PlayerProfileForm
           mode="profile"
+          legionDetails={inLegion || !!me.appliedAt}
           initial={{
             game: me.game,
             gameAnswers: me.gameAnswers,
+            playedGames: me.playedGames,
             ign: me.ign,
             gameClass: me.gameClass,
             playtime: me.playtime,
@@ -146,6 +169,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           }}
         />
       </Card>
+      </div>
     </>
   );
 }

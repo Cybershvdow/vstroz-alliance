@@ -40,7 +40,6 @@ export const GAME_CLASSES = [
   "Undecided",
 ] as const;
 
-export const GAMES = ["Aion", "Apex Legends", "All Games", "Side Game"] as const;
 
 /** Legion status labels (User.status). An account is always a community member; APPROVED means in the legion. */
 export const STATUS_LABEL: Record<string, string> = { PENDING: "Pending", APPROVED: "In the legion", DENIED: "Declined" };
@@ -146,6 +145,9 @@ export type GameEntry = {
 export const GAME_CATALOG: readonly GameEntry[] = [
   { name: "Aion", genre: "MMO", enabled: true, legion: true, classes: GAME_CLASSES },
   { name: "Apex Legends", genre: "BATTLE_ROYALE", enabled: true },
+  { name: "Enshrouded", genre: "OTHER", enabled: true },
+  { name: "Project Zomboid", genre: "OTHER", enabled: true },
+  { name: "Deadlock", genre: "MOBA", enabled: true },
   // { name: "Valorant", genre: "FPS", enabled: false },
   // { name: "League of Legends", genre: "MOBA", enabled: false },
 ];
@@ -153,6 +155,22 @@ export const GAME_CATALOG: readonly GameEntry[] = [
 export const ENABLED_GAMES = GAME_CATALOG.filter((g) => g.enabled);
 /** Games you can apply to a legion for (today: Aion). */
 export const LEGION_GAMES = GAME_CATALOG.filter((g) => g.enabled && g.legion);
+
+/** Game choices for matches and events. */
+export const GAMES: readonly string[] = [...ENABLED_GAMES.map((g) => g.name), "All Games", "Side Game"];
+
+/** The listed games a member plays (their profile tags), in catalog order. Old rows fall back to their single game. */
+export function playedGamesOf(u: { playedGames?: string | null; game?: string | null }): string[] {
+  let parsed: unknown = [];
+  try {
+    parsed = u.playedGames ? JSON.parse(u.playedGames) : [];
+  } catch {
+    parsed = [];
+  }
+  const picked = new Set(Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === "string") : []);
+  if (u.playedGames == null && u.game) picked.add(u.game);
+  return ENABLED_GAMES.map((g) => g.name).filter((n) => picked.has(n));
+}
 
 export type Question = {
   key: string;
@@ -168,7 +186,7 @@ const HOURS = ["Under 5 hours", "5–10 hours", "10–20 hours", "20+ hours"] as
 
 export const GENRE_QUESTIONS: Record<Genre, Question[]> = {
   MMO: [
-    { key: "ign", label: "In-game name", type: "text", placeholder: "Leave blank if you have not made a character yet" },
+    { key: "ign", label: "Character name", type: "text", placeholder: "Leave blank if you have not made a character yet", hint: "Your character's name in the game, so officers can find you on the legion list." },
     { key: "mainClass", label: "Main class", type: "select", options: [] /* filled from the game's class list */ },
     { key: "preferredRole", label: "Preferred group role", type: "select", options: ["Tank", "Healer", "DPS", "Support", "Flexible"], required: true },
     { key: "focus", label: "What do you focus on?", type: "select", options: ["PvE", "PvP", "Both equally"], required: true },
@@ -218,13 +236,10 @@ export const GENRE_QUESTIONS: Record<Genre, Question[]> = {
   ],
 };
 
-/** Select value meaning "a game that is not on the list; the member types its name". */
-export const OTHER_GAME = "__other";
-
-/** Questions for a specific game, with the class list injected for MMO/MOBA. Unlisted games get the generic set. */
+/** Questions for a specific game, with the class list injected for MMO/MOBA. */
 export function questionsFor(gameName: string): Question[] {
   const game = GAME_CATALOG.find((g) => g.name === gameName);
-  if (!game) return gameName ? GENRE_QUESTIONS.OTHER : [];
+  if (!game) return [];
   return GENRE_QUESTIONS[game.genre].flatMap((q) => {
     if (q.key === "mainClass") {
       if (!game.classes?.length) return [];

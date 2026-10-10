@@ -20,7 +20,7 @@ import {
 } from "@/lib/validation";
 import { normalizeSocial, SOCIAL_PLATFORMS, type SocialKey } from "@/lib/social";
 import { discordConfigured } from "@/lib/discord";
-import { LEGION_GAMES, OTHER_GAME } from "@/lib/constants";
+import { ENABLED_GAMES, LEGION_GAMES } from "@/lib/constants";
 
 function clean(v: FormDataEntryValue | null) {
   return typeof v === "string" ? v : "";
@@ -69,8 +69,8 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
   });
 
   await createSession(user.id);
-  // The account alone makes them a community member; the legion page is where they apply.
-  redirect("/dashboard/legion?welcome=1");
+  // The account alone makes them an alliance member; they pick their games on the profile page next.
+  redirect("/dashboard/profile?welcome=1");
 }
 
 /**
@@ -87,33 +87,37 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
     Object.fromEntries(
       [...new Set(formData.keys())]
         .filter((k) => k !== "intent")
-        .map((k) => [k, k === "interests" ? formData.getAll(k).filter((x): x is string => typeof x === "string") : clean(formData.get(k))]),
+        .map((k) => [k, k === "interests" || k === "playedGames" ? formData.getAll(k).filter((x): x is string => typeof x === "string") : clean(formData.get(k))]),
     );
 
   const parsed = playerProfileSchema.safeParse({
     playtime: clean(formData.get("playtime")),
     playerType: clean(formData.get("playerType")),
     interests: formData.getAll("interests").filter((x): x is string => typeof x === "string"),
+    playedGames: formData.getAll("playedGames").filter((x): x is string => typeof x === "string"),
     games: clean(formData.get("games")),
     game: clean(formData.get("game")),
-    gameOther: clean(formData.get("gameOther")),
+    ign: clean(formData.get("ign")),
     applicationNote: clean(formData.get("applicationNote")),
   });
   if (!parsed.success) return { ok: false, errors: flattenErrors(parsed.error), values: echo(), message: "Fix the highlighted fields." };
   const d = parsed.data;
-  // "Another game": the member typed its name. The legion application still needs the legion's own game.
-  const isOther = d.game === OTHER_GAME;
-  const gameName = isOther ? (d.gameOther ?? "").trim() : d.game;
-  const gameCheck = d.game ? validateGameAnswers(d.game, formData) : { answers: {} as Record<string, string>, errors: {} as FieldErrors };
+  // The legion block (and its `game` field) is only on the form when applying, or when a legion member edits their profile.
+  const legionGame = d.game || (intent === "apply" ? (LEGION_GAMES[0]?.name ?? "") : "");
+  const gameCheck = legionGame
+    ? validateGameAnswers(legionGame, formData, intent === "apply")
+    : { answers: {} as Record<string, string>, errors: {} as FieldErrors };
   const errors: FieldErrors = { ...gameCheck.errors };
-  if (isOther && gameName.length < 2) errors.gameOther = ["Type the game you play"];
-  if (intent === "apply" && !LEGION_GAMES.some((e) => e.name === d.game)) {
-    errors.game = [`The legion plays ${LEGION_GAMES.map((g) => g.name).join(" / ") || "the listed game"}. Pick it to apply; other games stay on your profile.`];
-  }
+  if (intent === "apply" && !legionGame) errors.game = ["The legion has no game set up yet."];
   if (intent === "apply" && clean(formData.get("inGameLegion")) !== "yes") {
-    errors.inGameLegion = ["Join the Vstroz Alliance legion in-game first, then confirm it here"];
+    errors.inGameLegion = ["Join the Vstroz Legion in-game first, then confirm it here"];
   }
   if (Object.keys(errors).length) return { ok: false, errors, values: echo(), message: "Fix the highlighted fields." };
+
+  // Profile tags: the listed games they ticked, plus the legion's game whenever the legion block was part of the form.
+  const picked = new Set(d.playedGames);
+  if (legionGame) picked.add(legionGame);
+  const played = ENABLED_GAMES.map((g) => g.name).filter((n) => picked.has(n));
 
   // The in-game confirmation travels with the answers so officers (and later saves) keep it.
   let previous: Record<string, string> = {};
@@ -129,10 +133,13 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
   await db.user.update({
     where: { id: me.id },
     data: {
-      game: gameName || null,
-      gameAnswers: JSON.stringify(answers),
-      // Only touch the in-game name/class when a game was picked; "No listed game" keeps what is stored.
-      ...(d.game ? { ign: answers.ign || null, gameClass: isOther ? null : answers.mainClass || null } : {}),
+      playedGames: JSON.stringify(played),
+      // Legion answers only change when the legion block was on the form; otherwise just the plain in-game name.
+      ...(legionGame
+        ? { game: legionGame, gameAnswers: JSON.stringify(answers), ign: answers.ign || null, gameClass: answers.mainClass || null }
+        : formData.has("ign")
+          ? { ign: (d.ign ?? "").trim() || null }
+          : {}),
       playtime: d.playtime,
       playerType: d.playerType,
       interests: d.interests.join(", "),
@@ -150,7 +157,7 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
       return { ok: true, message: "Player profile saved. You are already in the legion." };
     }
     if (discordConfigured() && !me.discordId) {
-      return { ok: false, message: "Connect your Discord to this account first. Being in the Discord is what makes you part of the community." };
+      return { ok: false, message: "Connect your Discord to this account first. Being in the Discord is what makes you part of the alliance." };
     }
     // Atomic: only the first apply stamps appliedAt and notifies the officers, even under double submits.
     const stamped = await db.user.updateMany({ where: { id: me.id, status: "PENDING", appliedAt: null }, data: { appliedAt: new Date() } });

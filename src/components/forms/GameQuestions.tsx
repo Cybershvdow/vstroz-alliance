@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ENABLED_GAMES, GAME_CATALOG, OTHER_GAME, questionsFor } from "@/lib/constants";
+import { GAME_CATALOG, questionsFor } from "@/lib/constants";
 import { Field } from "@/components/ui";
 
 const GENRE_LABEL: Record<string, string> = {
@@ -13,62 +13,51 @@ const GENRE_LABEL: Record<string, string> = {
   OTHER: "Game",
 };
 
-/** Game picker + the question set for that game's genre. Answers post as q_<key>. */
+/**
+ * The question set for a game (in-game name, class, role…). Answers post as q_<key>, the game as `game`.
+ * With one game there is nothing to choose, so it is fixed; with several a picker appears.
+ */
 export function GameQuestions({
   errors,
+  games,
   initialGame,
-  initialOther = "",
   initialAnswers,
-  allowNone = false,
-  allowOther = false,
+  optional = false,
 }: {
   errors?: Record<string, string[] | undefined>;
-  /** A listed game name, OTHER_GAME, or "" (nothing). */
+  /** Games this block can be about (the legion's games). */
+  games: readonly string[];
   initialGame?: string;
-  /** The typed name when initialGame is OTHER_GAME. */
-  initialOther?: string;
   initialAnswers?: Record<string, string>;
-  /** Offer "Nothing right now" (profile editing). Applying always needs a game. */
-  allowNone?: boolean;
-  /** Offer "Another game" with a text box (profile editing). */
-  allowOther?: boolean;
+  /** Profile editing: nothing is required. Applying: required questions are enforced. */
+  optional?: boolean;
 }) {
-  const listed = (g?: string) => !!g && ENABLED_GAMES.some((e) => e.name === g);
-  const [game, setGame] = useState(
-    listed(initialGame) ? (initialGame as string) : initialGame === OTHER_GAME && allowOther ? OTHER_GAME : allowNone ? "" : (ENABLED_GAMES[0]?.name ?? ""),
-  );
+  const [game, setGame] = useState(initialGame && games.includes(initialGame) ? initialGame : (games[0] ?? ""));
   const entry = GAME_CATALOG.find((g) => g.name === game);
   const questions = questionsFor(game);
-  const other = game === OTHER_GAME;
 
   return (
     <div className="space-y-5">
-      <Field
-        label="Which game do you play?"
-        name="game"
-        error={errors?.game}
-        hint={allowOther ? "Not on the list? Pick \"Another game\" and type it. Games that catch on get added to the site." : ENABLED_GAMES.length === 1 ? "More games open as the alliance expands." : undefined}
-      >
-        <select id="game" name="game" className="input" value={game} onChange={(e) => setGame(e.target.value)} required={!allowNone}>
-          {allowNone && <option value="">Nothing right now</option>}
-          {ENABLED_GAMES.map((g) => (
-            <option key={g.name} value={g.name}>
-              {g.name}
-            </option>
-          ))}
-          {allowOther && <option value={OTHER_GAME}>Another game (type it below)</option>}
-        </select>
-      </Field>
-
-      {other && (
-        <Field label="What game?" name="gameOther" error={errors?.gameOther} hint="The exact name, e.g. Throne and Liberty, Valorant, Lost Ark.">
-          <input id="gameOther" name="gameOther" className="input" defaultValue={initialOther} placeholder="Game name" maxLength={60} required aria-invalid={!!errors?.gameOther} />
+      {games.length > 1 ? (
+        <Field label="Which game?" name="game" error={errors?.game}>
+          <select id="game" name="game" className="input" value={game} onChange={(e) => setGame(e.target.value)} required>
+            {games.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
         </Field>
+      ) : (
+        <>
+          <input type="hidden" name="game" value={game} />
+          {errors?.game && <p className="text-xs text-danger">{errors.game[0]}</p>}
+        </>
       )}
 
-      {(entry || other) && (
+      {entry && (
         <p className="eyebrow">
-          {entry ? `${GENRE_LABEL[entry.genre]} questions · ${entry.name}` : "About you in that game"}
+          {GENRE_LABEL[entry.genre]} questions · {entry.name}
         </p>
       )}
 
@@ -76,14 +65,15 @@ export function GameQuestions({
         {questions.map((q) => {
           const name = `q_${q.key}`;
           const err = errors?.[name];
+          const required = !!q.required && !optional;
           const wide = q.type === "text" && (q.key === "previousGuilds" || q.key === "previousTeams");
           return (
             <div key={`${game}-${q.key}`} className={wide ? "sm:col-span-2" : ""}>
-              <Field label={q.label + (q.required ? "" : " (optional)")} name={name} error={err} hint={q.hint}>
+              <Field label={q.label + (required ? "" : " (optional)")} name={name} error={err} hint={q.hint}>
                 {q.type === "select" ? (
-                  <select id={name} name={name} className="input" defaultValue={initialAnswers?.[q.key] ?? ""} required={q.required} aria-invalid={!!err}>
-                    <option value="" disabled={q.required}>
-                      {q.required ? "Select…" : "—"}
+                  <select id={name} name={name} className="input" defaultValue={initialAnswers?.[q.key] ?? ""} required={required} aria-invalid={!!err}>
+                    <option value="" disabled={required}>
+                      {required ? "Select…" : "—"}
                     </option>
                     {q.options?.map((o) => (
                       <option key={o} value={o}>
@@ -92,7 +82,7 @@ export function GameQuestions({
                     ))}
                   </select>
                 ) : (
-                  <input id={name} name={name} className="input" defaultValue={initialAnswers?.[q.key] ?? ""} placeholder={q.placeholder} required={q.required} maxLength={120} aria-invalid={!!err} />
+                  <input id={name} name={name} className="input" defaultValue={initialAnswers?.[q.key] ?? ""} placeholder={q.placeholder} required={required} maxLength={120} aria-invalid={!!err} />
                 )}
               </Field>
             </div>

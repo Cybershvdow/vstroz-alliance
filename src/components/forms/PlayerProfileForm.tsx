@@ -2,49 +2,61 @@
 
 import { startTransition, useActionState } from "react";
 import { savePlayerProfileAction } from "@/lib/actions/auth";
-import { PLAYTIME_OPTIONS, PLAYER_TYPES, INTEREST_OPTIONS, ENABLED_GAMES, OTHER_GAME } from "@/lib/constants";
+import { PLAYTIME_OPTIONS, PLAYER_TYPES, INTEREST_OPTIONS, ENABLED_GAMES, LEGION_GAMES, playedGamesOf } from "@/lib/constants";
+import { useFormDraft } from "@/lib/formDraft";
 import { GameQuestions } from "./GameQuestions";
+import { DraftNotice } from "./DraftNotice";
+import { GameIcon } from "@/components/site/GameTag";
 import { Button, Field, FormMessage } from "@/components/ui";
 
 const playerTypeHelp: Record<(typeof PLAYER_TYPES)[number], string> = {
   Casual: "A few sessions a week, here for the people.",
   Softcore: "Regular play, shows up for events, no pressure.",
-  Hardcore: "Daily grind, gear-focused, wants every siege.",
+  Hardcore: "Daily grind, plays to improve, wants every event.",
   Competitive: "Top-end PvP and rankings. Voice, builds, discipline.",
 };
 
 export type PlayerProfileInitial = {
-  game: string | null;
+  game: string | null; // the legion game the answers below are about
   gameAnswers: string | null; // JSON keyed by question key
+  playedGames: string | null; // JSON array of listed games (profile tags)
   ign: string | null;
   gameClass: string | null;
   playtime: string | null;
   playerType: string | null;
   interests: string | null; // comma-separated
-  games: string | null;
+  games: string | null; // free text: other games, not tags
   applicationNote: string | null;
 };
 
+const LEGION_NAMES = LEGION_GAMES.map((g) => g.name);
+
 /**
- * The player profile: which game, in-game name, class, how they play.
- * mode "apply" submits it as the legion application; "profile" just saves it.
+ * The player profile: the games they play (tags), other games (free text), and how they play.
+ * mode "apply" adds the legion game's questions and submits it as the Vstroz Legion application.
+ * mode "profile" just saves; `legionDetails` shows the legion game's questions for members who applied or are in.
  */
 export function PlayerProfileForm({
   initial,
   mode,
   submitLabel,
+  legionDetails = false,
 }: {
   initial: PlayerProfileInitial;
   mode: "apply" | "profile";
   submitLabel?: string;
+  legionDetails?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(savePlayerProfileAction, undefined);
+  const [formRef, draft] = useFormDraft(`player-${mode}`, state);
   const err = state && !state.ok ? state.errors : undefined;
   const echoed = state && !state.ok ? state.values : undefined;
   const apply = mode === "apply";
+  const showLegion = apply || legionDetails;
 
   // Values to show: what the server echoed back after a validation error, else what is stored.
   const str = (k: string) => (echoed && typeof echoed[k] === "string" ? (echoed[k] as string) : undefined);
+  const list = (k: string) => (echoed ? (Array.isArray(echoed[k]) ? (echoed[k] as string[]) : typeof echoed[k] === "string" && echoed[k] ? [echoed[k] as string] : []) : undefined);
 
   let stored: Record<string, string> = {};
   try {
@@ -64,26 +76,19 @@ export function PlayerProfileForm({
         )
       : {}),
   };
-  // A stored game that is not on the list shows as "Another game" with its name in the text box.
-  const storedListed = !!initial.game && ENABLED_GAMES.some((e) => e.name === initial.game);
-  const game = str("game") ?? (storedListed ? (initial.game as string) : initial.game ? OTHER_GAME : undefined);
-  const gameOther = str("gameOther") ?? (storedListed ? "" : (initial.game ?? ""));
+  const played = new Set(list("playedGames") ?? playedGamesOf(initial));
   const chosenInterests = new Set(
-    echoed
-      ? Array.isArray(echoed.interests)
-        ? echoed.interests
-        : typeof echoed.interests === "string"
-          ? [echoed.interests]
-          : []
-      : (initial.interests ?? "")
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
+    list("interests") ??
+      (initial.interests ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
   );
   const playerType = str("playerType") ?? initial.playerType;
 
   return (
     <form
+      ref={formRef}
       action={formAction}
       // Submitting through startTransition keeps what the player typed if validation fails
       // (React resets uncontrolled forms after a direct form action).
@@ -95,23 +100,66 @@ export function PlayerProfileForm({
       className="space-y-8"
       noValidate
     >
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <input type="hidden" name="intent" value={apply ? "apply" : "save"} />
 
-      {/* ---------- Your game ---------- */}
+      {/* ---------- Games (profile tags) ---------- */}
       <section className="space-y-5">
-        <p className="eyebrow">Your game</p>
-        <p className="-mt-3 text-sm text-muted">
-          {apply ? "Pick the game you are applying with. The questions change to fit that game." : "Pick the game you play. The questions change to fit that game."}
-        </p>
-        <GameQuestions errors={err} initialGame={game} initialOther={gameOther} initialAnswers={answers} allowNone={!apply} allowOther={!apply} />
+        <p className="eyebrow">Games you play</p>
+        <fieldset>
+          <legend className="-mt-3 mb-3 text-sm text-muted">Tick every one you play. They show as tags on your profile.</legend>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {ENABLED_GAMES.map((g) => {
+              // The legion's game is part of the application, so it is always on for applicants and legion members.
+              const locked = showLegion && LEGION_NAMES.includes(g.name);
+              return (
+                <label
+                  key={g.name}
+                  className={`flex items-center gap-3 border border-line-strong bg-bg-2 px-3 py-2.5 has-[:checked]:border-accent has-[:checked]:bg-accent/10 ${locked ? "" : "cursor-pointer"}`}
+                >
+                  <input type="checkbox" name="playedGames" value={g.name} defaultChecked={locked || played.has(g.name)} disabled={locked} className="accent-[#9b4dff]" />
+                  <GameIcon game={g.name} />
+                  <span className="text-sm">
+                    {g.name}
+                    {g.legion && <span className="ml-2 text-xs text-muted">Vstroz Legion</span>}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          {err?.playedGames && <p className="mt-1.5 text-xs text-danger">{err.playedGames[0]}</p>}
+        </fieldset>
+        <Field label="Other games you play (optional)" name="games" error={err?.games} hint="Anything not on the list. Extra info only: it is not shown as a tag.">
+          <input id="games" name="games" className="input" defaultValue={str("games") ?? initial.games ?? ""} placeholder="e.g. Throne and Liberty, Valorant, Lost Ark" maxLength={300} />
+        </Field>
       </section>
+
+      {/* ---------- Legion game details ---------- */}
+      {showLegion ? (
+        <section className="space-y-5 border-t border-line pt-6">
+          <p className="eyebrow">{apply ? "Your legion application" : "Your legion details"}</p>
+          <p className="-mt-3 text-sm text-muted">
+            {apply
+              ? `The Vstroz Legion plays ${LEGION_NAMES.join(" / ")}. These answers are what the officers review.`
+              : "Your in-game name and class show on your profile and the roster."}
+          </p>
+          <GameQuestions errors={err} games={LEGION_NAMES} initialGame={str("game") ?? initial.game ?? undefined} initialAnswers={answers} optional={!apply} />
+        </section>
+      ) : (
+        <section className="space-y-5 border-t border-line pt-6">
+          <p className="eyebrow">In-game</p>
+          <Field label="In-game name (optional)" name="ign" error={err?.ign} hint="The name other players see in-game: your character name or account tag, for example your Apex or Steam name. Shown on your profile.">
+            <input id="ign" name="ign" className="input" defaultValue={str("ign") ?? initial.ign ?? ""} maxLength={32} />
+          </Field>
+        </section>
+      )}
 
       {/* ---------- How you play ---------- */}
       <section className="space-y-5 border-t border-line pt-6">
         <p className="eyebrow">How you play</p>
 
-        <Field label="How long have you been playing MMOs?" name="playtime" error={err?.playtime}>
+        <Field label="How long have you been playing online games?" name="playtime" error={err?.playtime}>
           <select id="playtime" name="playtime" className="input" defaultValue={str("playtime") ?? initial.playtime ?? ""} required aria-invalid={!!err?.playtime}>
             <option value="" disabled>
               Select…
@@ -158,10 +206,6 @@ export function PlayerProfileForm({
           </div>
           {err?.interests && <p className="mt-1.5 text-xs text-danger">{err.interests[0]}</p>}
         </fieldset>
-
-        <Field label="What other games do you play?" name="games" error={err?.games} hint="Anything else you play now or used to play seriously.">
-          <input id="games" name="games" className="input" defaultValue={str("games") ?? initial.games ?? ""} placeholder="e.g. Aion, Throne and Liberty, Valorant" maxLength={300} />
-        </Field>
       </section>
 
       {/* ---------- Comments ---------- */}
@@ -193,8 +237,8 @@ export function PlayerProfileForm({
               aria-invalid={!!err?.inGameLegion}
             />
             <span>
-              I have joined the <span className="font-semibold text-text">Vstroz Alliance</span> legion in-game. The website application is for the legion roster; the
-              in-game legion is where you actually play.
+              I have joined the <span className="font-semibold text-text">Vstroz Legion</span> in-game. This application puts you on the legion roster here; the in-game
+              legion is where you actually play.
             </span>
           </label>
           {err?.inGameLegion && <p className="mt-1.5 text-xs text-danger">{err.inGameLegion[0]}</p>}
@@ -202,7 +246,7 @@ export function PlayerProfileForm({
       )}
 
       <Button type="submit" size="lg" className="w-full" disabled={pending} aria-busy={pending}>
-        {pending ? (apply ? "Submitting…" : "Saving…") : (submitLabel ?? (apply ? "Apply to the legion" : "Save player profile"))}
+        {pending ? (apply ? "Submitting…" : "Saving…") : (submitLabel ?? (apply ? "Apply to the Vstroz Legion" : "Save player profile"))}
       </Button>
     </form>
   );

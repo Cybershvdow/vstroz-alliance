@@ -6,16 +6,17 @@ import { TIER_LABEL, type Tier } from "@/lib/constants";
 import { Badge, ButtonLink, Card, PageHeader } from "@/components/ui";
 import { DiscordIcon } from "@/components/site/Icons";
 import { PlayerProfileForm } from "@/components/forms/PlayerProfileForm";
+import { ClearDraft } from "@/components/forms/DraftNotice";
 import { DiscordButton } from "@/components/site/DiscordButton";
 import { discordConfigured } from "@/lib/discord";
 
 /**
- * The legion page. An account makes you part of the community; the legion is the in-game guild you apply to.
+ * The Vstroz Legion page. An account makes you part of the alliance; the legion is the Aion guild you apply to.
  * Four states: not applied, under review, in the legion, declined.
  */
-export default async function LegionPage({ searchParams }: { searchParams: Promise<{ submitted?: string; welcome?: string }> }) {
+export default async function LegionPage({ searchParams }: { searchParams: Promise<{ submitted?: string }> }) {
   const me = await requireUser();
-  const { submitted, welcome } = await searchParams;
+  const { submitted } = await searchParams;
   const inLegion = me.status === "APPROVED";
   const denied = me.status === "DENIED";
   const applied = !!me.appliedAt;
@@ -24,6 +25,7 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
   const initial = {
     game: me.game,
     gameAnswers: me.gameAnswers,
+    playedGames: me.playedGames,
     ign: me.ign,
     gameClass: me.gameClass,
     playtime: me.playtime,
@@ -41,27 +43,28 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
         ? "Legion application under review"
         : `Join the ${site.legionName}`;
   const text = inLegion
-    ? "Match signups, guild roles, rank votes, and the roster are open to you. Keep your player profile current so officers can build rosters."
+    ? "Match signups, guild roles, and the legion roster are open to you. Keep your player profile current so officers can build rosters."
     : denied
-      ? "An officer reviewed your application and did not approve it for the legion. You are still part of the Vstroz Alliance community: Discord, media, and The Round Table stay open to you."
+      ? "An officer reviewed your application and did not approve it for the legion. You are still part of the Vstroz Alliance: Discord, media, votes, and The Round Table stay open to you."
       : applied
         ? "Your application is in the officer queue. Most reviews happen within 48 hours. You can update your answers below until it is reviewed."
-        : "Your account already makes you part of the community. The legion is the in-game guild: fill in your player profile and apply. An officer reviews it within 48 hours.";
+        : `You are already in the alliance. The ${site.legionName} is our guild in ${site.legionGame}: join it in-game, fill in the application, and an officer reviews it within 48 hours. Don't play ${site.legionGame}? Skip this and just pick your games on your profile.`;
 
   return (
     <>
-      <PageHeader title={title} text={text} actions={inLegion ? <ButtonLink href="/dashboard/matches">Match signups</ButtonLink> : undefined} />
+      <PageHeader
+        title={title}
+        text={text}
+        actions={inLegion ? <ButtonLink href="/dashboard/matches">Match signups</ButtonLink> : <ButtonLink href="/dashboard/profile" variant="secondary">Pick your games</ButtonLink>}
+      />
 
       {submitted && (
-        <div className="panel mb-6 border-success/50 p-4 text-sm">
-          <span className="font-semibold text-success">Application submitted.</span> An officer reviews it within 48 hours. Join the Discord so they can reach you.
-        </div>
-      )}
-      {welcome && !applied && !inLegion && (
-        <div className="panel mb-6 border-accent/50 p-4 text-sm">
-          <span className="font-semibold">Welcome to the community, {me.displayName}.</span> Your account is set. Joining the {site.legionName} is a separate step: fill in your player
-          profile below and apply.
-        </div>
+        <>
+          <ClearDraft names={["player-apply"]} />
+          <div className="panel mb-6 border-success/50 p-4 text-sm">
+            <span className="font-semibold text-success">Application submitted.</span> An officer reviews it within 48 hours. Join the Discord so they can reach you.
+          </div>
+        </>
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -77,7 +80,8 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
                 {me.gameClass ? ` · ${me.gameClass}` : ""}
                 {me.game ? ` · ${me.game}` : ""}
               </p>
-              <p className="mt-1 text-sm text-muted">Update these on your{" "}
+              <p className="mt-1 text-sm text-muted">
+                Update these on your{" "}
                 <Link href="/dashboard/profile" className="text-gold hover:underline">
                   profile
                 </Link>
@@ -100,7 +104,7 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
               <Badge tone="accent">Step 1 · Discord</Badge>
               <h2 className="display mt-4 text-2xl">Connect your Discord first</h2>
               <p className="mb-6 mt-2 text-sm text-muted">
-                Being in the Vstroz Alliance Discord is what makes you part of the community, so the legion application needs your Discord
+                Being in the Vstroz Alliance Discord is what makes you part of the alliance, so the legion application needs your Discord
                 connected to this account. Join the server if you have not, then connect.
               </p>
               <div className="flex flex-wrap gap-3">
@@ -116,9 +120,11 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
                 <Badge tone={applied ? "warning" : "accent"}>{applied ? "Under review" : "Not applied yet"}</Badge>
                 {applied && me.appliedAt && <span className="text-xs text-muted">Applied {formatDate(me.appliedAt)}</span>}
               </div>
-              <h2 className="display mt-4 text-2xl">{applied ? "Your application" : "Your player profile"}</h2>
+              <h2 className="display mt-4 text-2xl">{applied ? "Your application" : `${site.legionName} application`}</h2>
               <p className="mb-6 mt-1 text-sm text-muted">
-                {applied ? "Officers see exactly this. Edit anything and save." : "This is what the officers review: your game, in-game name, class, and how you play."}
+                {applied
+                  ? "Officers see exactly this. Edit anything and save."
+                  : `What the officers review: your ${site.legionGame} character, class, and how you play. Your answers are saved as you type, so a refresh will not lose them.`}
               </p>
               <PlayerProfileForm mode="apply" submitLabel={applied ? "Update application" : undefined} initial={initial} />
             </Card>
@@ -141,13 +147,14 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
             </a>
           </Card>
           <Card>
-            <p className="eyebrow">Community vs legion</p>
+            <p className="eyebrow">Alliance vs legion</p>
             <ul className="mt-2 space-y-2 text-sm text-muted">
               <li>
-                <span className="text-text">Community</span>: anyone with a Vstroz Alliance account. Post content, bring disputes, follow announcements.
+                <span className="text-text">Alliance</span>: everyone with a Vstroz Alliance account, whatever they play. Pick your games, post content, vote, bring disputes.
               </li>
               <li>
-                <span className="text-text">Legion</span>: the in-game guild. Join it in Aion, then apply here with your player profile; officers approve. Unlocks match signups, roles, and the roster.
+                <span className="text-text">{site.legionName}</span>: our guild in {site.legionGame} only. Join it in-game, then apply here; officers approve. Unlocks match signups, roles, and
+                the legion roster.
               </li>
             </ul>
           </Card>

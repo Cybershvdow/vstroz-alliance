@@ -2,11 +2,12 @@ import Link from "next/link";
 import { gridCols } from "@/components/site/Sections";
 import { db } from "@/lib/db";
 import { site, games, identity } from "@/lib/site";
-import { ENABLED_GAMES, ROLE_LABEL, TIER_LABEL, type UserRole } from "@/lib/constants";
+import { ENABLED_GAMES, ROLE_LABEL, TIER_LABEL, playedGamesOf, type UserRole } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import { thumbnailFor, folderHref } from "@/lib/media";
 import { Avatar, Badge, ButtonLink, SectionHeading, roleTone } from "@/components/ui";
 import { ArrowIcon, DiscordIcon } from "./Icons";
+import { GameIcon, GameTag } from "./GameTag";
 
 /* ---------------- Teams grid (Team Liquid "divisions" pattern) ---------------- */
 
@@ -17,8 +18,10 @@ export async function TeamsGrid() {
   const counts = await Promise.all(
     ENABLED_GAMES.map(async (g) => ({
       name: g.name,
-      elite: await db.user.count({ where: { status: "APPROVED", tier: "ELITE", OR: [{ game: g.name }, { game: null }] } }),
-      members: await db.user.count({ where: { status: "APPROVED", OR: [{ game: g.name }, { game: null }] } }),
+      legion: !!g.legion,
+      // Everyone in the alliance who ticked this game on their profile.
+      players: await db.user.count({ where: { discordLeftAt: null, OR: [{ playedGames: { contains: `"${g.name}"` } }, { playedGames: null, game: g.name }] } }),
+      inLegion: g.legion ? await db.user.count({ where: { status: "APPROVED", discordLeftAt: null } }) : 0,
     })),
   );
 
@@ -27,7 +30,7 @@ export async function TeamsGrid() {
       <div className="bg-stripes absolute inset-0 opacity-40" />
       <div className="relative mx-auto max-w-7xl px-4 md:px-6">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <SectionHeading eyebrow="Divisions" title="Ride under the banner." text="One competitive division per game. Every division has a tried-out roster, a schedule, and a seat at The Round Table." />
+          <SectionHeading eyebrow="Games" title="Ride under the banner." text="Tick the games you play on your profile and they show as your tags. Aion is home to the Vstroz Legion; every other game is open to the whole alliance." />
           <ButtonLink href="/games" variant="secondary">
             All games <ArrowIcon />
           </ButtonLink>
@@ -44,22 +47,19 @@ export async function TeamsGrid() {
                     <Badge tone={statusBadge[g.status]}>{statusLabel[g.status]}</Badge>
                     <span className="label">{g.badge}</span>
                   </div>
-                  <h3 className="display mt-6 text-4xl">{g.name}</h3>
+                  <GameIcon game={g.name} className="mt-6 h-10 w-10" />
+                  <h3 className="display mt-3 text-4xl">{g.name}</h3>
                   <p className="mt-1 text-sm text-muted">{g.genre}</p>
                   <p className="mt-4 text-sm leading-relaxed text-muted">{g.desc}</p>
                   {active && c && (
-                    <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-line pt-4">
+                    <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-4">
                       <div>
-                        <dt className="label">Roster</dt>
-                        <dd className="display display-gold mt-1 text-2xl">{c.elite}</dd>
+                        <dt className="label">Players</dt>
+                        <dd className="display display-gold mt-1 text-2xl">{c.players}</dd>
                       </div>
                       <div>
-                        <dt className="label">Members</dt>
-                        <dd className="display mt-1 text-2xl">{c.members}</dd>
-                      </div>
-                      <div>
-                        <dt className="label">Tryouts</dt>
-                        <dd className="mt-1 text-sm text-success">Open</dd>
+                        <dt className="label">{c.legion ? "In the legion" : "Access"}</dt>
+                        {c.legion ? <dd className="display mt-1 text-2xl">{c.inLegion}</dd> : <dd className="mt-2 text-sm text-success">Open to all</dd>}
                       </div>
                     </dl>
                   )}
@@ -188,7 +188,7 @@ export async function Command() {
   const leaders = await db.user.findMany({
     where: { status: "APPROVED", role: { in: ["LEADER", "OFFICER"] } },
     orderBy: [{ createdAt: "asc" }],
-    select: { id: true, displayName: true, role: true, title: true, tier: true, gameClass: true, game: true },
+    select: { id: true, displayName: true, role: true, title: true, tier: true, gameClass: true, game: true, playedGames: true },
   });
   leaders.sort((a, b) => (a.role === "LEADER" ? -1 : b.role === "LEADER" ? 1 : 0));
 
@@ -214,7 +214,9 @@ export async function Command() {
                 <p className="mt-1 text-sm text-text">{l.title ?? ROLE_LABEL[l.role as UserRole]}</p>
                 <div className="mt-4 flex flex-wrap gap-1.5 border-t border-line pt-4">
                   <Badge tone="gold">{TIER_LABEL[l.tier as keyof typeof TIER_LABEL] ?? l.tier}</Badge>
-                  {l.game && <Badge tone="neutral">{l.game}</Badge>}
+                  {playedGamesOf(l).map((t) => (
+                    <GameTag key={t} game={t} />
+                  ))}
                   {l.gameClass && <Badge tone="neutral">{l.gameClass}</Badge>}
                 </div>
               </div>

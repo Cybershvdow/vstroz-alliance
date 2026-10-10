@@ -22,6 +22,7 @@ export const getCurrentUser = cache(async () => {
       interests: true,
       games: true,
       game: true,
+      playedGames: true,
       gameAnswers: true,
       applicationNote: true,
       appliedAt: true,

@@ -24,6 +24,19 @@ try {
     db.mediaPost.updateMany({ where: { game: "Aion 2" }, data: { game: "Aion" } }),
     db.tryoutRequest.updateMany({ where: { game: "Aion 2" }, data: { game: "Aion" } }),
   ]);
+  // Profile tags (2026-10-10): members now tick several listed games. Carry the old single game over once.
+  const LISTED = ["Aion", "Apex Legends", "Enshrouded", "Project Zomboid", "Deadlock"];
+  const LEGION = ["Aion"];
+  const legacy = await db.user.findMany({ where: { playedGames: null, game: { not: null } }, select: { id: true, game: true, games: true } });
+  for (const u of legacy) {
+    if (LISTED.includes(u.game)) {
+      await db.user.update({ where: { id: u.id }, data: { playedGames: JSON.stringify([u.game]), ...(LEGION.includes(u.game) ? {} : { game: null, gameAnswers: null }) } });
+    } else {
+      const other = [u.games, u.game].filter(Boolean).join(", ").slice(0, 300);
+      await db.user.update({ where: { id: u.id }, data: { playedGames: "[]", game: null, gameAnswers: null, games: other } });
+    }
+  }
+  if (legacy.length) console.log(`[bootstrap] moved ${legacy.length} profiles to game tags`);
   // Command roster fix (2026-10-08): Nugget is Alliance Leader & Founder and does not play Aion. Matches only while the old title is present.
   const nugget = await db.user.updateMany({ where: { username: "nugget", title: "Discord Server Leader" }, data: { title: "Alliance Leader & Founder", game: null, gameClass: null } });
   if (nugget.count) console.log("[bootstrap] updated Nugget title");

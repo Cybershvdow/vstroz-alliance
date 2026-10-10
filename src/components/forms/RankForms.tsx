@@ -4,12 +4,16 @@ import { useActionState } from "react";
 import { nominateAction } from "@/lib/actions/ranks";
 import { VOTED_TIERS, TIER_LABEL, VOTE_RULES } from "@/lib/constants";
 import { Field, FormMessage } from "@/components/ui";
+import { useFormDraft } from "@/lib/formDraft";
+import { DraftNotice } from "./DraftNotice";
 import { SubmitButton } from "./SubmitButton";
 
 export function NominateForm({ members }: { members: { id: string; displayName: string; tier: string }[] }) {
   const [state, action] = useActionState(nominateAction, undefined);
+  const [formRef, draft] = useFormDraft("nominate", state);
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form ref={formRef} action={action} className="space-y-4" noValidate>
+      <DraftNotice draft={draft} />
       <FormMessage state={state} />
       <Field label="Member" name="userId">
         <select id="userId" name="userId" className="input" defaultValue="" required>

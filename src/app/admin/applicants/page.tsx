@@ -55,10 +55,10 @@ export default async function ApplicantsPage() {
 
   return (
     <>
-      <PageHeader title="Legion applications" text="Approve to add them to the legion: match signups, roles, rank votes, and the roster. Deny with a note so they know why." />
+      <PageHeader title="Legion applications" text="Approve to add them to the Vstroz Legion (Aion): match signups, roles, and the legion roster. Deny with a note so they know why." />
 
       {pending.length === 0 ? (
-        <EmptyState title="Queue is clear" text="Legion applications appear here the moment a community member applies." />
+        <EmptyState title="Queue is clear" text="Vstroz Legion applications appear here the moment an alliance member applies." />
       ) : (
         <ul className="space-y-4">
           {pending.map((u) => (
@@ -143,7 +143,7 @@ export default async function ApplicantsPage() {
       {notApplied.length > 0 && (
         <>
           <h2 className="display mb-3 mt-12 text-2xl">
-            Community accounts not in the legion <span className="text-muted">({notApplied.length})</span>
+            Alliance members not in the legion <span className="text-muted">({notApplied.length})</span>
           </h2>
           <p className="mb-3 text-sm text-muted">
             They have an account but have not applied to the legion. They can post content, vote, and use The Round Table; they enter the queue when they apply.
@@ -157,7 +157,7 @@ export default async function ApplicantsPage() {
                     @{u.username} · joined {formatDate(u.createdAt)}
                   </p>
                 </div>
-                <Badge tone="neutral">Community</Badge>
+                <Badge tone="neutral">Alliance</Badge>
               </li>
             ))}
           </ul>

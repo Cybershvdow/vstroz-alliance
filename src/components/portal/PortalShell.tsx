@@ -20,7 +20,7 @@ export function PortalShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
+    <div className="flex min-h-screen flex-col lg:flex-row" data-draft-scope={user.username}>
       <aside className="flex shrink-0 flex-col border-b border-line bg-bg-2 lg:w-72 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between px-5 py-4 lg:py-6">
           <Link href="/" aria-label="Back to site">
@@ -38,7 +38,7 @@ export function PortalShell({
               <p className="truncate font-display text-lg font-bold uppercase leading-tight">{user.displayName}</p>
               <div className="flex flex-wrap gap-1">
                 {user.status === "APPROVED" && user.role !== "MEMBER" && <Badge tone={roleTone(user.role)}>{ROLE_LABEL[user.role as UserRole] ?? user.role}</Badge>}
-                <Badge tone={user.status === "APPROVED" ? "success" : "neutral"}>{user.status === "APPROVED" ? "Legion" : "Community"}</Badge>
+                <Badge tone={user.status === "APPROVED" ? "success" : "neutral"}>{user.status === "APPROVED" ? "Legion" : "Alliance"}</Badge>
               </div>
             </div>
           </div>

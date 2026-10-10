@@ -12,9 +12,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const items: NavItem[] = [
     { href: "/dashboard", label: "Overview" },
-    { href: "/dashboard/legion", label: inLegion ? "Legion" : "Join the legion" },
-    { href: "/dashboard/matches", label: "Matches" },
-    { href: "/dashboard/roles", label: "Roles" },
+    { href: "/dashboard/legion", label: inLegion ? "Vstroz Legion" : "Join the legion" },
+    // Matches and guild roles belong to the legion, so alliance-only members do not get links that bounce.
+    ...(inLegion
+      ? [
+          { href: "/dashboard/matches", label: "Matches" },
+          { href: "/dashboard/roles", label: "Roles" },
+        ]
+      : []),
     { href: "/dashboard/table", label: "The Round Table" },
     { href: "/dashboard/votes", label: "Rank votes" },
     { href: "/dashboard/media", label: "Post content" },
