@@ -174,6 +174,30 @@ export function PlayerProfileForm({
         </Field>
       </section>
 
+      {apply && (
+        <div>
+          <label
+            htmlFor="inGameLegion"
+            className={`flex cursor-pointer items-start gap-3 border bg-bg-2 p-3 text-sm has-[:checked]:border-accent has-[:checked]:bg-accent/10 ${err?.inGameLegion ? "border-danger" : "border-line-strong"}`}
+          >
+            <input
+              id="inGameLegion"
+              type="checkbox"
+              name="inGameLegion"
+              value="yes"
+              defaultChecked={str("inGameLegion") === "yes" || answers.inGameLegion === "Yes"}
+              className="mt-0.5 accent-[#9b4dff]"
+              aria-invalid={!!err?.inGameLegion}
+            />
+            <span>
+              I have joined the <span className="font-semibold text-text">Vstroz Alliance</span> legion in-game. The website application is for the legion roster; the
+              in-game legion is where you actually play.
+            </span>
+          </label>
+          {err?.inGameLegion && <p className="mt-1.5 text-xs text-danger">{err.inGameLegion[0]}</p>}
+        </div>
+      )}
+
       <Button type="submit" size="lg" className="w-full" disabled={pending} aria-busy={pending}>
         {pending ? (apply ? "Submitting…" : "Saving…") : (submitLabel ?? (apply ? "Apply to the legion" : "Save player profile"))}
       </Button>

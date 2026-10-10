@@ -6,6 +6,8 @@ import { TIER_LABEL, type Tier } from "@/lib/constants";
 import { Badge, ButtonLink, Card, PageHeader } from "@/components/ui";
 import { DiscordIcon } from "@/components/site/Icons";
 import { PlayerProfileForm } from "@/components/forms/PlayerProfileForm";
+import { DiscordButton } from "@/components/site/DiscordButton";
+import { discordConfigured } from "@/lib/discord";
 
 /**
  * The legion page. An account makes you part of the community; the legion is the in-game guild you apply to.
@@ -17,6 +19,7 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
   const inLegion = me.status === "APPROVED";
   const denied = me.status === "DENIED";
   const applied = !!me.appliedAt;
+  const needsDiscord = discordConfigured() && !me.discordId && !inLegion;
 
   const initial = {
     game: me.game,
@@ -92,6 +95,21 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
               )}
               <p className="mt-4 text-sm text-muted">If you think this was a mistake, reach out to an officer in Discord.</p>
             </Card>
+          ) : needsDiscord ? (
+            <Card accent>
+              <Badge tone="accent">Step 1 · Discord</Badge>
+              <h2 className="display mt-4 text-2xl">Connect your Discord first</h2>
+              <p className="mb-6 mt-2 text-sm text-muted">
+                Being in the Vstroz Alliance Discord is what makes you part of the community, so the legion application needs your Discord
+                connected to this account. Join the server if you have not, then connect.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <DiscordButton href="/api/discord/login?link=1">Connect Discord</DiscordButton>
+                <ButtonLink href={site.discordInvite} variant="secondary">
+                  Join the Discord
+                </ButtonLink>
+              </div>
+            </Card>
           ) : (
             <Card accent>
               <div className="flex flex-wrap items-center gap-2">
@@ -129,7 +147,7 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
                 <span className="text-text">Community</span>: anyone with a Vstroz Alliance account. Post content, bring disputes, follow announcements.
               </li>
               <li>
-                <span className="text-text">Legion</span>: the in-game guild. Apply with your player profile; officers approve. Unlocks match signups, roles, and rank votes.
+                <span className="text-text">Legion</span>: the in-game guild. Join it in Aion, then apply here with your player profile; officers approve. Unlocks match signups, roles, and the roster.
               </li>
             </ul>
           </Card>

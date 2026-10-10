@@ -29,6 +29,10 @@ model User {
   gameAnswers     String?   // JSON of genre-specific answers, keyed by question key
   appliedAt       DateTime? // when they first applied to the legion (status tracks that application)
   socials         String?   // JSON { youtube, twitch, tiktok, x, instagram } of normalized profile URLs
+  discordId       String?   // Discord user id once they signed in / connected with Discord (uniqueness enforced in code; no unique index so db push never warns at boot)
+  discordUsername String?
+  discordLinkedAt DateTime?
+  discordLeftAt   DateTime? // set by the membership sync when they leave the server; hides the account until they rejoin
   status          String    @default("PENDING") // PENDING | APPROVED | DENIED
   role            String    @default("MEMBER")  // MEMBER | OFFICER | LEADER
   tier            String    @default("RECRUIT") // RECRUIT | MEMBER | VETERAN | ELITE (rank ladder)
@@ -49,6 +53,8 @@ model User {
   nominations      Nomination[] @relation("Nominee")
   nominationsMade  Nomination[] @relation("Nominator")
   votes            Vote[]
+
+  @@index([discordId])
 }
 
 // A proposal to promote a member into a voted rank (Veteran / Elite).

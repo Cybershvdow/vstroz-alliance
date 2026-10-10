@@ -2,10 +2,23 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
 import { formatDate, formatDateTime } from "@/lib/format";
-import { Avatar, Badge, ButtonLink, Card, EmptyState, PageHeader, Stat } from "@/components/ui";
+import { Avatar, Badge, Button, ButtonLink, Card, EmptyState, PageHeader, Stat } from "@/components/ui";
+import { syncDiscordAction } from "@/lib/actions/discord";
+import { discordConfigured, discordSyncConfigured, lastDiscordSync } from "@/lib/discord";
 
-export default async function AdminOverview() {
+export default async function AdminOverview({ searchParams }: { searchParams: Promise<{ discord?: string; removed?: string; restored?: string }> }) {
   const me = await requireOfficer();
+  const { discord, removed, restored } = await searchParams;
+  const sync = discordSyncConfigured();
+  const last = lastDiscordSync();
+  const discordTitle = sync ? "Connected to the server" : discordConfigured() ? "Sign-in connected, sync not set up" : "Not connected yet";
+  const discordText = sync
+    ? `Every 5 minutes the site checks who is still in the Discord. Leaving removes them from the legion and hides their account; rejoining restores it. Last check: ${last ? `${formatDateTime(last.at)}${last.ok ? ` · ${last.checked} linked accounts` : ` · failed: ${last.error}`}` : "not yet since the last restart"}.`
+    : discordConfigured()
+      ? "Members can sign in with Discord. Add DISCORD_BOT_TOKEN in Railway to enable automatic removal when someone leaves the server."
+      : "Add DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_GUILD_ID and DISCORD_BOT_TOKEN in Railway to turn on Discord sign-in and membership sync.";
+  const discordMsg =
+    discord === "synced" ? `Sync done: ${removed ?? 0} removed, ${restored ?? 0} restored.` : discord === "error" ? "Sync failed. Check the server logs." : discord === "off" ? "Discord sync is not configured." : undefined;
   const now = new Date();
   const [members, pending, roleApps, upcoming, recentApplicants] = await Promise.all([
     db.user.count({ where: { status: "APPROVED" } }),
@@ -25,6 +38,24 @@ export default async function AdminOverview() {
         <Stat label="Role applications" value={roleApps} tone={roleApps ? "accent" : "text"} />
         <Stat label="Upcoming matches" value={upcoming.length} />
       </div>
+
+      <Card className="mt-8">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="eyebrow">Discord</p>
+            <h2 className="display mt-2 text-2xl">{discordTitle}</h2>
+            <p className="mt-2 max-w-2xl text-sm text-muted">{discordText}</p>
+            {discordMsg && <p className={`mt-2 text-sm ${discord === "synced" ? "text-success" : "text-danger"}`}>{discordMsg}</p>}
+          </div>
+          {sync && (
+            <form action={syncDiscordAction}>
+              <Button type="submit" variant="secondary">
+                Sync now
+              </Button>
+            </form>
+          )}
+        </div>
+      </Card>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <Card accent>

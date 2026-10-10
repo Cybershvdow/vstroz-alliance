@@ -46,13 +46,15 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
         interests: true,
         games: true,
         discord: true,
+        discordUsername: true,
+        discordLeftAt: true,
         socials: true,
         createdAt: true,
       },
     }),
     getCurrentUser(),
   ]);
-  if (!user) notFound();
+  if (!user || user.discordLeftAt) notFound();
 
   const parent = new URL(process.env.APP_URL || "http://localhost:3000").hostname;
   const posts = await db.mediaPost.findMany({
@@ -69,6 +71,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
 
   const inLegion = user.status === "APPROVED";
   const mine = !!me && me.id === user.id;
+  const discordHandle = user.discordUsername ?? user.discord;
   const socials = parseSocials(user.socials);
   const links = SOCIAL_PLATFORMS.filter((p) => socials[p.key]);
   const interests = (user.interests ?? "")
@@ -147,13 +150,13 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
 
             <div className="panel cut p-6">
               <p className="eyebrow">Find them</p>
-              {links.length === 0 && !user.discord ? (
+              {links.length === 0 && !discordHandle ? (
                 <p className="mt-3 text-sm text-dim">{mine ? "Add your social links on your profile page." : "No links shared yet."}</p>
               ) : (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {user.discord && (
-                    <span className="cut-sm inline-flex items-center gap-2 border border-line-strong bg-white/[0.03] px-4 py-2 font-display text-[0.72rem] font-bold uppercase tracking-[0.18em]">
-                      <DiscordIcon className="h-4 w-4" /> {user.discord}
+                  {discordHandle && (
+                    <span className="cut-sm inline-flex max-w-full items-center gap-2 border border-line-strong bg-white/[0.03] px-4 py-2 font-display text-[0.72rem] font-bold uppercase tracking-[0.18em]">
+                      <DiscordIcon className="h-4 w-4 shrink-0" /> <span className="truncate">{discordHandle}</span>
                     </span>
                   )}
                   {links.map((p) => (

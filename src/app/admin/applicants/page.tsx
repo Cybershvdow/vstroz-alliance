@@ -5,6 +5,14 @@ import { formatDate } from "@/lib/format";
 import { Avatar, Badge, Button, EmptyState, PageHeader, statusTone } from "@/components/ui";
 import { questionsFor, STATUS_LABEL } from "@/lib/constants";
 
+function inGameLegion(json: string | null) {
+  try {
+    return !!json && JSON.parse(json).inGameLegion === "Yes";
+  } catch {
+    return false;
+  }
+}
+
 function GameAnswers({ game, json }: { game: string | null; json: string | null }) {
   if (!game) return null;
   let answers: Record<string, string> = {};
@@ -74,7 +82,7 @@ export default async function ApplicantsPage() {
                       </div>
                       <div>
                         <dt className="label">Discord</dt>
-                        <dd>{u.discord ?? "—"}</dd>
+                        <dd>{u.discordId ? `@${u.discordUsername ?? u.discord ?? ""} · connected` : (u.discord ?? "—")}</dd>
                       </div>
                       <div>
                         <dt className="label">Applied</dt>
@@ -97,6 +105,10 @@ export default async function ApplicantsPage() {
                       <div className="col-span-2 sm:col-span-4">
                         <dt className="label">Games</dt>
                         <dd>{u.games ?? "—"}</dd>
+                      </div>
+                      <div className="col-span-2 sm:col-span-4">
+                        <dt className="label">Joined the legion in-game</dt>
+                        <dd className={inGameLegion(u.gameAnswers) ? "text-success" : "text-warning"}>{inGameLegion(u.gameAnswers) ? "Yes, confirmed by the applicant" : "Not confirmed"}</dd>
                       </div>
                     </dl>
                     <GameAnswers game={u.game} json={u.gameAnswers} />

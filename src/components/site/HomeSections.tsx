@@ -137,7 +137,7 @@ export async function CommunityTiles() {
 /* ---------------- Latest content (OpTic / Sentinels video feed) ---------------- */
 
 export async function LatestContent() {
-  const posts = await db.mediaPost.findMany({ where: { approved: true }, orderBy: [{ featured: "desc" }, { createdAt: "desc" }], take: 3, include: { postedBy: { select: { displayName: true, username: true } } } });
+  const posts = await db.mediaPost.findMany({ where: { approved: true, OR: [{ official: true }, { postedBy: { discordLeftAt: null } }] }, orderBy: [{ featured: "desc" }, { createdAt: "desc" }], take: 3, include: { postedBy: { select: { displayName: true, username: true } } } });
   if (posts.length === 0) return null;
   return (
     <section className="mx-auto max-w-7xl px-4 py-24 md:px-6">

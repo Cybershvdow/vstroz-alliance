@@ -19,6 +19,7 @@ import {
   type FieldErrors,
 } from "@/lib/validation";
 import { normalizeSocial, SOCIAL_PLATFORMS, type SocialKey } from "@/lib/social";
+import { discordConfigured } from "@/lib/discord";
 
 function clean(v: FormDataEntryValue | null) {
   return typeof v === "string" ? v : "";
@@ -101,9 +102,22 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
   const gameCheck = d.game ? validateGameAnswers(d.game, formData) : { answers: {} as Record<string, string>, errors: {} as FieldErrors };
   const errors: FieldErrors = { ...gameCheck.errors };
   if (intent === "apply" && !d.game) errors.game = ["Pick the game you are applying with"];
+  if (intent === "apply" && clean(formData.get("inGameLegion")) !== "yes") {
+    errors.inGameLegion = ["Join the Vstroz Alliance legion in-game first, then confirm it here"];
+  }
   if (Object.keys(errors).length) return { ok: false, errors, values: echo(), message: "Fix the highlighted fields." };
 
-  const answers = gameCheck.answers;
+  // The in-game confirmation travels with the answers so officers (and later saves) keep it.
+  let previous: Record<string, string> = {};
+  try {
+    previous = me.gameAnswers ? JSON.parse(me.gameAnswers) : {};
+  } catch {
+    previous = {};
+  }
+  const answers: Record<string, string> = {
+    ...gameCheck.answers,
+    ...(intent === "apply" || previous.inGameLegion === "Yes" ? { inGameLegion: "Yes" } : {}),
+  };
   await db.user.update({
     where: { id: me.id },
     data: {
@@ -126,6 +140,9 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
     if (me.status === "APPROVED") {
       revalidatePath("/", "layout");
       return { ok: true, message: "Player profile saved. You are already in the legion." };
+    }
+    if (discordConfigured() && !me.discordId) {
+      return { ok: false, message: "Connect your Discord to this account first. Being in the Discord is what makes you part of the community." };
     }
     // Atomic: only the first apply stamps appliedAt and notifies the officers, even under double submits.
     const stamped = await db.user.updateMany({ where: { id: me.id, status: "PENDING", appliedAt: null }, data: { appliedAt: new Date() } });

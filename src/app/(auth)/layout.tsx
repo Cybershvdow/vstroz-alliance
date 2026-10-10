@@ -22,7 +22,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </h2>
             <p className="mt-4 max-w-md text-muted">{site.tagline}</p>
           </div>
-          <p className="text-xs text-dim">Applications are reviewed by an officer, usually within 48 hours.</p>
+          <p className="text-xs text-dim">Your account makes you a community member. Legion applications are reviewed by an officer within 48 hours.</p>
         </div>
       </aside>
 

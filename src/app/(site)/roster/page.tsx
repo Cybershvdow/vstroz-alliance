@@ -30,7 +30,7 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
   const countFor = (c: string) => counts.find((x) => x.gameClass === c)?._count._all ?? 0;
 
   // Members with public content get a link to their media folder.
-  const community = await db.user.findMany({ where: { status: { not: "APPROVED" } }, select: { id: true, username: true, displayName: true }, orderBy: { createdAt: "desc" } });
+  const community = await db.user.findMany({ where: { status: { not: "APPROVED" }, discordLeftAt: null }, select: { id: true, username: true, displayName: true }, orderBy: { createdAt: "desc" } });
   const mediaCounts = await db.mediaPost.groupBy({ by: ["postedById"], where: { approved: true, official: false }, _count: { _all: true } });
   const videosBy = (id: string) => mediaCounts.find((x) => x.postedById === id)?._count._all ?? 0;
 

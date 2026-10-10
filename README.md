@@ -4,7 +4,8 @@ A production-grade website and members portal for the Vstroz Alliance, a multi-g
 
 - **Public site**: home, games, roster, schedule, recruitment.
 - **Accounts**: anyone can create an account and is part of the community right away: portal, media, rank votes, The Round Table, and a public profile at `/members/<username>` with social links.
-- **Legion applications**: members fill in a player profile and apply to the Aion legion from `/dashboard/legion`; officers approve or deny with a note. Approval unlocks match signups, guild roles, and the roster.
+- **Legion applications**: members fill in a player profile, confirm they joined the legion in-game, and apply from `/dashboard/legion`; officers approve or deny with a note. Approval unlocks match signups, guild roles, and the roster.
+- **Discord** (optional, see below): "Continue with Discord" creates accounts only for members of the alliance server, and a background sync removes people from the legion and hides their account when they leave the server.
 - **Member portal** (unlocked on approval): match signups, guild-role applications, announcements, profile.
 - **Command center** (officers/leader): applicant queue, member management, match creation and roster confirmation, guild roles, announcements.
 
@@ -161,3 +162,16 @@ src/lib            db, auth, session, validation, server actions, site content
 src/components     brand (logo), ui primitives, site sections, forms, portal shell
 src/proxy.ts       route protection (Next 16 "proxy", formerly middleware)
 ```
+
+## Discord
+
+Set these in Railway (Variables) and redeploy:
+
+| Variable | Where it comes from |
+|---|---|
+| `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET` | Discord Developer Portal → your application → OAuth2. Add the redirect `https://vstrozalliance.com/api/discord/callback`. |
+| `DISCORD_GUILD_ID` | Your server id (Discord → User Settings → Advanced → Developer Mode, then right-click the server → Copy Server ID). |
+| `DISCORD_BOT_TOKEN` | Developer Portal → Bot → Reset Token. Turn on **Server Members Intent**. Invite the bot with the OAuth2 URL generator (scope `bot`, no permissions needed). |
+| `DISCORD_SYNC_SECRET` | Optional. Any long random string; lets an external scheduler call `POST /api/discord/sync` with `Authorization: Bearer <secret>`. |
+
+With the first three set, `/login` and `/register` offer **Continue with Discord**; the site checks the person is in the server, then signs them in or creates their community account. Existing accounts can connect Discord from `/dashboard/profile`, and connecting is required before applying to the legion. With the bot token set, the server process re-checks membership every 5 minutes (`src/instrumentation.ts`), and Command center has a **Sync now** button: leaving the server removes a member from the legion and hides their profile; rejoining restores a community account. Generals and Captains are never removed automatically.

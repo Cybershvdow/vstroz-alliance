@@ -18,7 +18,7 @@ const SOCIAL_LABEL: Record<string, string> = { youtube: "YouTube", twitch: "Twit
 export default async function MediaPage() {
   const parent = new URL(process.env.APP_URL || "http://localhost:3000").hostname;
   const posts = await db.mediaPost.findMany({
-    where: { approved: true },
+    where: { approved: true, OR: [{ official: true }, { postedBy: { discordLeftAt: null } }] },
     orderBy: { createdAt: "desc" },
     include: { postedBy: { select: { id: true, username: true, displayName: true, role: true } } },
   });
