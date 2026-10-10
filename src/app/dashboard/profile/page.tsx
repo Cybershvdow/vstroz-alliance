@@ -2,15 +2,31 @@ import { requireUser } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { parseSocials } from "@/lib/social";
 import { discordConfigured } from "@/lib/discord";
-import { Badge, ButtonLink, Card, PageHeader } from "@/components/ui";
+import { Badge, Button, ButtonLink, Card, PageHeader } from "@/components/ui";
 import { ROLE_LABEL, STATUS_LABEL, type UserRole } from "@/lib/constants";
 import { ProfileForm, PasswordForm } from "@/components/forms/MemberForms";
 import { PlayerProfileForm } from "@/components/forms/PlayerProfileForm";
 import { DiscordButton } from "@/components/site/DiscordButton";
+import { ApexAccountForm } from "@/components/forms/ApexAccountForm";
+import { unlinkSteamAction } from "@/lib/actions/accounts";
+import { steamConfigured } from "@/lib/steam";
+import { apexConfigured } from "@/lib/apex";
 
-export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ discord?: string }> }) {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ discord?: string; steam?: string }> }) {
   const me = await requireUser();
-  const { discord } = await searchParams;
+  const { discord, steam } = await searchParams;
+  const steamMsg =
+    steam === "linked"
+      ? "Steam connected."
+      : steam === "unlinked"
+        ? "Steam unlinked."
+        : steam === "taken"
+          ? "That Steam account is already linked to another member."
+          : steam === "error"
+            ? "Steam sign-in could not be verified. Try again."
+            : steam === "off"
+              ? "Steam linking is not set up yet."
+              : undefined;
   const inLegion = me.status === "APPROVED";
   const discordMsg =
     discord === "linked" ? "Discord connected." : discord === "taken" ? "That Discord account is already connected to another member." : undefined;
@@ -47,6 +63,40 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             ) : (
               <p className="mt-2 text-sm text-muted">Discord sign-in is not set up yet. Your Discord username above is shown on your profile.</p>
             )}
+          </Card>
+          <Card>
+            <p className="eyebrow">Game accounts</p>
+            <p className="mt-1 text-sm text-muted">Linked accounts show live stats on your public profile.</p>
+            {steamMsg && <p className={`mt-2 text-sm ${steam === "linked" ? "text-success" : steam === "unlinked" ? "text-muted" : "text-danger"}`}>{steamMsg}</p>}
+            <div className="mt-4 border-t border-line pt-4">
+              <p className="label">Steam</p>
+              {me.steamId ? (
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-3 text-sm">
+                  <span>
+                    Connected{me.steamName ? ` as ${me.steamName}` : ""}. Shows your Apex playtime (Steam privacy → Game details must be Public).
+                  </span>
+                  <form action={unlinkSteamAction}>
+                    <Button type="submit" size="sm" variant="ghost">
+                      Unlink
+                    </Button>
+                  </form>
+                </div>
+              ) : steamConfigured() ? (
+                <div className="mt-2">
+                  <ButtonLink href="/api/steam/login" variant="secondary" size="sm">
+                    Connect Steam
+                  </ButtonLink>
+                </div>
+              ) : (
+                <p className="mt-2 text-sm text-dim">Steam linking is not set up yet.</p>
+              )}
+            </div>
+            <div className="mt-4 border-t border-line pt-4">
+              <p className="label mb-3">Apex Legends</p>
+              {!apexConfigured() && <p className="mb-3 text-xs text-dim">Live Apex stats switch on once the stats key is set up. You can save your name now.</p>}
+              {me.apexError && me.apexName && <p className="mb-3 text-xs text-warning">Last check: {me.apexError}</p>}
+              <ApexAccountForm initial={{ platform: me.apexPlatform, name: me.apexName }} />
+            </div>
           </Card>
           <Card>
             <h2 className="display mb-5 text-2xl">Password</h2>

@@ -12,6 +12,9 @@ import { Avatar, Badge, ButtonLink, roleTone } from "@/components/ui";
 import { ArrowIcon, DiscordIcon } from "@/components/site/Icons";
 import { MediaPlayer } from "@/components/site/MediaPlayer";
 import { toItems } from "@/components/site/MediaFolders";
+import { GameStats } from "@/components/site/GameStats";
+import { refreshApexStats } from "@/lib/apex";
+import { refreshSteamStats } from "@/lib/steam";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +51,14 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
         discord: true,
         discordUsername: true,
         discordLeftAt: true,
+        steamId: true,
+        steamStats: true,
+        steamStatsAt: true,
+        apexPlatform: true,
+        apexName: true,
+        apexStats: true,
+        apexStatsAt: true,
+        apexError: true,
         socials: true,
         createdAt: true,
       },
@@ -68,6 +79,9 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
     const elsewhere = await db.mediaPost.findFirst({ where: { id: v, approved: true }, include: { postedBy: { select: { username: true } } } });
     if (elsewhere) redirect(folderHref(elsewhere, v));
   }
+
+  // Live stats: refreshed on view when stale (Apex 15 min, Steam 30 min); failures fall back to the last snapshot.
+  const [apex, steam] = await Promise.all([refreshApexStats(user), refreshSteamStats(user)]);
 
   const inLegion = user.status === "APPROVED";
   const mine = !!me && me.id === user.id;
@@ -148,6 +162,8 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
                 </ul>
               )}
             </div>
+
+            <GameStats apex={apex} apexError={user.apexError} steam={steam} steamProfileUrl={steam?.profileUrl} />
 
             <div className="panel cut p-6">
               <p className="eyebrow">Find them</p>

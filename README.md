@@ -175,3 +175,12 @@ Set these in Railway (Variables) and redeploy:
 | `DISCORD_SYNC_SECRET` | Optional. Any long random string; lets an external scheduler call `POST /api/discord/sync` with `Authorization: Bearer <secret>`. |
 
 With the first three set, `/login` and `/register` offer **Continue with Discord**; the site checks the person is in the server, then signs them in or creates their community account. Existing accounts can connect Discord from `/dashboard/profile`, and connecting is required before applying to the legion. With the bot token set, the server process re-checks membership every 5 minutes (`src/instrumentation.ts`), and Command center has a **Sync now** button: leaving the server removes a member from the legion and hides their profile; rejoining restores a community account. Generals and Captains are never removed automatically.
+
+## Live stats (Steam + Apex)
+
+| Variable | Where it comes from |
+|---|---|
+| `STEAM_API_KEY` | https://steamcommunity.com/dev/apikey (domain: vstrozalliance.com). Enables **Connect Steam** on the profile page (official Steam sign-in) and shows Apex Legends playtime from the member's Steam profile (their Game details privacy must be Public). |
+| `APEX_API_KEY` | https://apexlegendsapi.com → My API Access. Enables live Apex rank, RP, level, kills, K/D and online state looked up by the member's EA name (PC) or PSN/Xbox name. Third-party service; EA has no public API. |
+
+Members set these on `/dashboard/profile` ("Game accounts"). Stats are cached on the user row and refreshed when someone views the profile (Apex every 15 min, Steam every 30 min). Aion has no public stats API.

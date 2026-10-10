@@ -33,6 +33,17 @@ model User {
   discordUsername String?
   discordLinkedAt DateTime?
   discordLeftAt   DateTime? // set by the membership sync when they leave the server; hides the account until they rejoin
+  steamId         String?   // 64-bit SteamID after "Connect Steam" (uniqueness enforced in code)
+  steamName       String?
+  steamAvatar     String?
+  steamLinkedAt   DateTime?
+  steamStats      String?   // JSON SteamSnapshot (profile + Apex playtime), refreshed every 30 min on view
+  steamStatsAt    DateTime?
+  apexPlatform    String?   // PC | PS4 | X1
+  apexName        String?   // EA / PSN / Xbox name used for Apex stats
+  apexStats       String?   // JSON ApexStats (normalized), refreshed every 15 min on view
+  apexStatsAt     DateTime?
+  apexError       String?   // last stats error, shown to the member only
   status          String    @default("PENDING") // PENDING | APPROVED | DENIED
   role            String    @default("MEMBER")  // MEMBER | OFFICER | LEADER
   tier            String    @default("RECRUIT") // RECRUIT | MEMBER | VETERAN | ELITE (rank ladder)
