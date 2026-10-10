@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { isOfficer } from "@/lib/constants";
 import { createSession, getSession } from "@/lib/session";
-import { createDiscordAccount, discordConfigured, exchangeCode, fetchDiscordUser, isGuildMember, STATE_COOKIE } from "@/lib/discord";
+import { createDiscordAccount, discordConfig, discordConfigured, exchangeCode, fetchDiscordUser, isGuildMember, STATE_COOKIE } from "@/lib/discord";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,9 @@ export const dynamic = "force-dynamic";
  * - otherwise -> create a community account and land on the legion page
  */
 export async function GET(req: NextRequest) {
-  const fail = (e: string) => NextResponse.redirect(new URL(`/login?error=${e}`, req.url));
+  // Behind Railway the request URL is the internal host, so public redirects are built from APP_URL.
+  const base = discordConfig().appUrl;
+  const fail = (e: string) => NextResponse.redirect(new URL(`/login?error=${e}`, base));
   const code = req.nextUrl.searchParams.get("code");
   const state = req.nextUrl.searchParams.get("state");
   const store = await cookies();
@@ -37,12 +39,12 @@ export async function GET(req: NextRequest) {
   const existing = await db.user.findFirst({ where: { discordId: du.id } });
 
   if (link && session?.userId) {
-    if (existing && existing.id !== session.userId) return NextResponse.redirect(new URL("/dashboard/profile?discord=taken", req.url));
+    if (existing && existing.id !== session.userId) return NextResponse.redirect(new URL("/dashboard/profile?discord=taken", base));
     await db.user.update({
       where: { id: session.userId },
       data: { discordId: du.id, discordUsername: du.username, discordLinkedAt: new Date(), discordLeftAt: null, discord: du.username },
     });
-    return NextResponse.redirect(new URL("/dashboard/profile?discord=linked", req.url));
+    return NextResponse.redirect(new URL("/dashboard/profile?discord=linked", base));
   }
 
   let user = existing;
@@ -71,5 +73,5 @@ export async function GET(req: NextRequest) {
 
   await createSession(user.id);
   const dest = fresh ? "/dashboard/legion?welcome=1" : user.status === "APPROVED" && isOfficer(user.role) ? "/admin" : "/dashboard";
-  return NextResponse.redirect(new URL(dest, req.url));
+  return NextResponse.redirect(new URL(dest, base));
 }
