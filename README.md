@@ -187,7 +187,7 @@ Members set these on `/dashboard/profile` ("Game accounts"). Stats are cached on
 
 ## Games, tags, and saved drafts
 
-- **Listed games** live in  () and  (). Members tick the ones they play on their profile; they are stored in  and shown as icon tags () on profiles and the roster. "Other games" is free text and is not a tag. Command center shows how many members ticked each game and which unlisted games get mentioned.
-- **Alliance vs legion**: an account makes someone an alliance member. The Vstroz Legion is the guild in the game flagged  (Aion); its application is the only place the game-specific questions are required.
-- **Game icons** are original glyphs. To use official artwork, put a square image in  and map it in  inside .
-- **Saved drafts**: forms keep what was typed in the browser (), so a refresh or a validation error does not wipe it. Drafts are per form and per member, expire after 7 days, clear on a successful save, and never include passwords.
+- **Listed games** live in `GAME_CATALOG` (`src/lib/constants.ts`) and `games` (`src/lib/site.ts`). Members tick the ones they play on their profile; they are stored in `User.playedGames` and shown as icon tags (`src/components/site/GameTag.tsx`) on profiles and the roster. "Other games" is free text and is not a tag. Command center shows how many members ticked each game and which unlisted games get mentioned.
+- **Alliance vs legion**: an account makes someone an alliance member. The Vstroz Legion is the guild in the game flagged `legion: true` (Aion); its application is the only place the game-specific questions are required.
+- **Game icons** are original glyphs. To use official artwork, put a square image in `public/games/` and map it in `ART` inside `GameTag.tsx`.
+- **Saved drafts**: forms keep what was typed in the browser (`src/lib/formDraft.ts`), so a refresh or a validation error does not wipe it. Drafts are per form and per member, expire after 7 days, clear on a successful save, and never include passwords.
