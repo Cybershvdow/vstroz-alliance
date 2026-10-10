@@ -3,7 +3,8 @@ import { requireOfficer } from "@/lib/auth";
 import { reviewApplicantAction } from "@/lib/actions/admin";
 import { formatDate } from "@/lib/format";
 import { Avatar, Badge, Button, EmptyState, PageHeader, statusTone } from "@/components/ui";
-import { questionsFor, STATUS_LABEL } from "@/lib/constants";
+import { questionsFor, playedGamesOf, STATUS_LABEL } from "@/lib/constants";
+import { GameTag } from "@/components/site/GameTag";
 
 function inGameLegion(json: string | null) {
   try {
@@ -91,7 +92,7 @@ export default async function ApplicantsPage() {
                     </dl>
                     <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
                       <div>
-                        <dt className="label">Playing MMOs</dt>
+                        <dt className="label">Gaming for</dt>
                         <dd>{u.playtime ?? "—"}</dd>
                       </div>
                       <div>
@@ -103,7 +104,13 @@ export default async function ApplicantsPage() {
                         <dd>{u.interests ?? "—"}</dd>
                       </div>
                       <div className="col-span-2 sm:col-span-4">
-                        <dt className="label">Games</dt>
+                        <dt className="label">Plays</dt>
+                        <dd className="mt-1 flex flex-wrap gap-1.5">
+                          {playedGamesOf(u).length > 0 ? playedGamesOf(u).map((t) => <GameTag key={t} game={t} compact />) : "—"}
+                        </dd>
+                      </div>
+                      <div className="col-span-2 sm:col-span-4">
+                        <dt className="label">Other games</dt>
                         <dd>{u.games ?? "—"}</dd>
                       </div>
                       <div className="col-span-2 sm:col-span-4">

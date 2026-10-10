@@ -182,7 +182,7 @@ export function GamesGrid({ full = false }: { full?: boolean }) {
                   <span className="label">{g.badge}</span>
                 </div>
                 <GameIcon game={g.name} className="mt-6 h-11 w-11" />
-                <h3 className="display mt-3 text-4xl md:text-5xl">{g.name}</h3>
+                <h3 className="display mt-3 text-3xl xl:text-4xl">{g.name}</h3>
                 <p className="mt-1 text-sm text-muted">{g.genre}</p>
                 <p className="mt-5 text-sm leading-relaxed text-muted">{g.desc}</p>
                 <dl className="mt-6 grid grid-cols-2 gap-3 border-t border-line pt-4 text-sm">

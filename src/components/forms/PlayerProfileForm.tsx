@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState } from "react";
+import { startTransition, useActionState, useState } from "react";
 import { savePlayerProfileAction } from "@/lib/actions/auth";
 import { PLAYTIME_OPTIONS, PLAYER_TYPES, INTEREST_OPTIONS, ENABLED_GAMES, LEGION_GAMES, playedGamesOf } from "@/lib/constants";
 import { useFormDraft } from "@/lib/formDraft";
@@ -34,25 +34,23 @@ const LEGION_NAMES = LEGION_GAMES.map((g) => g.name);
 /**
  * The player profile: the games they play (tags), other games (free text), and how they play.
  * mode "apply" adds the legion game's questions and submits it as the Vstroz Legion application.
- * mode "profile" just saves; `legionDetails` shows the legion game's questions for members who applied or are in.
+ * mode "profile" just saves; the legion game's questions appear (all optional) only while that game is ticked.
  */
 export function PlayerProfileForm({
   initial,
   mode,
   submitLabel,
-  legionDetails = false,
 }: {
   initial: PlayerProfileInitial;
   mode: "apply" | "profile";
   submitLabel?: string;
-  legionDetails?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(savePlayerProfileAction, undefined);
-  const [formRef, draft] = useFormDraft(`player-${mode}`, state);
+  // Both pages edit the same record, so saving either one drops the other's draft too.
+  const [formRef, draft] = useFormDraft(`player-${mode}`, state, { alsoClear: ["player-apply", "player-profile"] });
   const err = state && !state.ok ? state.errors : undefined;
   const echoed = state && !state.ok ? state.values : undefined;
   const apply = mode === "apply";
-  const showLegion = apply || legionDetails;
 
   // Values to show: what the server echoed back after a validation error, else what is stored.
   const str = (k: string) => (echoed && typeof echoed[k] === "string" ? (echoed[k] as string) : undefined);
@@ -85,6 +83,9 @@ export function PlayerProfileForm({
         .filter(Boolean),
   );
   const playerType = str("playerType") ?? initial.playerType;
+  // The legion block follows the legion game's checkbox: ticking it shows the character questions, unticking hides them.
+  const [playsLegion, setPlaysLegion] = useState(() => LEGION_NAMES.some((n) => played.has(n)));
+  const showLegion = apply || playsLegion;
 
   return (
     <form
@@ -111,14 +112,30 @@ export function PlayerProfileForm({
           <legend className="-mt-3 mb-3 text-sm text-muted">Tick every one you play. They show as tags on your profile.</legend>
           <div className="grid gap-2 sm:grid-cols-2">
             {ENABLED_GAMES.map((g) => {
-              // The legion's game is part of the application, so it is always on for applicants and legion members.
-              const locked = showLegion && LEGION_NAMES.includes(g.name);
+              // The legion's game is part of the application, so it is locked on while applying. On the profile it is a free choice.
+              const isLegionGame = LEGION_NAMES.includes(g.name);
+              const locked = apply && isLegionGame;
               return (
                 <label
                   key={g.name}
                   className={`flex items-center gap-3 border border-line-strong bg-bg-2 px-3 py-2.5 has-[:checked]:border-accent has-[:checked]:bg-accent/10 ${locked ? "" : "cursor-pointer"}`}
                 >
-                  <input type="checkbox" name="playedGames" value={g.name} defaultChecked={locked || played.has(g.name)} disabled={locked} className="accent-[#9b4dff]" />
+                  <input
+                    type="checkbox"
+                    name="playedGames"
+                    value={g.name}
+                    defaultChecked={locked || played.has(g.name)}
+                    disabled={locked}
+                    onChange={
+                      isLegionGame
+                        ? (e) => {
+                            const form = e.currentTarget.form;
+                            setPlaysLegion(LEGION_NAMES.some((n) => !!form?.querySelector<HTMLInputElement>(`input[name="playedGames"][value="${n}"]`)?.checked));
+                          }
+                        : undefined
+                    }
+                    className="accent-[#9b4dff]"
+                  />
                   <GameIcon game={g.name} />
                   <span className="text-sm">
                     {g.name}
@@ -138,11 +155,11 @@ export function PlayerProfileForm({
       {/* ---------- Legion game details ---------- */}
       {showLegion ? (
         <section className="space-y-5 border-t border-line pt-6">
-          <p className="eyebrow">{apply ? "Your legion application" : "Your legion details"}</p>
+          <p className="eyebrow">{apply ? "Your legion application" : `Your ${LEGION_NAMES.join(" / ")} character`}</p>
           <p className="-mt-3 text-sm text-muted">
             {apply
               ? `The Vstroz Legion plays ${LEGION_NAMES.join(" / ")}. These answers are what the officers review.`
-              : "Your in-game name and class show on your profile and the roster."}
+              : `Optional. Your ${LEGION_NAMES.join(" / ")} character name and class show on your profile and, in the legion, on the roster.`}
           </p>
           <GameQuestions errors={err} games={LEGION_NAMES} initialGame={str("game") ?? initial.game ?? undefined} initialAnswers={answers} optional={!apply} />
         </section>
@@ -232,6 +249,7 @@ export function PlayerProfileForm({
               type="checkbox"
               name="inGameLegion"
               value="yes"
+              data-draft-skip
               defaultChecked={str("inGameLegion") === "yes" || answers.inGameLegion === "Yes"}
               className="mt-0.5 accent-[#9b4dff]"
               aria-invalid={!!err?.inGameLegion}

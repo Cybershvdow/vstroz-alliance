@@ -120,7 +120,7 @@ export function VoteCard({
       )}
       {open && self && <p className="mt-4 text-xs text-muted">You cannot vote on your own nomination.</p>}
       {open && !self && !canVote && (
-        <p className="mt-4 text-xs text-muted">Only {TIER_LABEL[nom.tier as Tier]}s and above, plus officers, vote on this rank.</p>
+        <p className="mt-4 text-xs text-muted">Voting is open to alliance members in good standing.</p>
       )}
 
       {officerControls && nom.status === "OPEN" && (

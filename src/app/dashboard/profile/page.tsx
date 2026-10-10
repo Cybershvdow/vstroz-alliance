@@ -40,7 +40,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       />
       {welcome && (
         <>
-          <ClearDraft names={["register"]} />
+          <ClearDraft names={["register"]} scope="anon" />
           <div className="panel mb-6 flex flex-col gap-3 border-accent/50 p-4 text-sm md:flex-row md:items-center md:justify-between">
             <p>
               <span className="font-semibold">Welcome to the alliance, {me.displayName}.</span> Tick the games you play and they show as tags on your profile. Play{" "}
@@ -154,7 +154,6 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         <p className="mb-6 text-sm text-muted">The games you tick show as tags on your public profile. Officers use the rest to get to know you and build rosters.</p>
         <PlayerProfileForm
           mode="profile"
-          legionDetails={inLegion || !!me.appliedAt}
           initial={{
             game: me.game,
             gameAnswers: me.gameAnswers,

@@ -66,24 +66,24 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
         ))}
       </div>
 
-      <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {legion.map((m) => {
           const tags = playedGamesOf(m);
           return (
             <Link
               key={m.id}
               href={`/members/${encodeURIComponent(m.username)}`}
-              className={`panel cut flex items-center gap-4 p-4 transition hover:-translate-y-0.5 ${m.role === "LEADER" ? "border-gold/50" : m.role === "OFFICER" ? "border-accent/40" : ""}`}
+              className={`panel cut flex min-w-0 items-center gap-4 p-4 transition hover:-translate-y-0.5 ${m.role === "LEADER" ? "border-gold/50" : m.role === "OFFICER" ? "border-accent/40" : ""}`}
             >
               <Avatar name={m.displayName} tone={roleTone(m.role)} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <p className="display min-w-0 break-words text-xl">{m.displayName}</p>
+                  <p className="display min-w-0 text-xl [overflow-wrap:anywhere]">{m.displayName}</p>
                   {m.role !== "MEMBER" && <Badge tone={roleTone(m.role)}>{ROLE_LABEL[m.role as UserRole]}</Badge>}
                   {m.tier === "ELITE" && <Badge tone="gold">Elite</Badge>}
                   {m.tier === "VETERAN" && <Badge tone="accent">Veteran</Badge>}
                 </div>
-                <p className="truncate text-xs text-muted">{[m.gameClass, m.title].filter(Boolean).join(" · ") || "Legion member"}</p>
+                <p className="truncate text-xs text-muted">{[tags.includes(site.legionGame) ? m.gameClass : null, m.title].filter(Boolean).join(" · ") || "Legion member"}</p>
                 {tags.length > 0 && (
                   <div className="mt-1.5 flex flex-wrap gap-1">
                     {tags.map((t) => (
@@ -114,11 +114,11 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
             Alliance members <span className="text-muted">· {alliance.length}</span>
           </h2>
           <p className="mt-1 text-sm text-muted">In the alliance, not in the legion. Click a name to see their profile and content.</p>
-          <ul className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {alliance.map((c) => {
               const tags = playedGamesOf(c);
               return (
-                <li key={c.id}>
+                <li key={c.id} className="min-w-0">
                   <Link
                     href={`/members/${encodeURIComponent(c.username)}`}
                     className="cut-sm flex min-w-0 items-center gap-3 border border-line-strong bg-white/[0.02] px-3 py-2 text-sm transition hover:border-text"

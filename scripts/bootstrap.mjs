@@ -27,16 +27,53 @@ try {
   // Profile tags (2026-10-10): members now tick several listed games. Carry the old single game over once.
   const LISTED = ["Aion", "Apex Legends", "Enshrouded", "Project Zomboid", "Deadlock"];
   const LEGION = ["Aion"];
-  const legacy = await db.user.findMany({ where: { playedGames: null, game: { not: null } }, select: { id: true, game: true, games: true } });
-  for (const u of legacy) {
-    if (LISTED.includes(u.game)) {
-      await db.user.update({ where: { id: u.id }, data: { playedGames: JSON.stringify([u.game]), ...(LEGION.includes(u.game) ? {} : { game: null, gameAnswers: null }) } });
-    } else {
-      const other = [u.games, u.game].filter(Boolean).join(", ").slice(0, 300);
-      await db.user.update({ where: { id: u.id }, data: { playedGames: "[]", game: null, gameAnswers: null, games: other } });
+  const canonOf = (s) => LISTED.find((n) => n.toLowerCase() === String(s ?? "").trim().toLowerCase());
+  const confirmedInGame = (json) => {
+    try {
+      return JSON.parse(json ?? "null")?.inGameLegion === "Yes";
+    } catch {
+      return false;
     }
+  };
+  const legacy = await db.user.findMany({ where: { playedGames: null, game: { not: null } }, select: { id: true, game: true, games: true, gameAnswers: true } });
+  for (const u of legacy) {
+    const canon = canonOf(u.game);
+    const isLegionGame = !!canon && LEGION.includes(canon);
+    const confirmed = confirmedInGame(u.gameAnswers); // applied to the legion earlier, then switched their single game
+    const tags = new Set([...(canon ? [canon] : []), ...(confirmed ? [LEGION[0]] : [])]);
+    await db.user.update({
+      where: { id: u.id },
+      data: {
+        playedGames: JSON.stringify(LISTED.filter((n) => tags.has(n))),
+        game: isLegionGame ? canon : confirmed ? LEGION[0] : null,
+        ...(isLegionGame ? {} : { gameAnswers: confirmed ? '{"inGameLegion":"Yes"}' : null }),
+        ...(canon ? {} : { games: [u.games, u.game].filter(Boolean).join(", ").slice(0, 300) }),
+      },
+    });
   }
   if (legacy.length) console.log(`[bootstrap] moved ${legacy.length} profiles to game tags`);
+  // A listed game typed into "other games" becomes a tag (the profile form does the same on save).
+  const typed = await db.user.findMany({ where: { games: { not: null } }, select: { id: true, games: true, playedGames: true, game: true } });
+  let promoted = 0;
+  for (const u of typed) {
+    const parts = u.games.split(",").map((s) => s.trim()).filter(Boolean);
+    const hits = parts.map(canonOf).filter(Boolean);
+    if (!hits.length) continue;
+    let tags = [];
+    try {
+      tags = JSON.parse(u.playedGames ?? "[]");
+    } catch {
+      tags = [];
+    }
+    const set = new Set([...(Array.isArray(tags) ? tags : []), ...hits]);
+    if (u.playedGames == null && canonOf(u.game)) set.add(canonOf(u.game));
+    await db.user.update({
+      where: { id: u.id },
+      data: { playedGames: JSON.stringify(LISTED.filter((n) => set.has(n))), games: parts.filter((p) => !canonOf(p)).join(", ") || null },
+    });
+    promoted++;
+  }
+  if (promoted) console.log(`[bootstrap] turned typed listed games into tags on ${promoted} profiles`);
   // Command roster fix (2026-10-08): Nugget is Alliance Leader & Founder and does not play Aion. Matches only while the old title is present.
   const nugget = await db.user.updateMany({ where: { username: "nugget", title: "Discord Server Leader" }, data: { title: "Alliance Leader & Founder", game: null, gameClass: null } });
   if (nugget.count) console.log("[bootstrap] updated Nugget title");

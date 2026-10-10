@@ -48,7 +48,7 @@ export async function TeamsGrid() {
                     <span className="label">{g.badge}</span>
                   </div>
                   <GameIcon game={g.name} className="mt-6 h-10 w-10" />
-                  <h3 className="display mt-3 text-4xl">{g.name}</h3>
+                  <h3 className="display mt-3 text-3xl xl:text-4xl">{g.name}</h3>
                   <p className="mt-1 text-sm text-muted">{g.genre}</p>
                   <p className="mt-4 text-sm leading-relaxed text-muted">{g.desc}</p>
                   {active && c && (
@@ -90,7 +90,7 @@ export async function TeamsGrid() {
 const SOCIAL_LABEL: Record<string, string> = { youtube: "YouTube", twitch: "Twitch", tiktok: "TikTok", x: "X", instagram: "Instagram" };
 
 export async function CommunityTiles() {
-  const memberCount = await db.user.count({ where: { status: "APPROVED" } });
+  const memberCount = await db.user.count({ where: { discordLeftAt: null } });
   const socials = Object.entries(site.social).filter(([, url]) => url);
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
@@ -100,13 +100,13 @@ export async function CommunityTiles() {
           <div className="relative">
             <p className="eyebrow">Community</p>
             <h2 className="display mt-3 text-3xl md:text-4xl">The crew lives on Discord.</h2>
-            <p className="mt-3 max-w-lg text-sm text-muted md:text-base">{identity.audience} Events are called there, votes are announced there, and every applicant gets their intro there.</p>
+            <p className="mt-3 max-w-lg text-sm text-muted md:text-base">{identity.audience} Events are called there, votes are announced there, and every new member gets their intro there.</p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <a href={site.discordInvite} target="_blank" rel="noreferrer" className="cut-sm inline-flex items-center gap-2 bg-[#5865F2] px-6 py-3 font-display text-[0.8rem] font-bold uppercase tracking-[0.16em] text-white hover:brightness-110">
                 <DiscordIcon className="h-4 w-4" /> Join the Discord
               </a>
               <span className="text-sm text-muted">
-                <span className="display display-gold text-2xl">{memberCount}</span> approved members
+                <span className="display display-gold text-2xl">{memberCount}</span> alliance members
               </span>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { logoutAction } from "@/lib/actions/auth";
 import { ROLE_LABEL, type UserRole } from "@/lib/constants";
 import type { CurrentUser } from "@/lib/auth";
 import { PortalNav } from "./PortalNav";
+import { SignOutButton } from "./SignOutButton";
 
 export type NavItem = { href: string; label: string; badge?: number };
 
@@ -47,9 +48,10 @@ export function PortalShell({
               Site
             </Link>
             <form action={logoutAction} className="flex-1">
-              <button type="submit" className="cut-sm w-full border border-line-strong px-3 py-2 font-display text-xs font-bold uppercase tracking-[0.14em] text-muted hover:border-danger hover:text-danger">
-                Sign out
-              </button>
+              <SignOutButton
+                scope={user.username}
+                className="cut-sm w-full border border-line-strong px-3 py-2 font-display text-xs font-bold uppercase tracking-[0.14em] text-muted hover:border-danger hover:text-danger"
+              />
             </form>
           </div>
         </div>

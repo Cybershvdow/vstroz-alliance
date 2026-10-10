@@ -21,22 +21,30 @@ export default async function VotesPage() {
   ]);
 
   const myTier = meFull?.tier ?? "RECRUIT";
+  const inLegion = me.status === "APPROVED";
+  const declined = me.status === "DENIED";
 
   return (
     <>
       <PageHeader
         title="Rank votes"
-        text={`You are ${TIER_LABEL[myTier as Tier] ?? myTier}. Every alliance member votes on promotions into Veteran and Elite. Officers can veto or override.`}
+        text={
+          inLegion
+            ? `You are ${TIER_LABEL[myTier as Tier] ?? myTier}. Every alliance member votes on promotions into Veteran and Elite. Officers can veto or override.`
+            : declined
+              ? "Your legion application was declined, so you cannot vote on legion ranks right now."
+              : "You are an alliance member. Legion ranks start at Recruit once you join the Vstroz Legion. Every alliance member votes on promotions into Veteran and Elite; officers can veto or override."
+        }
       />
 
       <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {TIERS.map((t, i) => (
-          <div key={t} className={`panel p-4 ${t === myTier ? "border-gold/50" : ""}`}>
+          <div key={t} className={`panel p-4 ${inLegion && t === myTier ? "border-gold/50" : ""}`}>
             <div className="flex items-center justify-between">
               <span className="display text-xl">{TIER_LABEL[t]}</span>
               <span className="flex items-center gap-2">
                 {(VOTED_TIERS as readonly string[]).includes(t) && <Badge tone="gold">Voted</Badge>}
-                {t === myTier && <Badge tone="accent">You</Badge>}
+                {inLegion && t === myTier && <Badge tone="accent">You</Badge>}
               </span>
             </div>
             <p className="mt-2 text-xs text-muted">{TIER_BLURB[t]}</p>
@@ -53,7 +61,7 @@ export default async function VotesPage() {
       ) : (
         <div className="space-y-4">
           {open.map((n) => (
-            <VoteCard key={n.id} nom={n} viewer={me} canVote={!!meFull && canVoteOn(meFull, n.tier)} />
+            <VoteCard key={n.id} nom={n} viewer={me} canVote={!declined && !!meFull && canVoteOn(meFull, n.tier)} />
           ))}
         </div>
       )}

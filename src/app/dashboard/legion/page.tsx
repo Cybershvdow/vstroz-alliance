@@ -45,7 +45,7 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
   const text = inLegion
     ? "Match signups, guild roles, and the legion roster are open to you. Keep your player profile current so officers can build rosters."
     : denied
-      ? "An officer reviewed your application and did not approve it for the legion. You are still part of the Vstroz Alliance: Discord, media, votes, and The Round Table stay open to you."
+      ? "An officer reviewed your application and did not approve it for the legion. You are still part of the Vstroz Alliance: Discord, media, and The Round Table stay open to you."
       : applied
         ? "Your application is in the officer queue. Most reviews happen within 48 hours. You can update your answers below until it is reviewed."
         : `You are already in the alliance. The ${site.legionName} is our guild in ${site.legionGame}: join it in-game, fill in the application, and an officer reviews it within 48 hours. Don't play ${site.legionGame}? Skip this and just pick your games on your profile.`;
@@ -60,7 +60,7 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
 
       {submitted && (
         <>
-          <ClearDraft names={["player-apply"]} />
+          <ClearDraft names={["player-apply", "player-profile"]} scope={me.username} />
           <div className="panel mb-6 border-success/50 p-4 text-sm">
             <span className="font-semibold text-success">Application submitted.</span> An officer reviews it within 48 hours. Join the Discord so they can reach you.
           </div>

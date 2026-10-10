@@ -6,7 +6,7 @@ A production-grade website and members portal for the Vstroz Alliance, a multi-g
 - **Accounts**: anyone can create an account and is part of the community right away: portal, media, rank votes, The Round Table, and a public profile at `/members/<username>` with social links.
 - **Legion applications**: members fill in a player profile, confirm they joined the legion in-game, and apply from `/dashboard/legion`; officers approve or deny with a note. Approval unlocks match signups, guild roles, and the roster.
 - **Discord** (optional, see below): "Continue with Discord" creates accounts only for members of the alliance server, and a background sync removes people from the legion and hides their account when they leave the server.
-- **Member portal** (unlocked on approval): match signups, guild-role applications, announcements, profile.
+- **Member portal** (every account): profile and game tags, media, votes, The Round Table, announcements. Match signups and guild-role applications unlock in the Vstroz Legion.
 - **Command center** (officers/leader): applicant queue, member management, match creation and roster confirmation, guild roles, announcements.
 
 ## Stack
@@ -71,7 +71,7 @@ Roster, matches, roles, and announcements are managed from the Command Center at
 | Officer   | Everything above + approve/deny applicants, create matches, confirm rosters, manage roles and announcements, set member titles, remove members |
 | Leader    | Everything above + promote/demote officers                          |
 
-Pending and denied accounts can sign in but only see their application status.
+Accounts that are not in the legion still get the portal; legion-only pages send them to the legion application.
 
 ## Scripts
 
@@ -88,14 +88,12 @@ Pending and denied accounts can sign in but only see their application status.
 | `npm run lint`    | ESLint                                         |
 | `npm run logo`    | Rebuild logo exports in `public/brand/` and `src/app/icon.png` |
 
-## Application questions per game
+## Games and the legion application
 
-The application asks which game the person is applying for, then shows questions that fit that game type. Both live in `src/lib/constants.ts`:
+- `GAME_CATALOG` in `src/lib/constants.ts` lists the games (`genre`, `enabled`, and `legion: true` for the game the Vstroz Legion plays). Every enabled game is a tick box on the player profile and shows as a tag. To add a game: one line in `GAME_CATALOG`, one card in `games` (`src/lib/site.ts`), one icon in `LOOKS` (`src/components/site/GameTag.tsx`), and its name in `LISTED` in `scripts/bootstrap.mjs`.
+- Only the legion game has an application. Its question set comes from `GENRE_QUESTIONS` for that game's genre (MMO games with a `classes` list get a class dropdown). The questions are required when applying and optional when a member edits their profile.
 
-- `GAME_CATALOG` lists games with a genre (`MMO`, `FPS`, `MOBA`, `BATTLE_ROYALE`, `STRATEGY`, `OTHER`) and an `enabled` flag. Only enabled games appear in the form. Add a line to add a game.
-- `GENRE_QUESTIONS` holds the question set for each genre (role, rank, experience, hours per week, voice, previous teams, and so on). MMO games with a `classes` list get a class dropdown automatically.
-
-Answers are stored with the application and shown to officers in the Applicants queue and in the notification email.
+Answers are stored with the application and shown to officers in the Legion applications queue and in the notification email.
 
 ## The Round Table & Media
 
@@ -109,7 +107,7 @@ Answers are stored with the application and shown to officers in the Applicants 
 Members climb a four-step ladder: **Recruit → Member → Veteran → Elite**. Elite is the competitive roster.
 
 - Recruit → Member is an officer decision (Command Center → Ranks & votes).
-- Veteran and Elite are decided by vote. An officer opens a nomination with a written case; everyone at the target rank or above, plus officers and leaders, can vote Yes / No / Abstain. Nominees cannot vote on themselves.
+- Veteran and Elite are decided by vote. An officer opens a nomination with a written case; every alliance member can vote Yes / No / Abstain (not members whose legion application was declined). Nominees cannot vote on themselves.
 - Rules live in `src/lib/constants.ts` (`VOTE_RULES`): 72-hour window, quorum of 3 counted votes, two-thirds Yes to pass. Expired votes close automatically the next time anyone opens a votes page.
 - Leaders can close a vote early, veto it, or override a rank directly. Officers can close a vote once its window has ended, or withdraw it.
 
@@ -156,7 +154,7 @@ The official artwork is the raven crest in `public/brand/source-logo.webp`. `nod
 prisma/            schema + seed
 src/app/(site)     public pages (home, games, roster, schedule, recruit)
 src/app/(auth)     login, register
-src/app/dashboard  member portal (gated on approval)
+src/app/dashboard  member portal (every account; matches and roles need the legion)
 src/app/admin      command center (officers + leader)
 src/lib            db, auth, session, validation, server actions, site content
 src/components     brand (logo), ui primitives, site sections, forms, portal shell

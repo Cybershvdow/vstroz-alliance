@@ -99,7 +99,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
   const facts: [string, string][] = [
     ["Games", tags.length ? tags.join(", ") : "—"],
     ["In-game name", user.ign ?? "—"],
-    ["Class", user.gameClass ?? "—"],
+    ...(tags.includes(site.legionGame) && user.gameClass ? ([[`${site.legionGame} class`, user.gameClass]] as [string, string][]) : []),
     ["Player type", user.playerType ?? "—"],
     ["Gaming for", user.playtime ?? "—"],
     ["Other games", user.games ?? "—"],

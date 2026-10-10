@@ -20,7 +20,7 @@ import {
 } from "@/lib/validation";
 import { normalizeSocial, SOCIAL_PLATFORMS, type SocialKey } from "@/lib/social";
 import { discordConfigured } from "@/lib/discord";
-import { ENABLED_GAMES, LEGION_GAMES } from "@/lib/constants";
+import { ENABLED_GAMES, LEGION_GAMES, splitOtherGames } from "@/lib/constants";
 
 function clean(v: FormDataEntryValue | null) {
   return typeof v === "string" ? v : "";
@@ -102,8 +102,10 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
   });
   if (!parsed.success) return { ok: false, errors: flattenErrors(parsed.error), values: echo(), message: "Fix the highlighted fields." };
   const d = parsed.data;
-  // The legion block (and its `game` field) is only on the form when applying, or when a legion member edits their profile.
-  const legionGame = d.game || (intent === "apply" ? (LEGION_GAMES[0]?.name ?? "") : "");
+  // Applying always concerns the legion's game. On the profile page the legion block is only shown, and only counts,
+  // when the member ticked that game themselves, so nobody gets a game forced onto their profile.
+  const legionGame =
+    intent === "apply" ? d.game || (LEGION_GAMES[0]?.name ?? "") : d.game && d.playedGames.includes(d.game) ? d.game : "";
   const gameCheck = legionGame
     ? validateGameAnswers(legionGame, formData, intent === "apply")
     : { answers: {} as Record<string, string>, errors: {} as FieldErrors };
@@ -114,15 +116,17 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
   }
   if (Object.keys(errors).length) return { ok: false, errors, values: echo(), message: "Fix the highlighted fields." };
 
-  // Profile tags: the listed games they ticked, plus the legion's game whenever the legion block was part of the form.
-  const picked = new Set(d.playedGames);
+  // Profile tags: the listed games they ticked, the legion's game when applying, and any listed game they typed under "other games".
+  const other = splitOtherGames(d.games ?? "");
+  const picked = new Set([...d.playedGames, ...other.tags]);
   if (legionGame) picked.add(legionGame);
   const played = ENABLED_GAMES.map((g) => g.name).filter((n) => picked.has(n));
 
   // The in-game confirmation travels with the answers so officers (and later saves) keep it.
   let previous: Record<string, string> = {};
   try {
-    previous = me.gameAnswers ? JSON.parse(me.gameAnswers) : {};
+    const parsed: unknown = me.gameAnswers ? JSON.parse(me.gameAnswers) : {};
+    previous = parsed && typeof parsed === "object" ? (parsed as Record<string, string>) : {};
   } catch {
     previous = {};
   }
@@ -130,20 +134,27 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
     ...gameCheck.answers,
     ...(intent === "apply" || previous.inGameLegion === "Yes" ? { inGameLegion: "Yes" } : {}),
   };
+  // Without the legion block only the plain in-game name is on the form; keep any stored answers in step with it.
+  const plainIgn = (d.ign ?? "").trim() || null;
+  const syncedAnswers = () => {
+    const next = { ...previous };
+    if (plainIgn) next.ign = plainIgn;
+    else delete next.ign;
+    return JSON.stringify(next);
+  };
   await db.user.update({
     where: { id: me.id },
     data: {
       playedGames: JSON.stringify(played),
-      // Legion answers only change when the legion block was on the form; otherwise just the plain in-game name.
       ...(legionGame
         ? { game: legionGame, gameAnswers: JSON.stringify(answers), ign: answers.ign || null, gameClass: answers.mainClass || null }
         : formData.has("ign")
-          ? { ign: (d.ign ?? "").trim() || null }
+          ? { ign: plainIgn, ...(me.gameAnswers ? { gameAnswers: syncedAnswers() } : {}) }
           : {}),
       playtime: d.playtime,
       playerType: d.playerType,
       interests: d.interests.join(", "),
-      games: d.games || null,
+      games: other.rest || null,
       applicationNote: d.applicationNote || null,
     },
   });

@@ -99,10 +99,10 @@ export const TIER_LABEL: Record<Tier, string> = {
 };
 
 export const TIER_BLURB: Record<Tier, string> = {
-  RECRUIT: "New to the alliance. Proving reliability and attitude.",
+  RECRUIT: "New to the legion. Proving reliability and attitude.",
   MEMBER: "Trusted regular. Promoted by an officer after showing up consistently.",
-  VETERAN: "Backbone of the alliance. Voted in by Veterans, Elites, and officers.",
-  ELITE: "The competitive roster. Voted in by the Elite and officers. Plays the professional matches.",
+  VETERAN: "Backbone of the legion. Voted in by the alliance; officers can veto.",
+  ELITE: "The competitive roster. Voted in by the alliance; officers can veto. Plays the professional matches.",
 };
 
 /** Tiers that require a member vote instead of an officer decision. */
@@ -235,6 +235,18 @@ export const GENRE_QUESTIONS: Record<Genre, Question[]> = {
     { key: "hoursPerWeek", label: "Hours per week you can play", type: "select", options: HOURS, required: true },
   ],
 };
+
+/** Split the free-text "other games" box: names that match a listed game become tags, the rest stays as text. */
+export function splitOtherGames(text: string): { tags: string[]; rest: string } {
+  const tags: string[] = [];
+  const rest: string[] = [];
+  for (const part of text.split(",").map((s) => s.trim()).filter(Boolean)) {
+    const hit = ENABLED_GAMES.find((g) => g.name.toLowerCase() === part.toLowerCase());
+    if (hit) tags.push(hit.name);
+    else rest.push(part);
+  }
+  return { tags, rest: rest.join(", ") };
+}
 
 /** Questions for a specific game, with the class list injected for MMO/MOBA. */
 export function questionsFor(gameName: string): Question[] {

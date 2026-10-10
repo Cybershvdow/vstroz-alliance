@@ -55,7 +55,7 @@ export const pillars = [
   {
     icon: "▲",
     title: "Elite, earned",
-    text: "Competitive spots are voted on by the players already holding them. You do not buy in. You get voted in.",
+    text: "Competitive spots are voted on by the alliance. You do not buy in. You get voted in.",
   },
   {
     icon: "∞",
@@ -173,7 +173,7 @@ export const membershipPath = [
   { n: "02", title: "Apply", text: "Play Aion? Join the Vstroz Legion in-game, then apply from your account. An officer replies within 48 hours. Every other game needs no application." },
   { n: "03", title: "Recruit", text: "Approved. You are in the legion: match signups, guild roles, and a place on the roster." },
   { n: "04", title: "Member", text: "Show up consistently and an officer promotes you. Members hold roles that keep the alliance running." },
-  { n: "05", title: "Veteran & Elite", text: "Voted in by the players already at that rank. Elite is the competitive roster. Everything competitive is tried out for." },
+  { n: "05", title: "Veteran & Elite", text: "Voted in by the alliance; officers can veto. Elite is the competitive roster. Everything competitive is tried out for." },
 ];
 
 /* Rules & The Round Table */
@@ -203,7 +203,7 @@ export const rules = {
       title: "Ranks",
       items: [
         "Recruit → Member is decided by officers after consistent attendance and attitude.",
-        "Veteran and Elite are decided by vote of the players already at that rank, plus officers and leaders.",
+        "Veteran and Elite are decided by a vote of the alliance. Officers and leaders can veto or override.",
         "Elite is the competitive roster. Every competitive spot is tried out for and can be lost.",
         "Members hold individual roles they must keep up to remain part of the crew.",
       ],

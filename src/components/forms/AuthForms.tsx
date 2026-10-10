@@ -75,6 +75,7 @@ export function RegisterForm() {
           <input
             id="ageConfirm"
             type="checkbox"
+            data-draft-skip
             name="ageConfirm"
             value="yes"
             className="mt-0.5 accent-[#9b4dff]"

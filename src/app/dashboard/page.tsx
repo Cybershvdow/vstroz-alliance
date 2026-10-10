@@ -42,7 +42,7 @@ export default async function DashboardPage() {
               </h2>
               <p className="mt-2 max-w-xl text-sm text-muted">
                 {me.status === "DENIED"
-                  ? "You are still part of the alliance: post content, bring disputes, vote, and keep your profile."
+                  ? "You are still part of the alliance: post content, bring disputes, and keep your profile."
                   : me.appliedAt
                     ? "An officer reviews it within 48 hours. Match signups, roles, and the roster unlock when you are approved."
                     : "Fill in your player profile (game, in-game name, how you play) and apply. Officers review within 48 hours."}
@@ -56,14 +56,23 @@ export default async function DashboardPage() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Upcoming matches" value={upcoming.length} />
-        <Stat label="My signups" value={mySignups.length} tone="accent" />
+        {inLegion ? (
+          <>
+            <Stat label="Upcoming matches" value={upcoming.length} />
+            <Stat label="My signups" value={mySignups.length} tone="accent" />
+          </>
+        ) : (
+          <>
+            <Stat label="Games you play" value={playedGamesOf(me).length} tone="accent" />
+            <Stat label={site.legionName} value={me.status === "DENIED" ? "Declined" : me.appliedAt ? "In review" : "Not applied"} />
+          </>
+        )}
         <Stat label="Alliance members" value={memberCount} tone="gold" />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
-          {next && (
+          {next && inLegion && (
             <Card accent>
               <div className="flex items-center justify-between">
                 <p className="eyebrow">Next match</p>
