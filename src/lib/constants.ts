@@ -40,7 +40,7 @@ export const GAME_CLASSES = [
   "Undecided",
 ] as const;
 
-export const GAMES = ["Aion", "All Games", "Side Game"] as const;
+export const GAMES = ["Aion", "Apex Legends", "All Games", "Side Game"] as const;
 
 /** Legion status labels (User.status). An account is always a community member; APPROVED means in the legion. */
 export const STATUS_LABEL: Record<string, string> = { PENDING: "Pending", APPROVED: "In the legion", DENIED: "Declined" };
@@ -136,18 +136,23 @@ export type GameEntry = {
   name: string;
   genre: Genre;
   enabled: boolean;
+  /** The alliance runs an in-game legion/guild for this game (members apply to it). */
+  legion?: boolean;
   /** Optional class/character list for MMO/MOBA games. */
   classes?: readonly string[];
 };
 
 /** Add a game here and it appears in the application form with the right question set. */
 export const GAME_CATALOG: readonly GameEntry[] = [
-  { name: "Aion", genre: "MMO", enabled: true, classes: GAME_CLASSES },
+  { name: "Aion", genre: "MMO", enabled: true, legion: true, classes: GAME_CLASSES },
+  { name: "Apex Legends", genre: "BATTLE_ROYALE", enabled: true },
   // { name: "Valorant", genre: "FPS", enabled: false },
   // { name: "League of Legends", genre: "MOBA", enabled: false },
 ];
 
 export const ENABLED_GAMES = GAME_CATALOG.filter((g) => g.enabled);
+/** Games you can apply to a legion for (today: Aion). */
+export const LEGION_GAMES = GAME_CATALOG.filter((g) => g.enabled && g.legion);
 
 export type Question = {
   key: string;

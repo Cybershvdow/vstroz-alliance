@@ -94,7 +94,7 @@ export async function Hero() {
         <div className="mx-auto grid max-w-7xl grid-cols-2 divide-line md:grid-cols-4 md:divide-x">
           {[
             ["Legion members", `${memberCount}`],
-            ["Playing now", "Aion"],
+            ["Playing now", games.filter((g) => g.status === "active").map((g) => g.short ?? g.name).join(" + ")],
             ["Matches won", `${wins}`],
             ["Recruiting", "Open"],
           ].map(([label, value]) => (
@@ -184,14 +184,12 @@ export function GamesGrid({ full = false }: { full?: boolean }) {
                 <p className="mt-1 text-sm text-muted">{g.genre}</p>
                 <p className="mt-5 text-sm leading-relaxed text-muted">{g.desc}</p>
                 <dl className="mt-6 grid grid-cols-2 gap-3 border-t border-line pt-4 text-sm">
-                  <div>
-                    <dt className="label">Faction</dt>
-                    <dd className="mt-1">{g.faction}</dd>
-                  </div>
-                  <div>
-                    <dt className="label">Server</dt>
-                    <dd className="mt-1">{g.server}</dd>
-                  </div>
+                  {g.facts.map(([k, v]) => (
+                    <div key={k}>
+                      <dt className="label">{k}</dt>
+                      <dd className="mt-1">{v}</dd>
+                    </div>
+                  ))}
                 </dl>
                 <ul className="mt-5 flex flex-wrap gap-2">
                   {g.focus.map((f) => (

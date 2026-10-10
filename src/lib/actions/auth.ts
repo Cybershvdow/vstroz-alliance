@@ -20,7 +20,7 @@ import {
 } from "@/lib/validation";
 import { normalizeSocial, SOCIAL_PLATFORMS, type SocialKey } from "@/lib/social";
 import { discordConfigured } from "@/lib/discord";
-import { ENABLED_GAMES, OTHER_GAME } from "@/lib/constants";
+import { LEGION_GAMES, OTHER_GAME } from "@/lib/constants";
 
 function clean(v: FormDataEntryValue | null) {
   return typeof v === "string" ? v : "";
@@ -107,8 +107,8 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
   const gameCheck = d.game ? validateGameAnswers(d.game, formData) : { answers: {} as Record<string, string>, errors: {} as FieldErrors };
   const errors: FieldErrors = { ...gameCheck.errors };
   if (isOther && gameName.length < 2) errors.gameOther = ["Type the game you play"];
-  if (intent === "apply" && !ENABLED_GAMES.some((e) => e.name === d.game)) {
-    errors.game = [`The legion plays ${ENABLED_GAMES[0]?.name ?? "the listed game"}. Pick it to apply; other games stay on your profile.`];
+  if (intent === "apply" && !LEGION_GAMES.some((e) => e.name === d.game)) {
+    errors.game = [`The legion plays ${LEGION_GAMES.map((g) => g.name).join(" / ") || "the listed game"}. Pick it to apply; other games stay on your profile.`];
   }
   if (intent === "apply" && clean(formData.get("inGameLegion")) !== "yes") {
     errors.inGameLegion = ["Join the Vstroz Alliance legion in-game first, then confirm it here"];

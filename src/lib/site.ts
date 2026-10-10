@@ -68,24 +68,43 @@ export type GameStatus = "active" | "voting" | "upcoming";
 export const games: {
   slug: string;
   name: string;
+  /** Short label for stats and tags. */
+  short?: string;
   status: GameStatus;
   badge: string;
   genre: string;
-  faction: string;
-  server: string;
+  /** Two quick facts shown on the card. */
+  facts: [string, string][];
   desc: string;
   focus: string[];
 }[] = [
   {
     slug: "aion",
     name: "Aion",
+    short: "Aion",
     status: "active",
-    badge: "First Title",
+    badge: "First Title · Legion",
     genre: "MMORPG · NCSOFT",
-    faction: "Decided at launch",
-    server: "Decided at launch",
+    facts: [
+      ["Faction", "Decided at launch"],
+      ["Server", "Decided at launch"],
+    ],
     desc: "The first game the alliance officially builds a guild website for. Legion structure, siege rosters, dungeon groups, and class leads. Details lock in as the game rolls out.",
     focus: ["Fortress Sieges", "Abyss PvP", "Endgame Dungeons", "Legion Progression"],
+  },
+  {
+    slug: "apex-legends",
+    name: "Apex Legends",
+    short: "Apex",
+    status: "active",
+    badge: "Community Game",
+    genre: "Battle royale · EA",
+    facts: [
+      ["Squads", "Ranked & pubs"],
+      ["Platform", "Crossplay"],
+    ],
+    desc: "A lot of the community drops in Apex. Squad up from the Discord, post your clips, and build the Apex side of the alliance. A division with its own roster opens when the numbers are there.",
+    focus: ["Ranked Squads", "Mixtape Nights", "Clips & Highlights", "Scrims later"],
   },
 ];
 

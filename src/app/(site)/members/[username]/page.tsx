@@ -108,6 +108,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
                 {inLegion && user.role !== "MEMBER" && <Badge tone={roleTone(user.role)}>{ROLE_LABEL[user.role as UserRole]}</Badge>}
                 {inLegion && <Badge tone={user.tier === "ELITE" ? "gold" : user.tier === "VETERAN" ? "accent" : "neutral"}>{TIER_LABEL[user.tier as Tier] ?? user.tier}</Badge>}
                 <Badge tone={inLegion ? "success" : "neutral"}>{inLegion ? "Legion" : "Community"}</Badge>
+                {user.game && <Badge tone="accent">{user.game}</Badge>}
               </div>
             </div>
           </div>

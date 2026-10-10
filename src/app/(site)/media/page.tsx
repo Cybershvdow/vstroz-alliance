@@ -20,7 +20,7 @@ export default async function MediaPage() {
   const posts = await db.mediaPost.findMany({
     where: { approved: true, OR: [{ official: true }, { postedBy: { discordLeftAt: null } }] },
     orderBy: { createdAt: "desc" },
-    include: { postedBy: { select: { id: true, username: true, displayName: true, role: true } } },
+    include: { postedBy: { select: { id: true, username: true, displayName: true, role: true, game: true } } },
   });
 
   const official = posts.filter((p) => p.official);
@@ -101,7 +101,7 @@ export default async function MediaPage() {
               kind="member"
               href={`/members/${encodeURIComponent(user.username)}`}
               name={user.displayName}
-              subtitle={`@${user.username}${user.role !== "MEMBER" ? ` · ${ROLE_LABEL[user.role as UserRole]}` : ""}`}
+              subtitle={[user.game, `@${user.username}`, user.role !== "MEMBER" ? ROLE_LABEL[user.role as UserRole] : null].filter(Boolean).join(" · ")}
               count={theirs.length}
               thumb={firstThumb(theirs)}
               role={user.role}
