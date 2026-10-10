@@ -2,7 +2,7 @@
 
 import { startTransition, useActionState } from "react";
 import { savePlayerProfileAction } from "@/lib/actions/auth";
-import { PLAYTIME_OPTIONS, PLAYER_TYPES, INTEREST_OPTIONS } from "@/lib/constants";
+import { PLAYTIME_OPTIONS, PLAYER_TYPES, INTEREST_OPTIONS, ENABLED_GAMES, OTHER_GAME } from "@/lib/constants";
 import { GameQuestions } from "./GameQuestions";
 import { Button, Field, FormMessage } from "@/components/ui";
 
@@ -64,7 +64,10 @@ export function PlayerProfileForm({
         )
       : {}),
   };
-  const game = str("game") ?? initial.game ?? undefined;
+  // A stored game that is not on the list shows as "Another game" with its name in the text box.
+  const storedListed = !!initial.game && ENABLED_GAMES.some((e) => e.name === initial.game);
+  const game = str("game") ?? (storedListed ? (initial.game as string) : initial.game ? OTHER_GAME : undefined);
+  const gameOther = str("gameOther") ?? (storedListed ? "" : (initial.game ?? ""));
   const chosenInterests = new Set(
     echoed
       ? Array.isArray(echoed.interests)
@@ -101,7 +104,7 @@ export function PlayerProfileForm({
         <p className="-mt-3 text-sm text-muted">
           {apply ? "Pick the game you are applying with. The questions change to fit that game." : "Pick the game you play. The questions change to fit that game."}
         </p>
-        <GameQuestions errors={err} initialGame={game} initialAnswers={answers} allowNone={!apply} />
+        <GameQuestions errors={err} initialGame={game} initialOther={gameOther} initialAnswers={answers} allowNone={!apply} allowOther={!apply} />
       </section>
 
       {/* ---------- How you play ---------- */}

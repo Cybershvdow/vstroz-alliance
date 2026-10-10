@@ -27,7 +27,7 @@ export default async function DashboardPage() {
     <>
       <PageHeader
         title={<>Welcome back, <span className="text-accent">{me.displayName}</span></>}
-        text={[me.playerType, me.gameClass ? `Aion · ${me.gameClass}` : null, `With the alliance since ${formatDate(me.createdAt)}`].filter(Boolean).join(" · ")}
+        text={[me.playerType, me.game ? [me.game, me.gameClass].filter(Boolean).join(" · ") : null, `With the alliance since ${formatDate(me.createdAt)}`].filter(Boolean).join(" · ")}
         actions={inLegion ? <ButtonLink href="/dashboard/matches">Match signups</ButtonLink> : <ButtonLink href="/dashboard/legion">{me.appliedAt ? "Your legion application" : "Join the legion"}</ButtonLink>}
       />
 

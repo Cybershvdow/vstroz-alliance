@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MATCH_TYPE, POSITION, PLAYTIME_OPTIONS, PLAYER_TYPES, INTEREST_OPTIONS, ENABLED_GAMES, questionsFor } from "@/lib/constants";
+import { MATCH_TYPE, POSITION, PLAYTIME_OPTIONS, PLAYER_TYPES, INTEREST_OPTIONS, ENABLED_GAMES, OTHER_GAME, questionsFor } from "@/lib/constants";
 
 export const usernameSchema = z
   .string()
@@ -29,7 +29,8 @@ export const playerProfileSchema = z.object({
   playerType: z.enum(PLAYER_TYPES, { message: "Pick the type of player you are" }),
   interests: z.array(z.enum(INTEREST_OPTIONS)).min(1, "Pick at least one thing you enjoy"),
   games: z.string().trim().max(300).optional().or(z.literal("")),
-  game: z.string().refine((g) => g === "" || ENABLED_GAMES.some((e) => e.name === g), "Pick a game"),
+  game: z.string().refine((g) => g === "" || g === OTHER_GAME || ENABLED_GAMES.some((e) => e.name === g), "Pick a game"),
+  gameOther: z.string().trim().max(60).optional().or(z.literal("")),
   applicationNote: z.string().trim().max(1000).optional().or(z.literal("")),
 });
 

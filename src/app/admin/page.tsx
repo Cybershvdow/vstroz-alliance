@@ -17,6 +17,13 @@ export default async function AdminOverview({ searchParams }: { searchParams: Pr
     : discordConfigured()
       ? "Members can sign in with Discord. Add DISCORD_BOT_TOKEN in Railway to enable automatic removal when someone leaves the server."
       : "Add DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_GUILD_ID and DISCORD_BOT_TOKEN in Railway to turn on Discord sign-in and membership sync.";
+  const gamesPlayed = await db.user.groupBy({
+    by: ["game"],
+    where: { game: { not: null }, discordLeftAt: null },
+    _count: { _all: true },
+    orderBy: { _count: { game: "desc" } },
+    take: 12,
+  });
   const discordMsg =
     discord === "synced" ? `Sync done: ${removed ?? 0} removed, ${restored ?? 0} restored.` : discord === "error" ? "Sync failed. Check the server logs." : discord === "off" ? "Discord sync is not configured." : undefined;
   const now = new Date();
@@ -55,6 +62,27 @@ export default async function AdminOverview({ searchParams }: { searchParams: Pr
             </form>
           )}
         </div>
+      </Card>
+
+      <Card className="mt-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="eyebrow">Games members play</p>
+            <p className="mt-1 text-sm text-muted">From every profile. When a game catches on, add it to the site (one line in src/lib/constants.ts and src/lib/site.ts).</p>
+          </div>
+        </div>
+        {gamesPlayed.length === 0 ? (
+          <p className="mt-4 text-sm text-muted">No games on profiles yet.</p>
+        ) : (
+          <ul className="mt-4 flex flex-wrap gap-2">
+            {gamesPlayed.map((g) => (
+              <li key={g.game ?? ""} className="cut-sm inline-flex items-center gap-2 border border-line-strong bg-white/[0.02] px-3 py-1.5 text-sm">
+                <span className="font-display font-bold uppercase tracking-wider">{g.game}</span>
+                <span className="text-muted">{g._count._all}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">

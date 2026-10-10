@@ -16,7 +16,7 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
 
   const members = await db.user.findMany({
     where: { status: "APPROVED", ...(filter ? { gameClass: filter } : {}) },
-    select: { id: true, username: true, displayName: true, ign: true, gameClass: true, role: true, tier: true, title: true, createdAt: true },
+    select: { id: true, username: true, displayName: true, ign: true, game: true, gameClass: true, role: true, tier: true, title: true, createdAt: true },
     orderBy: { createdAt: "asc" },
   });
   const TIER_ORDER: Record<string, number> = { ELITE: 0, VETERAN: 1, MEMBER: 2, RECRUIT: 3 };
@@ -68,7 +68,7 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
                 {m.tier === "VETERAN" && <Badge tone="accent">Veteran</Badge>}
               </div>
               <p className="truncate text-xs text-muted">
-                {m.gameClass ? `Aion · ${m.gameClass}` : "Alliance member"}
+                {m.game ? [m.game, m.gameClass].filter(Boolean).join(" · ") : "Alliance member"}
                 {m.title ? ` · ${m.title}` : ""}
               </p>
               <p className="text-[0.7rem] text-dim">

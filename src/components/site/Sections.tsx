@@ -264,7 +264,7 @@ export async function Leadership() {
   const leaders = await db.user.findMany({
     where: { status: "APPROVED", role: { in: ["LEADER", "OFFICER"] } },
     orderBy: [{ createdAt: "asc" }],
-    select: { id: true, displayName: true, role: true, title: true, gameClass: true, ign: true },
+    select: { id: true, displayName: true, role: true, title: true, gameClass: true, game: true, ign: true },
   });
   leaders.sort((a, b) => (a.role === "LEADER" ? -1 : b.role === "LEADER" ? 1 : 0));
 
@@ -289,7 +289,7 @@ export async function Leadership() {
                 {ROLE_LABEL[l.role as UserRole]}
               </Badge>
               {l.title && <p className="mt-3 text-sm text-text">{l.title}</p>}
-              {l.gameClass && <p className="mt-1 text-xs text-muted">Aion · {l.gameClass}</p>}
+              {(l.game || l.gameClass) && <p className="mt-1 text-xs text-muted">{[l.game, l.gameClass].filter(Boolean).join(" · ")}</p>}
             </div>
           ))}
         </div>

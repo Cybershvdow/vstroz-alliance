@@ -213,10 +213,13 @@ export const GENRE_QUESTIONS: Record<Genre, Question[]> = {
   ],
 };
 
-/** Questions for a specific game, with the class list injected for MMO/MOBA. */
+/** Select value meaning "a game that is not on the list; the member types its name". */
+export const OTHER_GAME = "__other";
+
+/** Questions for a specific game, with the class list injected for MMO/MOBA. Unlisted games get the generic set. */
 export function questionsFor(gameName: string): Question[] {
   const game = GAME_CATALOG.find((g) => g.name === gameName);
-  if (!game) return [];
+  if (!game) return gameName ? GENRE_QUESTIONS.OTHER : [];
   return GENRE_QUESTIONS[game.genre].flatMap((q) => {
     if (q.key === "mainClass") {
       if (!game.classes?.length) return [];

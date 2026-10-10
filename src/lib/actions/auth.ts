@@ -20,6 +20,7 @@ import {
 } from "@/lib/validation";
 import { normalizeSocial, SOCIAL_PLATFORMS, type SocialKey } from "@/lib/social";
 import { discordConfigured } from "@/lib/discord";
+import { ENABLED_GAMES, OTHER_GAME } from "@/lib/constants";
 
 function clean(v: FormDataEntryValue | null) {
   return typeof v === "string" ? v : "";
@@ -95,13 +96,20 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
     interests: formData.getAll("interests").filter((x): x is string => typeof x === "string"),
     games: clean(formData.get("games")),
     game: clean(formData.get("game")),
+    gameOther: clean(formData.get("gameOther")),
     applicationNote: clean(formData.get("applicationNote")),
   });
   if (!parsed.success) return { ok: false, errors: flattenErrors(parsed.error), values: echo(), message: "Fix the highlighted fields." };
   const d = parsed.data;
+  // "Another game": the member typed its name. The legion application still needs the legion's own game.
+  const isOther = d.game === OTHER_GAME;
+  const gameName = isOther ? (d.gameOther ?? "").trim() : d.game;
   const gameCheck = d.game ? validateGameAnswers(d.game, formData) : { answers: {} as Record<string, string>, errors: {} as FieldErrors };
   const errors: FieldErrors = { ...gameCheck.errors };
-  if (intent === "apply" && !d.game) errors.game = ["Pick the game you are applying with"];
+  if (isOther && gameName.length < 2) errors.gameOther = ["Type the game you play"];
+  if (intent === "apply" && !ENABLED_GAMES.some((e) => e.name === d.game)) {
+    errors.game = [`The legion plays ${ENABLED_GAMES[0]?.name ?? "the listed game"}. Pick it to apply; other games stay on your profile.`];
+  }
   if (intent === "apply" && clean(formData.get("inGameLegion")) !== "yes") {
     errors.inGameLegion = ["Join the Vstroz Alliance legion in-game first, then confirm it here"];
   }
@@ -121,10 +129,10 @@ export async function savePlayerProfileAction(_prev: ActionState, formData: Form
   await db.user.update({
     where: { id: me.id },
     data: {
-      game: d.game || null,
+      game: gameName || null,
       gameAnswers: JSON.stringify(answers),
       // Only touch the in-game name/class when a game was picked; "No listed game" keeps what is stored.
-      ...(d.game ? { ign: answers.ign || null, gameClass: answers.mainClass || null } : {}),
+      ...(d.game ? { ign: answers.ign || null, gameClass: isOther ? null : answers.mainClass || null } : {}),
       playtime: d.playtime,
       playerType: d.playerType,
       interests: d.interests.join(", "),
