@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { site, games, identity } from "@/lib/site";
 import { ENABLED_GAMES, ROLE_LABEL, TIER_LABEL, playedGamesOf, type UserRole } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { thumbnailFor, folderHref } from "@/lib/media";
 import { Avatar, Badge, ButtonLink, SectionHeading, roleTone } from "@/components/ui";
 import { ArrowIcon, DiscordIcon } from "./Icons";
@@ -188,7 +189,7 @@ export async function Command() {
   const leaders = await db.user.findMany({
     where: { status: "APPROVED", role: { in: ["LEADER", "OFFICER"] } },
     orderBy: [{ createdAt: "asc" }],
-    select: { id: true, displayName: true, role: true, title: true, tier: true, gameClass: true, game: true, playedGames: true },
+    select: { id: true, displayName: true, role: true, title: true, tier: true, gameClass: true, game: true, playedGames: true, avatarAt: true },
   });
   leaders.sort((a, b) => (a.role === "LEADER" ? -1 : b.role === "LEADER" ? 1 : 0));
 
@@ -207,7 +208,7 @@ export async function Command() {
               <div className="bg-glow-accent absolute inset-0 opacity-0 transition group-hover:opacity-60" />
               <div className="relative">
                 <div className="flex items-start justify-between">
-                  <Avatar name={l.displayName} size="lg" tone={roleTone(l.role)} />
+                  <Avatar name={l.displayName} size="lg" tone={roleTone(l.role)} src={avatarUrl(l)} />
                   <Badge tone={roleTone(l.role)}>{ROLE_LABEL[l.role as UserRole]}</Badge>
                 </div>
                 <h3 className="display mt-5 text-3xl">{l.displayName}</h3>

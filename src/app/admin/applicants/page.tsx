@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
 import { reviewApplicantAction } from "@/lib/actions/admin";
 import { formatDate } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, EmptyState, PageHeader, statusTone } from "@/components/ui";
 import { questionsFor, playedGamesOf, STATUS_LABEL } from "@/lib/constants";
 import { GameTag } from "@/components/site/GameTag";
@@ -66,7 +67,7 @@ export default async function ApplicantsPage() {
             <li key={u.id} className="panel panel-accent cut p-5 md:p-6">
               <div className="flex flex-col gap-5 md:flex-row">
                 <div className="flex flex-1 gap-4">
-                  <Avatar name={u.displayName} size="lg" />
+                  <Avatar name={u.displayName} size="lg" src={avatarUrl(u)} />
                   <div className="min-w-0">
                     <h2 className="display text-3xl">{u.displayName}</h2>
                     <p className="text-sm text-muted">

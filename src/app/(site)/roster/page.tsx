@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { site } from "@/lib/site";
 import { GAME_CLASSES, ROLE_LABEL, playedGamesOf, type UserRole } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, SectionHeading, roleTone } from "@/components/ui";
 import { GameTag } from "@/components/site/GameTag";
 
@@ -21,14 +22,14 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
   const [legion, legionTotal, counts, alliance, mediaCounts] = await Promise.all([
     db.user.findMany({
       where: { status: "APPROVED", ...(filter ? { gameClass: filter } : {}) },
-      select: { id: true, username: true, displayName: true, ign: true, game: true, playedGames: true, gameClass: true, role: true, tier: true, title: true, createdAt: true },
+      select: { id: true, username: true, displayName: true, ign: true, game: true, playedGames: true, gameClass: true, role: true, tier: true, title: true, createdAt: true, avatarAt: true },
       orderBy: { createdAt: "asc" },
     }),
     db.user.count({ where: { status: "APPROVED" } }),
     db.user.groupBy({ by: ["gameClass"], where: { status: "APPROVED" }, _count: { _all: true } }),
     db.user.findMany({
       where: { status: { not: "APPROVED" }, discordLeftAt: null },
-      select: { id: true, username: true, displayName: true, game: true, playedGames: true },
+      select: { id: true, username: true, displayName: true, game: true, playedGames: true, avatarAt: true },
       orderBy: { createdAt: "desc" },
     }),
     db.mediaPost.groupBy({ by: ["postedById"], where: { approved: true, official: false }, _count: { _all: true } }),
@@ -75,7 +76,7 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
               href={`/members/${encodeURIComponent(m.username)}`}
               className={`panel cut flex min-w-0 items-center gap-4 p-4 transition hover:-translate-y-0.5 ${m.role === "LEADER" ? "border-gold/50" : m.role === "OFFICER" ? "border-accent/40" : ""}`}
             >
-              <Avatar name={m.displayName} tone={roleTone(m.role)} />
+              <Avatar name={m.displayName} tone={roleTone(m.role)} src={avatarUrl(m)} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <p className="display min-w-0 text-xl [overflow-wrap:anywhere]">{m.displayName}</p>
@@ -123,7 +124,7 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
                     href={`/members/${encodeURIComponent(c.username)}`}
                     className="cut-sm flex min-w-0 items-center gap-3 border border-line-strong bg-white/[0.02] px-3 py-2 text-sm transition hover:border-text"
                   >
-                    <Avatar name={c.displayName} size="sm" />
+                    <Avatar name={c.displayName} size="sm" src={avatarUrl(c)} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-display font-bold uppercase tracking-wider">{c.displayName}</span>
                       {tags.length > 0 ? (

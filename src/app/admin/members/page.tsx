@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
 import { setMemberRoleAction, setMemberTitleAction, removeMemberAction } from "@/lib/actions/admin";
 import { formatDate } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, PageHeader, roleTone } from "@/components/ui";
 import { ROLE_LABEL, type UserRole } from "@/lib/constants";
 import { ConfirmSubmit } from "@/components/forms/SubmitButton";
@@ -25,7 +26,7 @@ export default async function MembersPage() {
           return (
             <li key={u.id} className="grid gap-4 px-4 py-4 lg:grid-cols-[1.4fr_1fr_auto] lg:items-center">
               <div className="flex items-center gap-3">
-                <Avatar name={u.displayName} tone={roleTone(u.role)} />
+                <Avatar name={u.displayName} tone={roleTone(u.role)} src={avatarUrl(u)} />
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="display text-xl">{u.displayName}</p>

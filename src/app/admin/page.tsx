@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
 import { formatDate, formatDateTime } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, ButtonLink, Card, EmptyState, PageHeader, Stat } from "@/components/ui";
 import { syncDiscordAction } from "@/lib/actions/discord";
 import { discordConfigured, discordSyncConfigured, lastDiscordSync } from "@/lib/discord";
@@ -116,7 +117,7 @@ export default async function AdminOverview({ searchParams }: { searchParams: Pr
             <ul className="mt-4 divide-y divide-line">
               {recentApplicants.map((u) => (
                 <li key={u.id} className="flex items-center gap-3 py-3">
-                  <Avatar name={u.displayName} size="sm" />
+                  <Avatar name={u.displayName} size="sm" src={avatarUrl(u)} />
                   <div className="min-w-0 flex-1">
                     <p className="display truncate text-lg">{u.displayName}</p>
                     <p className="text-xs text-muted">

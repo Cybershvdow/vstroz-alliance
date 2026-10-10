@@ -9,6 +9,8 @@ import { PlayerProfileForm } from "@/components/forms/PlayerProfileForm";
 import { DiscordButton } from "@/components/site/DiscordButton";
 import { ClearDraft } from "@/components/forms/DraftNotice";
 import { ApexAccountForm } from "@/components/forms/ApexAccountForm";
+import { AvatarForm } from "@/components/forms/AvatarForm";
+import { avatarUrl } from "@/lib/avatar";
 import { unlinkSteamAction } from "@/lib/actions/accounts";
 import { steamConfigured } from "@/lib/steam";
 import { apexConfigured } from "@/lib/apex";
@@ -57,6 +59,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           </div>
         </>
       )}
+      <Card className="mb-6">
+        <h2 className="display mb-1 text-2xl">Profile picture</h2>
+        <p className="mb-5 text-sm text-muted">Shown on your profile, the roster, and around the portal. You can change or remove it any time.</p>
+        <AvatarForm name={me.displayName} current={avatarUrl(me)} />
+      </Card>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <h2 className="display mb-5 text-2xl">Account & links</h2>

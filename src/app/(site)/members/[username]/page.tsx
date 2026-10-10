@@ -7,6 +7,7 @@ import { site } from "@/lib/site";
 import { formatDate } from "@/lib/format";
 import { ROLE_LABEL, TIER_LABEL, playedGamesOf, type Tier, type UserRole } from "@/lib/constants";
 import { folderHref } from "@/lib/media";
+import { avatarUrl } from "@/lib/avatar";
 import { SOCIAL_PLATFORMS, parseSocials } from "@/lib/social";
 import { Avatar, Badge, ButtonLink, roleTone } from "@/components/ui";
 import { ArrowIcon, DiscordIcon } from "@/components/site/Icons";
@@ -62,6 +63,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
         apexStatsAt: true,
         apexError: true,
         socials: true,
+        avatarAt: true,
         createdAt: true,
       },
     }),
@@ -113,7 +115,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
         </Link>
         <div className="mt-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
-            <Avatar name={user.displayName} size="lg" tone={roleTone(user.role)} />
+            <Avatar name={user.displayName} size="lg" tone={roleTone(user.role)} src={avatarUrl(user)} />
             <div className="min-w-0 flex-1">
               <p className="eyebrow">{inLegion ? `${site.legionName} · ${site.legionGame}` : "Alliance member"}</p>
               <h1 className="display mt-3 break-words text-3xl sm:text-4xl md:text-6xl">{user.displayName}</h1>

@@ -5,6 +5,7 @@ import { site } from "@/lib/site";
 import { ROLE_LABEL, playedGamesOf, type UserRole } from "@/lib/constants";
 import { embedSrc, folderHref, thumbnailFor } from "@/lib/media";
 import { formatDate } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { Badge, ButtonLink, SectionHeading } from "@/components/ui";
 import { FolderCard, firstThumb } from "@/components/site/MediaFolders";
 import { ArrowIcon } from "@/components/site/Icons";
@@ -20,7 +21,7 @@ export default async function MediaPage() {
   const posts = await db.mediaPost.findMany({
     where: { approved: true, OR: [{ official: true }, { postedBy: { discordLeftAt: null } }] },
     orderBy: { createdAt: "desc" },
-    include: { postedBy: { select: { id: true, username: true, displayName: true, role: true, game: true, playedGames: true } } },
+    include: { postedBy: { select: { id: true, username: true, displayName: true, role: true, game: true, playedGames: true, avatarAt: true } } },
   });
 
   const official = posts.filter((p) => p.official);
@@ -105,6 +106,7 @@ export default async function MediaPage() {
               count={theirs.length}
               thumb={firstThumb(theirs)}
               role={user.role}
+              avatar={avatarUrl(user)}
             />
           ))}
         </ul>

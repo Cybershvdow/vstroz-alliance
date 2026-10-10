@@ -30,6 +30,7 @@ model User {
   gameAnswers     String?   // JSON of genre-specific answers, keyed by question key
   appliedAt       DateTime? // when they first applied to the legion (status tracks that application)
   socials         String?   // JSON { youtube, twitch, tiktok, x, instagram } of normalized profile URLs
+  avatarAt        DateTime? // set when they upload a profile picture; also versions its URL
   discordId       String?   // Discord user id once they signed in / connected with Discord (uniqueness enforced in code; no unique index so db push never warns at boot)
   discordUsername String?
   discordLinkedAt DateTime?
@@ -62,6 +63,7 @@ model User {
   disputesAgainst  Dispute[]      @relation("DisputeAgainst")
   tryouts          TryoutRequest[]
   mediaPosts       MediaPost[]
+  avatar           Avatar?
   nominations      Nomination[] @relation("Nominee")
   nominationsMade  Nomination[] @relation("Nominator")
   votes            Vote[]
@@ -204,6 +206,15 @@ model TryoutRequest {
 }
 
 // Media hub: videos (YouTube / Twitch) posted by members, approved by officers.
+/// A member's profile picture, kept out of the User row so normal queries never load image bytes.
+model Avatar {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Bytes    // 256x256 WebP, re-encoded on the server
+  mime      String   @default("image/webp")
+  updatedAt DateTime @updatedAt
+}
+
 model MediaPost {
   id          String   @id @default(cuid())
   title       String

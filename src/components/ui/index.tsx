@@ -201,9 +201,14 @@ export function Stat({ label, value, tone = "text" }: { label: string; value: Re
   );
 }
 
-export function Avatar({ name, size = "md", tone = "neutral" }: { name: string; size?: "sm" | "md" | "lg"; tone?: Tone }) {
+/** A member's picture (pass `src` from avatarUrl), falling back to their initials. */
+export function Avatar({ name, size = "md", tone = "neutral", src }: { name: string; size?: "sm" | "md" | "lg"; tone?: Tone; src?: string | null }) {
   const sz = size === "sm" ? "h-8 w-8 text-xs" : size === "lg" ? "h-16 w-16 text-2xl" : "h-11 w-11 text-base";
   const ring = tone === "gold" ? "ring-gold" : tone === "accent" ? "ring-accent" : "ring-line-strong";
+  if (src) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt="" loading="lazy" className={`inline-block ${sz} shrink-0 rounded-full bg-bg-2 object-cover ring-1 ${ring}`} />;
+  }
   return (
     <span
       className={`inline-flex ${sz} shrink-0 items-center justify-center rounded-full bg-[radial-gradient(circle_at_30%_25%,#2a2440,#0f0e16)] font-display font-bold uppercase ring-1 ${ring}`}

@@ -5,6 +5,7 @@ import { logoutAction } from "@/lib/actions/auth";
 import { ROLE_LABEL, type UserRole } from "@/lib/constants";
 import type { CurrentUser } from "@/lib/auth";
 import { PortalNav } from "./PortalNav";
+import { avatarUrl } from "@/lib/avatar";
 import { SignOutButton } from "./SignOutButton";
 
 export type NavItem = { href: string; label: string; badge?: number };
@@ -34,7 +35,7 @@ export function PortalShell({
 
         <div className="mt-auto border-t border-line p-5">
           <div className="flex items-center gap-3">
-            <Avatar name={user.displayName} tone={roleTone(user.role)} />
+            <Avatar name={user.displayName} tone={roleTone(user.role)} src={avatarUrl(user)} />
             <div className="min-w-0">
               <p className="truncate font-display text-lg font-bold uppercase leading-tight">{user.displayName}</p>
               <div className="flex flex-wrap gap-1">

@@ -55,6 +55,7 @@ export function FolderCard({
   thumb,
   kind,
   role = "MEMBER",
+  avatar = null,
 }: {
   href: string;
   name: string;
@@ -63,6 +64,8 @@ export function FolderCard({
   thumb: string | null;
   kind: "alliance" | "member";
   role?: string;
+  /** The member's profile picture URL, when they have one. */
+  avatar?: string | null;
 }) {
   const alliance = kind === "alliance";
   return (
@@ -88,7 +91,7 @@ export function FolderCard({
                   <LogoMark className="h-24 w-24 drop-shadow-[0_0_24px_rgba(155,77,255,0.5)]" title="" />
                 </span>
               ) : (
-                <Avatar name={name} size="lg" tone={roleTone(role)} />
+                <Avatar name={name} size="lg" tone={roleTone(role)} src={avatar} />
               )}
             </span>
           )}
@@ -105,7 +108,7 @@ export function FolderCard({
               <LogoMark className="h-9 w-9" title="" />
             </span>
           ) : (
-            <Avatar name={name} size="sm" tone={roleTone(role)} />
+            <Avatar name={name} size="sm" tone={roleTone(role)} src={avatar} />
           )}
           <span className="min-w-0 flex-1">
             <span className="display block truncate text-xl">{name}</span>

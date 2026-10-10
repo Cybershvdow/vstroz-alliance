@@ -189,3 +189,7 @@ Members set these on `/dashboard/profile` ("Game accounts"). Stats are cached on
 - **Alliance vs legion**: an account makes someone an alliance member. The Vstroz Legion is the guild in the game flagged `legion: true` (Aion); its application is the only place the game-specific questions are required.
 - **Game icons** are original glyphs. To use official artwork, put a square image in `public/games/` and map it in `ART` inside `GameTag.tsx`.
 - **Saved drafts**: forms keep what was typed in the browser (`src/lib/formDraft.ts`), so a refresh or a validation error does not wipe it. Drafts are per form and per member, expire after 7 days, clear on a successful save, and never include passwords.
+
+## Profile pictures
+
+Members upload a picture from `/dashboard/profile`. The browser crops it to a square and shrinks it before sending (`src/components/forms/AvatarForm.tsx`); the server decodes it with `sharp` and stores a 256px WebP in the `Avatar` table (`saveAvatarAction` in `src/lib/actions/accounts.ts`), so only a real, re-encoded image is ever served. `GET /api/avatar/<userId>?v=<timestamp>` serves it; `avatarUrl()` in `src/lib/avatar.ts` builds the link and `<Avatar src>` shows it, falling back to initials.
