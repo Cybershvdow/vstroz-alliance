@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { closeExpiredNominations } from "@/lib/ranks";
-import { TIERS, TIER_LABEL, TIER_BLURB, VOTED_TIERS, VOTE_RULES, canVoteOn, type Tier } from "@/lib/constants";
+import { TIERS, TIER_LABEL, TIER_BLURB, VOTED_TIERS, VOTE_RULES, allianceRank, canVoteOn } from "@/lib/constants";
 import { Badge, EmptyState, PageHeader } from "@/components/ui";
 import { VoteCard } from "@/components/portal/VoteCard";
 
@@ -20,31 +20,33 @@ export default async function VotesPage() {
     db.nomination.findMany({ where: { status: { not: "OPEN" } }, orderBy: { decidedAt: "desc" }, take: 8, include }),
   ]);
 
-  const myTier = meFull?.tier ?? "RECRUIT";
-  const inLegion = me.status === "APPROVED";
-  const declined = me.status === "DENIED";
+  const mine = meFull ?? me;
+  const myTier = mine.tier;
+  const rank = allianceRank(mine);
+  // Captains and Generals sit above the ladder, so no tile is theirs.
+  const onLadder = mine.role === "MEMBER";
+  // Accounts that left the Discord are hidden and do not vote. The legion application has no say here.
+  const hidden = !!me.discordLeftAt;
 
   return (
     <>
       <PageHeader
         title="Rank votes"
         text={
-          inLegion
-            ? `You are ${TIER_LABEL[myTier as Tier] ?? myTier}. Every alliance member votes on promotions into Veteran and Elite. Officers can veto or override.`
-            : declined
-              ? "Your legion application was declined, so you cannot vote on legion ranks right now."
-              : "You are an alliance member. Legion ranks start at Recruit once you join the Vstroz Legion. Every alliance member votes on promotions into Veteran and Elite; officers can veto or override."
+          hidden
+            ? "Rejoin the Discord to vote on promotions."
+            : `Your rank is ${rank.label}. Every alliance member votes on promotions into Veteran and Elite. Officers can veto or override.`
         }
       />
 
       <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {TIERS.map((t, i) => (
-          <div key={t} className={`panel p-4 ${inLegion && t === myTier ? "border-gold/50" : ""}`}>
+          <div key={t} className={`panel p-4 ${onLadder && t === myTier ? "border-gold/50" : ""}`}>
             <div className="flex items-center justify-between">
               <span className="display text-xl">{TIER_LABEL[t]}</span>
               <span className="flex items-center gap-2">
                 {(VOTED_TIERS as readonly string[]).includes(t) && <Badge tone="gold">Voted</Badge>}
-                {inLegion && t === myTier && <Badge tone="accent">You</Badge>}
+                {onLadder && t === myTier && <Badge tone="accent">You</Badge>}
               </span>
             </div>
             <p className="mt-2 text-xs text-muted">{TIER_BLURB[t]}</p>
@@ -61,7 +63,7 @@ export default async function VotesPage() {
       ) : (
         <div className="space-y-4">
           {open.map((n) => (
-            <VoteCard key={n.id} nom={n} viewer={me} canVote={!declined && !!meFull && canVoteOn(meFull, n.tier)} />
+            <VoteCard key={n.id} nom={n} viewer={me} canVote={!hidden && !!meFull && canVoteOn(meFull, n.tier)} />
           ))}
         </div>
       )}

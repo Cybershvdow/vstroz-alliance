@@ -376,7 +376,7 @@ async function main() {
   await db.announcement.create({
     data: {
       title: "Welcome to the new members portal",
-      body: "You can now sign up for matches, apply for roles, and keep your profile current here. Officers review everything within 48 hours.",
+      body: "Everyone starts here as a Recruit. Show up and an officer promotes you to Member. Veteran and Elite are decided by an alliance vote. Play Aion? Apply to the Vstroz Legion from your account to unlock match signups and guild roles. Officers review applications within 48 hours.",
       authorId: officers[2].id,
     },
   });

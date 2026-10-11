@@ -5,11 +5,11 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { formatDate } from "@/lib/format";
-import { ROLE_LABEL, TIER_LABEL, playedGamesOf, type Tier, type UserRole } from "@/lib/constants";
+import { allianceRank, playedGamesOf } from "@/lib/constants";
 import { folderHref } from "@/lib/media";
 import { avatarUrl } from "@/lib/avatar";
 import { SOCIAL_PLATFORMS, parseSocials } from "@/lib/social";
-import { Avatar, Badge, ButtonLink, roleTone } from "@/components/ui";
+import { Avatar, Badge, ButtonLink } from "@/components/ui";
 import { ArrowIcon, DiscordIcon } from "@/components/site/Icons";
 import { MediaPlayer } from "@/components/site/MediaPlayer";
 import { toItems } from "@/components/site/MediaFolders";
@@ -87,6 +87,8 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
   // Live stats: refreshed on view when stale (Apex 15 min, Steam 30 min); failures fall back to the last snapshot.
   const [apex, steam] = await Promise.all([refreshApexStats(user), refreshSteamStats(user)]);
 
+  // The rank belongs to the alliance; the legion is a separate tag.
+  const rank = allianceRank(user);
   const inLegion = user.status === "APPROVED";
   const mine = !!me && me.id === user.id;
   const discordHandle = user.discordUsername ?? user.discord;
@@ -115,18 +117,17 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
         </Link>
         <div className="mt-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
-            <Avatar name={user.displayName} size="lg" tone={roleTone(user.role)} src={avatarUrl(user)} />
+            <Avatar name={user.displayName} size="lg" tone={rank.tone} src={avatarUrl(user)} />
             <div className="min-w-0 flex-1">
-              <p className="eyebrow">{inLegion ? `${site.legionName} · ${site.legionGame}` : "Alliance member"}</p>
+              <p className="eyebrow">{site.name}</p>
               <h1 className="display mt-3 break-words text-3xl sm:text-4xl md:text-6xl">{user.displayName}</h1>
               <p className="mt-2 break-words text-sm text-muted">
                 @{user.username}
                 {user.title ? ` · ${user.title}` : ""} · with the alliance since {formatDate(user.createdAt)}
               </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {inLegion && user.role !== "MEMBER" && <Badge tone={roleTone(user.role)}>{ROLE_LABEL[user.role as UserRole]}</Badge>}
-                {inLegion && <Badge tone={user.tier === "ELITE" ? "gold" : user.tier === "VETERAN" ? "accent" : "neutral"}>{TIER_LABEL[user.tier as Tier] ?? user.tier}</Badge>}
-                <Badge tone={inLegion ? "success" : "neutral"}>{inLegion ? "Legion" : "Alliance"}</Badge>
+                <Badge tone={rank.tone}>{rank.label}</Badge>
+                {inLegion && <Badge tone="success">{site.legionName}</Badge>}
                 {tags.map((t) => (
                   <GameTag key={t} game={t} />
                 ))}

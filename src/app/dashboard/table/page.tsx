@@ -56,12 +56,12 @@ export default async function TablePage() {
         <div className="space-y-6">
           <Card accent>
             <h2 className="display text-2xl">Competitive tryout</h2>
-            <p className="mb-4 mt-1 text-sm text-muted">Every competitive spot is tried out for. Pass the tryout, then the Elite vote.</p>
+            <p className="mb-4 mt-1 text-sm text-muted">Aion competitive spots are tried out for.</p>
             {me.status === "APPROVED" ? (
               <TryoutForm />
             ) : (
               <p className="text-sm text-muted">
-                Tryouts are for legion members.{" "}
+                Aion tryouts are for Vstroz Legion members. Elite itself is an alliance vote and does not need one.{" "}
                 <Link href="/dashboard/legion" className="text-gold hover:underline">
                   Apply to the legion →
                 </Link>

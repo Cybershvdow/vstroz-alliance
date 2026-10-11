@@ -8,7 +8,7 @@ import { DiscordIcon } from "./Icons";
 
 export async function Navbar() {
   const user = await getCurrentUser();
-  const portalHref = user ? (user.status === "APPROVED" && isOfficer(user.role) ? "/admin" : "/dashboard") : "/login";
+  const portalHref = user ? (!user.discordLeftAt && isOfficer(user.role) ? "/admin" : "/dashboard") : "/login";
   const portalLabel = user ? "Portal" : "Sign in";
 
   return (

@@ -110,7 +110,7 @@ export const games: {
       ["Squads", "Ranked & pubs"],
       ["Platform", "Crossplay"],
     ],
-    desc: "A lot of the community drops in Apex. Squad up from the Discord, post your clips, and build the Apex side of the alliance. A division with its own roster opens when the numbers are there.",
+    desc: "A lot of the community drops in Apex. Squad up from the Discord, post your clips, and build the Apex side of the alliance. An Apex division with its own squads opens when the numbers are there.",
     focus: ["Ranked Squads", "Mixtape Nights", "Clips & Highlights", "Scrims later"],
   },
   {
@@ -175,11 +175,11 @@ export const requirements = [
 ];
 
 export const membershipPath = [
-  { n: "01", title: "Account", text: "Create your Vstroz Alliance account. You are in the alliance from that moment: pick your games, post content, vote, and get a public profile." },
-  { n: "02", title: "Apply", text: "Play Aion? Join the Vstroz Legion in-game, then apply from your account. An officer replies within 48 hours. Every other game needs no application." },
-  { n: "03", title: "Recruit", text: "Approved. You are in the legion: match signups, guild roles, and a place on the roster." },
-  { n: "04", title: "Member", text: "Show up consistently and an officer promotes you. Members hold roles that keep the alliance running." },
-  { n: "05", title: "Veteran & Elite", text: "Voted in by the alliance; officers can veto. Elite is the competitive roster. Everything competitive is tried out for." },
+  { n: "01", title: "Recruit", text: "Create your Vstroz Alliance account. You join the alliance as a Recruit, whatever you play. Pick your games, post content, vote, and get a public profile and a place on the roster." },
+  { n: "02", title: "Member", text: "Show up consistently and an officer promotes you to Member." },
+  { n: "03", title: "Veteran", text: "Voted in by the alliance. Officers can veto." },
+  { n: "04", title: "Elite", text: "The competitive roster. Voted in by the alliance; officers can veto. Every competitive spot is tried out for." },
+  { n: "05", title: "Play Aion?", text: "Optional, and separate from your rank. Join the Vstroz Legion in-game, then apply from your account. An officer replies within 48 hours. Approval unlocks match signups and guild roles. Every other game needs no application." },
 ];
 
 /* Rules & The Round Table */
@@ -208,10 +208,13 @@ export const rules = {
     {
       title: "Ranks",
       items: [
+        "Every account starts as a Recruit. Ranks belong to the alliance, not to one game.",
         "Recruit → Member is decided by officers after consistent attendance and attitude.",
         "Veteran and Elite are decided by a vote of the alliance. Officers and leaders can veto or override.",
         "Elite is the competitive roster. Every competitive spot is tried out for and can be lost.",
-        "Members hold individual roles they must keep up to remain part of the crew.",
+        "Captain and General are command ranks above the ladder.",
+        "The Vstroz Legion is our Aion guild. Joining it unlocks match signups and guild roles. It does not change your rank.",
+        "Anyone who holds a guild role must keep it up to remain part of the crew.",
       ],
     },
   ],

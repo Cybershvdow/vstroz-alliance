@@ -25,7 +25,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { href: "/dashboard/media", label: "Post content" },
     { href: "/dashboard/profile", label: "Profile" },
   ];
-  if (inLegion && isOfficer(user.role)) items.push({ href: "/admin", label: "Command center" });
+  // Captain and General are alliance ranks: the command center does not depend on legion status.
+  if (!user.discordLeftAt && isOfficer(user.role)) items.push({ href: "/admin", label: "Command center" });
 
   return (
     <PortalShell user={user} items={items} area="Member portal">

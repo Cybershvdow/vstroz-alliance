@@ -3,8 +3,8 @@
 A production-grade website and members portal for the Vstroz Alliance, a multi-game community with **Aion** as its flagship title.
 
 - **Public site**: home, games, roster, schedule, recruitment.
-- **Accounts**: anyone can create an account and is part of the community right away: portal, media, rank votes, The Round Table, and a public profile at `/members/<username>` with social links.
-- **Legion applications**: members fill in a player profile, confirm they joined the legion in-game, and apply from `/dashboard/legion`; officers approve or deny with a note. Approval unlocks match signups, guild roles, and the roster.
+- **Accounts**: anyone can create an account and joins the alliance as a Recruit right away: portal, media, rank votes, The Round Table, a place on the public roster, and a public profile at `/members/<username>` with social links.
+- **Legion applications**: members fill in a player profile, confirm they joined the legion in-game, and apply from `/dashboard/legion`; officers approve or deny with a note. Approval unlocks match signups and guild roles. The public roster lists every alliance member in one list, by rank.
 - **Discord** (optional, see below): "Continue with Discord" creates accounts only for members of the alliance server, and a background sync removes people from the legion and hides their account when they leave the server.
 - **Member portal** (every account): profile and game tags, media, votes, The Round Table, announcements. Match signups and guild-role applications unlock in the Vstroz Legion.
 - **Command center** (officers/leader): applicant queue, member management, match creation and roster confirmation, guild roles, announcements.
@@ -37,7 +37,7 @@ npm run dev          # http://localhost:3000
 | Alliance Leader | `cybershvdow` | `SEED_LEADER_PASSWORD` in `.env` |
 | Alliance Leader & Founder | `nugget` | `SEED_NUGGET_PASSWORD` in `.env` |
 
-Both should change their password after first sign-in (Profile → Password). Everyone else joins by applying on the site.
+Both should change their password after first sign-in (Profile → Password). Everyone else joins by creating an account and starts as a Recruit.
 
 For a populated demo (fake members, matches, votes), run `npm run db:seed:demo` instead. Demo accounts use `Password123!`.
 
@@ -67,11 +67,13 @@ Roster, matches, roles, and announcements are managed from the Command Center at
 
 | Role      | Can                                                                 |
 | --------- | ------------------------------------------------------------------- |
-| Member    | Sign up for matches, apply for guild roles, edit own profile        |
-| Officer   | Everything above + approve/deny applicants, create matches, confirm rosters, manage roles and announcements, set member titles, remove members |
-| Leader    | Everything above + promote/demote officers                          |
+| Member (role, any ladder rank) | Edit own profile, post content, vote. In the legion: sign up for matches, apply for guild roles |
+| Officer (Captain) | Everything above + approve/deny applicants, create matches, confirm rosters, manage roles and announcements, set member titles, remove members |
+| Leader (General) | Everything above + promote/demote officers                          |
 
-Accounts that are not in the legion still get the portal; legion-only pages send them to the legion application.
+Accounts that are not in the legion still get the portal and hold an alliance rank; legion-only pages (matches, guild roles) send them to the legion application.
+
+Captain and General are alliance ranks. Officer and leader permissions do not require legion membership, only an account that has not left the Discord.
 
 ## Scripts
 
@@ -98,20 +100,20 @@ Answers are stored with the application and shown to officers in the Legion appl
 ## The Round Table & Media
 
 - **The Round Table** (`/dashboard/table`, `/admin/table`): command (Generals and Captains) settles disputes and reviews tryouts here. Members bring disputes with a subject and details; officers record a decision (Resolved / Dismissed) that the member can see. Rank votes are linked from the same place.
-- **Tryouts**: members request a tryout from The Round Table; officers mark them Scheduled / Passed / Failed, then open an Elite vote on the Ranks page.
+- **Tryouts** (legion only, for Aion): legion members request a tryout from The Round Table; officers mark them Scheduled / Passed / Failed. Passing does not promote anyone, and a tryout is not a requirement for an Elite nomination.
 - **Media** (`/media`): folder overview. A Vstroz Alliance folder (`/media/alliance`) holds posts flagged official; every member who posts gets a folder on their public profile (`/members/<username>`, `?v=<postId>` opens a video). Members post YouTube or Twitch links from `/dashboard/media`; officers approve, feature, hide, delete, or move posts between folders at `/admin/media`, and "Post as Vstroz Alliance" goes live immediately. Set `site.twitchChannel` in `src/lib/site.ts` to show a live Twitch player. Alliance social links live in `site.social`; members add their own on their profile.
 - **Rules** (`/rules`): code of conduct, chain of command, and rank ladder, all from `rules` in `src/lib/site.ts`. Officer titles come from `ROLE_LABEL` in `src/lib/constants.ts` (General, Captain).
 
 ## Ranks & voting
 
-Members climb a four-step ladder: **Recruit → Member → Veteran → Elite**. Elite is the competitive roster.
+Every account starts as a Recruit and climbs a four-step alliance ladder: **Recruit → Member → Veteran → Elite**. Elite is the competitive roster. Captain and General are command ranks above the ladder and do not require legion membership. The ladder belongs to the alliance; the legion application does not affect it.
 
 - Recruit → Member is an officer decision (Command Center → Ranks & votes).
-- Veteran and Elite are decided by vote. An officer opens a nomination with a written case; every alliance member can vote Yes / No / Abstain (not members whose legion application was declined). Nominees cannot vote on themselves.
+- Veteran and Elite are decided by vote. An officer opens a nomination with a written case; every alliance member who has not left the Discord can vote Yes / No / Abstain, including members whose legion application was declined. Nominees cannot vote on themselves.
 - Rules live in `src/lib/constants.ts` (`VOTE_RULES`): 72-hour window, quorum of 3 counted votes, two-thirds Yes to pass. Expired votes close automatically the next time anyone opens a votes page.
 - Leaders can close a vote early, veto it, or override a rank directly. Officers can close a vote once its window has ended, or withdraw it.
 
-Members see open votes and results under **Rank votes** in the portal. The public roster shows Elite and Veteran badges.
+Members see open votes and results under **Rank votes** in the portal. The public roster shows one rank per member: General, Captain, Elite, Veteran, Member, or Recruit (`allianceRank` in `src/lib/constants.ts`).
 
 ## Email notifications
 
@@ -172,7 +174,7 @@ Set these in Railway (Variables) and redeploy:
 | `DISCORD_BOT_TOKEN` | Developer Portal → Bot → Reset Token. Turn on **Server Members Intent**. Invite the bot with the OAuth2 URL generator (scope `bot`, no permissions needed). |
 | `DISCORD_SYNC_SECRET` | Optional. Any long random string; lets an external scheduler call `POST /api/discord/sync` with `Authorization: Bearer <secret>`. |
 
-With the first three set, `/login` and `/register` offer **Continue with Discord**; the site checks the person is in the server, then signs them in or creates their community account. Existing accounts can connect Discord from `/dashboard/profile`, and connecting is required before applying to the legion. With the bot token set, the server process re-checks membership every 5 minutes (`src/instrumentation.ts`), and Command center has a **Sync now** button: leaving the server removes a member from the legion and hides their profile; rejoining restores a community account. Generals and Captains are never removed automatically.
+With the first three set, `/login` and `/register` offer **Continue with Discord**; the site checks the person is in the server, then signs them in or creates their community account. Existing accounts can connect Discord from `/dashboard/profile`, and connecting is required before applying to the legion. With the bot token set, the server process re-checks membership every 5 minutes (`src/instrumentation.ts`), and Command center has a **Sync now** button: leaving the server removes a member from the legion and hides their profile; rejoining restores the account with the rank it had (the legion has to be applied for again). While hidden, an account cannot vote, be nominated, or be promoted. Generals and Captains are never removed automatically.
 
 ## Live stats (Steam + Apex)
 
@@ -186,7 +188,7 @@ Members set these on `/dashboard/profile` ("Game accounts"). Stats are cached on
 ## Games, tags, and saved drafts
 
 - **Listed games** live in `GAME_CATALOG` (`src/lib/constants.ts`) and `games` (`src/lib/site.ts`). Members tick the ones they play on their profile; they are stored in `User.playedGames` and shown as icon tags (`src/components/site/GameTag.tsx`) on profiles and the roster. "Other games" is free text and is not a tag. Command center shows how many members ticked each game and which unlisted games get mentioned.
-- **Alliance vs legion**: an account makes someone an alliance member. The Vstroz Legion is the guild in the game flagged `legion: true` (Aion); its application is the only place the game-specific questions are required.
+- **Alliance vs legion**: an account makes someone an alliance member and a Recruit. Ranks belong to the alliance, in or out of the legion. The Vstroz Legion is the guild in the game flagged `legion: true` (Aion); its application only unlocks match signups and guild roles, and is the only place the game-specific questions are required.
 - **Game icons** are original glyphs. To use official artwork, put a square image in `public/games/` and map it in `ART` inside `GameTag.tsx`.
 - **Saved drafts**: forms keep what was typed in the browser (`src/lib/formDraft.ts`), so a refresh or a validation error does not wipe it. Drafts are per form and per member, expire after 7 days, clear on a successful save, and never include passwords.
 

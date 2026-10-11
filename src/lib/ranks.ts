@@ -21,7 +21,8 @@ export async function closeExpiredNominations() {
     const status = t.passing ? "PASSED" : "FAILED";
     await db.$transaction([
       db.nomination.update({ where: { id: nom.id }, data: { status, decidedAt: new Date() } }),
-      ...(t.passing ? [db.user.updateMany({ where: { id: nom.userId, tier: { in: TIERS.slice(0, tierRank(nom.tier)) as string[] } }, data: { tier: nom.tier } })] : []),
+      // A nominee hidden after leaving the Discord is not promoted.
+      ...(t.passing ? [db.user.updateMany({ where: { id: nom.userId, discordLeftAt: null, tier: { in: TIERS.slice(0, tierRank(nom.tier)) as string[] } }, data: { tier: nom.tier } })] : []),
     ]);
   }
   return expired.length;

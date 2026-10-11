@@ -27,7 +27,7 @@ export default async function SchedulePage() {
 
   return (
     <section className="mx-auto max-w-7xl px-4 pb-24 pt-32 md:px-6 md:pt-40">
-      <SectionHeading eyebrow="Schedule" title="Operations calendar" text="All times in UTC. Members sign up for matches from the portal." />
+      <SectionHeading eyebrow="Schedule" title="Operations calendar" text="All times in UTC. Vstroz Legion members sign up for matches from the portal." />
 
       {next && (
         <div className="panel panel-accent cut mt-10 grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center md:p-8">

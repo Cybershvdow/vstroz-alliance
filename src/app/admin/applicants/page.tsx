@@ -4,7 +4,7 @@ import { reviewApplicantAction } from "@/lib/actions/admin";
 import { formatDate } from "@/lib/format";
 import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, EmptyState, PageHeader, statusTone } from "@/components/ui";
-import { questionsFor, playedGamesOf, STATUS_LABEL } from "@/lib/constants";
+import { allianceRank, questionsFor, playedGamesOf, STATUS_LABEL } from "@/lib/constants";
 import { GameTag } from "@/components/site/GameTag";
 
 function inGameLegion(json: string | null) {
@@ -47,9 +47,10 @@ export default async function ApplicantsPage() {
   await requireOfficer();
   const [pending, notApplied, recent] = await Promise.all([
     db.user.findMany({ where: { status: "PENDING", appliedAt: { not: null } }, orderBy: { appliedAt: "asc" } }),
-    db.user.findMany({ where: { status: "PENDING", appliedAt: null }, select: { id: true, displayName: true, username: true, createdAt: true }, orderBy: { createdAt: "desc" } }),
+    db.user.findMany({ where: { status: "PENDING", appliedAt: null }, select: { id: true, displayName: true, username: true, createdAt: true, role: true, tier: true }, orderBy: { createdAt: "desc" } }),
     db.user.findMany({
-      where: { status: { in: ["APPROVED", "DENIED"] }, role: "MEMBER", reviewedAt: { not: null } },
+      // Accounts hidden after leaving the Discord are not legion decisions and cannot be added back from here.
+      where: { status: { in: ["APPROVED", "DENIED"] }, role: "MEMBER", reviewedAt: { not: null }, discordLeftAt: null },
       orderBy: { reviewedAt: "desc" },
       take: 10,
     }),
@@ -57,7 +58,7 @@ export default async function ApplicantsPage() {
 
   return (
     <>
-      <PageHeader title="Legion applications" text="Approve to add them to the Vstroz Legion (Aion): match signups, roles, and the legion roster. Deny with a note so they know why." />
+      <PageHeader title="Legion applications" text="Approve to add them to the Vstroz Legion (Aion). That unlocks match signups and guild roles. It does not change their rank. Deny with a note so they know why." />
 
       {pending.length === 0 ? (
         <EmptyState title="Queue is clear" text="Vstroz Legion applications appear here the moment an alliance member applies." />
@@ -154,7 +155,7 @@ export default async function ApplicantsPage() {
             Alliance members not in the legion <span className="text-muted">({notApplied.length})</span>
           </h2>
           <p className="mb-3 text-sm text-muted">
-            They have an account but have not applied to the legion. They can post content, vote, and use The Round Table; they enter the queue when they apply.
+            They have an account and an alliance rank but have not applied to the legion. They can post content, vote, and use The Round Table; they enter the queue when they apply.
           </p>
           <ul className="panel divide-y divide-line">
             {notApplied.map((u) => (
@@ -165,7 +166,7 @@ export default async function ApplicantsPage() {
                     @{u.username} · joined {formatDate(u.createdAt)}
                   </p>
                 </div>
-                <Badge tone="neutral">Alliance</Badge>
+                <Badge tone={allianceRank(u).tone}>{allianceRank(u).label}</Badge>
               </li>
             ))}
           </ul>

@@ -99,9 +99,9 @@ export const TIER_LABEL: Record<Tier, string> = {
 };
 
 export const TIER_BLURB: Record<Tier, string> = {
-  RECRUIT: "New to the legion. Proving reliability and attitude.",
+  RECRUIT: "Where everyone starts. New to the alliance, proving reliability and attitude.",
   MEMBER: "Trusted regular. Promoted by an officer after showing up consistently.",
-  VETERAN: "Backbone of the legion. Voted in by the alliance; officers can veto.",
+  VETERAN: "Backbone of the crew. Voted in by the alliance; officers can veto.",
   ELITE: "The competitive roster. Voted in by the alliance; officers can veto. Plays the professional matches.",
 };
 
@@ -119,6 +119,19 @@ export const VOTE_CHOICES = ["YES", "NO", "ABSTAIN"] as const;
 export function tierRank(t: string) {
   const i = (TIERS as readonly string[]).indexOf(t);
   return i < 0 ? 0 : i;
+}
+
+/**
+ * A member's one rank in the alliance, highest first: General, Captain, then the ladder (Elite, Veteran, Member,
+ * Recruit). The ladder is alliance-wide: every account starts as a Recruit, whatever they play. The legion is separate.
+ */
+export function allianceRank(u: { role: string; tier: string }): { label: string; order: number; tone: "gold" | "accent" | "neutral" } {
+  if (u.role === "LEADER") return { label: ROLE_LABEL.LEADER, order: 0, tone: "gold" };
+  if (u.role === "OFFICER") return { label: ROLE_LABEL.OFFICER, order: 1, tone: "accent" };
+  if (u.tier === "ELITE") return { label: TIER_LABEL.ELITE, order: 2, tone: "gold" };
+  if (u.tier === "VETERAN") return { label: TIER_LABEL.VETERAN, order: 3, tone: "accent" };
+  if (u.tier === "MEMBER") return { label: TIER_LABEL.MEMBER, order: 4, tone: "neutral" };
+  return { label: TIER_LABEL.RECRUIT, order: 5, tone: "neutral" };
 }
 
 /** Can this user vote on a nomination to the given tier? */

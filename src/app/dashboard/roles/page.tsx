@@ -22,7 +22,7 @@ export default async function RolesPage() {
 
   return (
     <>
-      <PageHeader title="Guild roles" text="Leadership positions inside the alliance. Apply for what you can own. Officers review every application." />
+      <PageHeader title="Guild roles" text="Jobs inside the Vstroz Legion, like class lead or raid leader. They are separate from your alliance rank. Apply for what you can own. Officers review every application." />
 
       {roles.length === 0 ? (
         <EmptyState title="No roles posted yet" />

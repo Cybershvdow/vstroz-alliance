@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { formatDateTime, formatDate } from "@/lib/format";
-import { MATCH_TYPE_LABEL, playedGamesOf, type MatchType } from "@/lib/constants";
+import { MATCH_TYPE_LABEL, allianceRank, playedGamesOf, type MatchType } from "@/lib/constants";
 import { Badge, ButtonLink, Card, EmptyState, PageHeader, Stat, statusTone } from "@/components/ui";
 import { Countdown } from "@/components/site/Countdown";
 import { GameTag } from "@/components/site/GameTag";
@@ -28,9 +28,23 @@ export default async function DashboardPage() {
     <>
       <PageHeader
         title={<>Welcome back, <span className="text-accent">{me.displayName}</span></>}
-        text={[me.playerType, playedGamesOf(me).join(" · ") || null, `With the alliance since ${formatDate(me.createdAt)}`].filter(Boolean).join(" · ")}
+        text={[allianceRank(me).label, me.playerType, playedGamesOf(me).join(" · ") || null, `With the alliance since ${formatDate(me.createdAt)}`].filter(Boolean).join(" · ")}
         actions={inLegion ? <ButtonLink href="/dashboard/matches">Match signups</ButtonLink> : <ButtonLink href="/dashboard/legion">{me.appliedAt ? "Your legion application" : "Join the legion"}</ButtonLink>}
       />
+
+      {!me.avatarAt && (
+        <Card className="mb-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="display text-xl">Add your profile picture</h2>
+              <p className="mt-1 max-w-xl text-sm text-muted">It shows on the roster, your profile, and around the portal. You can change or remove it any time from your profile.</p>
+            </div>
+            <ButtonLink href="/dashboard/profile#profile-picture" variant="secondary">
+              Upload a picture
+            </ButtonLink>
+          </div>
+        </Card>
+      )}
 
       {!inLegion && (
         <Card accent className="mb-6">
@@ -42,9 +56,9 @@ export default async function DashboardPage() {
               </h2>
               <p className="mt-2 max-w-xl text-sm text-muted">
                 {me.status === "DENIED"
-                  ? "You are still part of the alliance: post content, bring disputes, and keep your profile."
+                  ? "You are still in the alliance and your rank stands. Post content, bring disputes, and keep your profile current."
                   : me.appliedAt
-                    ? "An officer reviews it within 48 hours. Match signups, roles, and the roster unlock when you are approved."
+                    ? "An officer reviews it within 48 hours. Match signups and guild roles unlock when you are approved."
                     : "Fill in your player profile (game, in-game name, how you play) and apply. Officers review within 48 hours."}
               </p>
             </div>

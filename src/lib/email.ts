@@ -111,9 +111,9 @@ export async function notifyNewApplication(a: ApplicantEmailData) {
 export async function notifyDecision(a: { displayName: string; email: string }, decision: "APPROVED" | "DENIED", note: string | null, discordInvite: string) {
   const approved = decision === "APPROVED";
   const body = approved
-    ? `<p style="margin:0">You're in the Vstroz Legion, ${esc(a.displayName)}. An officer approved your application. Match signups, guild roles, and the legion roster are now unlocked in your portal.</p>
+    ? `<p style="margin:0">You're in the Vstroz Legion, ${esc(a.displayName)}. An officer approved your application. Match signups and guild roles are now unlocked in your portal. Your alliance rank stays as it is.</p>
        <p style="margin:12px 0 0">If you have not already, join the Discord: <a href="${discordInvite}" style="color:#c9ccd6">${discordInvite}</a></p>`
-    : `<p style="margin:0">Thanks for applying, ${esc(a.displayName)}. An officer reviewed your application and did not approve it for the legion at this time. You are still part of the Vstroz Alliance: Discord, media, and The Round Table stay open to you.</p>`;
+    : `<p style="margin:0">Thanks for applying, ${esc(a.displayName)}. An officer reviewed your application and did not approve it for the legion at this time. You are still part of the Vstroz Alliance and you keep your rank. Discord, media, and The Round Table stay open to you.</p>`;
   const noteHtml = note ? `<p style="margin:12px 0 0;padding-top:12px;border-top:1px solid rgba(155,77,255,.2)"><strong>Note from the officer</strong><br>${esc(note)}</p>` : "";
   return sendEmail({
     to: a.email,

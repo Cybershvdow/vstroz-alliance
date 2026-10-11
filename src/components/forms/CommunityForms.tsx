@@ -54,7 +54,7 @@ export function TryoutForm() {
           ))}
         </select>
       </Field>
-      <Field label="Why you" name="tryout-message" error={err?.message} hint="Role, rank, what you bring. Mic is required for competitive play.">
+      <Field label="Why you" name="tryout-message" error={err?.message} hint="Role, in-game rank, what you bring. Mic is required for competitive play.">
         <textarea id="tryout-message" name="message" className="input min-h-24" maxLength={1000} required />
       </Field>
       <SubmitButton pendingText="Requesting…">Request a tryout</SubmitButton>

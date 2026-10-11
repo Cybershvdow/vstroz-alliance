@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { site } from "@/lib/site";
-import { ROLE_LABEL, playedGamesOf, type UserRole } from "@/lib/constants";
+import { allianceRank, playedGamesOf } from "@/lib/constants";
 import { embedSrc, folderHref, thumbnailFor } from "@/lib/media";
 import { formatDate } from "@/lib/format";
 import { avatarUrl } from "@/lib/avatar";
@@ -21,7 +21,7 @@ export default async function MediaPage() {
   const posts = await db.mediaPost.findMany({
     where: { approved: true, OR: [{ official: true }, { postedBy: { discordLeftAt: null } }] },
     orderBy: { createdAt: "desc" },
-    include: { postedBy: { select: { id: true, username: true, displayName: true, role: true, game: true, playedGames: true, avatarAt: true } } },
+    include: { postedBy: { select: { id: true, username: true, displayName: true, role: true, tier: true, game: true, playedGames: true, avatarAt: true } } },
   });
 
   const official = posts.filter((p) => p.official);
@@ -102,10 +102,10 @@ export default async function MediaPage() {
               kind="member"
               href={`/members/${encodeURIComponent(user.username)}`}
               name={user.displayName}
-              subtitle={[playedGamesOf(user).join(" · "), `@${user.username}`, user.role !== "MEMBER" ? ROLE_LABEL[user.role as UserRole] : null].filter(Boolean).join(" · ")}
+              subtitle={[playedGamesOf(user).join(" · "), `@${user.username}`].filter(Boolean).join(" · ")}
               count={theirs.length}
               thumb={firstThumb(theirs)}
-              role={user.role}
+              rank={allianceRank(user)}
               avatar={avatarUrl(user)}
             />
           ))}

@@ -7,8 +7,9 @@ import { db } from "@/lib/db";
   Discord integration.
   - Sign in / create an account with Discord (OAuth2). Only members of the alliance server can create an account:
     being in the Discord IS being in the community.
-  - Membership sync via the bot: leaving the server removes you from the legion and hides your account;
-    rejoining restores a community account. Command (Generals/Captains) is never auto-removed.
+  - Membership sync via the bot: leaving the server removes you from the legion, hides your account, and withdraws
+    any open rank vote for you; rejoining restores a community account with the rank you had.
+    Command (Generals/Captains) is never auto-removed.
   Everything is driven by env vars; when they are missing the site falls back to username/password only.
 */
 
@@ -161,10 +162,14 @@ export async function reconcileDiscord(): Promise<SyncResult> {
     const inGuild = ids.has(u.discordId ?? "");
     if (!inGuild && !u.discordLeftAt) {
       if (u.role !== "MEMBER") continue; // command is never auto-removed
-      await db.user.update({
-        where: { id: u.id },
-        data: { discordLeftAt: at, status: "DENIED", appliedAt: null, reviewedAt: at, reviewNote: "Left the Discord server." },
-      });
+      // The rank (tier) is kept for when they come back. Any open rank vote for them is withdrawn.
+      await db.$transaction([
+        db.user.update({
+          where: { id: u.id },
+          data: { discordLeftAt: at, status: "DENIED", appliedAt: null, reviewedAt: at, reviewNote: "Left the Discord server." },
+        }),
+        db.nomination.updateMany({ where: { userId: u.id, status: "OPEN" }, data: { status: "WITHDRAWN", decidedAt: at } }),
+      ]);
       removed++;
     } else if (inGuild && u.discordLeftAt) {
       await db.user.update({

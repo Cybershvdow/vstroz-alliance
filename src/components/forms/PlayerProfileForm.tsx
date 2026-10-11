@@ -159,7 +159,7 @@ export function PlayerProfileForm({
           <p className="-mt-3 text-sm text-muted">
             {apply
               ? `The Vstroz Legion plays ${LEGION_NAMES.join(" / ")}. These answers are what the officers review.`
-              : `Optional. Your ${LEGION_NAMES.join(" / ")} character name and class show on your profile and, in the legion, on the roster.`}
+              : `Optional. Your ${LEGION_NAMES.join(" / ")} character name and class show on your profile.`}
           </p>
           <GameQuestions errors={err} games={LEGION_NAMES} initialGame={str("game") ?? initial.game ?? undefined} initialAnswers={answers} optional={!apply} />
         </section>
@@ -255,7 +255,7 @@ export function PlayerProfileForm({
               aria-invalid={!!err?.inGameLegion}
             />
             <span>
-              I have joined the <span className="font-semibold text-text">Vstroz Legion</span> in-game. This application puts you on the legion roster here; the in-game
+              I have joined the <span className="font-semibold text-text">Vstroz Legion</span> in-game. This application adds you to the legion on this site; the in-game
               legion is where you actually play.
             </span>
           </label>

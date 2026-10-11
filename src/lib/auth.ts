@@ -69,16 +69,19 @@ export async function requireApproved() {
   return user;
 }
 
-/** Officer or Leader. */
+/**
+ * Captain or General. These are alliance ranks, so legion status is not required.
+ * Accounts hidden after leaving the Discord are turned away.
+ */
 export async function requireOfficer() {
-  const user = await requireApproved();
-  if (!isOfficer(user.role)) redirect("/dashboard");
+  const user = await requireUser();
+  if (user.discordLeftAt || !isOfficer(user.role)) redirect("/dashboard");
   return user;
 }
 
-/** Leader only. */
+/** General only. */
 export async function requireLeader() {
-  const user = await requireApproved();
+  const user = await requireOfficer();
   if (user.role !== "LEADER") redirect("/admin");
   return user;
 }

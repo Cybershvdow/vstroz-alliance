@@ -3,7 +3,7 @@ import { site } from "@/lib/site";
 import { parseSocials } from "@/lib/social";
 import { discordConfigured } from "@/lib/discord";
 import { Badge, Button, ButtonLink, Card, PageHeader } from "@/components/ui";
-import { ROLE_LABEL, STATUS_LABEL, type UserRole } from "@/lib/constants";
+import { STATUS_LABEL, allianceRank } from "@/lib/constants";
 import { ProfileForm, PasswordForm } from "@/components/forms/MemberForms";
 import { PlayerProfileForm } from "@/components/forms/PlayerProfileForm";
 import { DiscordButton } from "@/components/site/DiscordButton";
@@ -31,6 +31,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
               ? "Steam linking is not set up yet."
               : undefined;
   const inLegion = me.status === "APPROVED";
+  const rank = allianceRank(me);
   const discordMsg =
     discord === "linked" ? "Discord connected." : discord === "taken" ? "That Discord account is already connected to another member." : undefined;
   return (
@@ -45,7 +46,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           <ClearDraft names={["register"]} scope="anon" />
           <div className="panel mb-6 flex flex-col gap-3 border-accent/50 p-4 text-sm md:flex-row md:items-center md:justify-between">
             <p>
-              <span className="font-semibold">Welcome to the alliance, {me.displayName}.</span> Tick the games you play and they show as tags on your profile. Play{" "}
+              <span className="font-semibold">Welcome to the alliance, {me.displayName}.</span> You start as a Recruit. Add a profile picture below, then tick the games you play and they show as tags on your profile. Play{" "}
               {site.legionGame}? The {site.legionName} is our guild there, with its own application.
             </p>
             <div className="flex shrink-0 flex-wrap gap-2">
@@ -60,7 +61,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         </>
       )}
       <Card className="mb-6">
-        <h2 className="display mb-1 text-2xl">Profile picture</h2>
+        <h2 id="profile-picture" className="display mb-1 scroll-mt-28 text-2xl">Profile picture</h2>
         <p className="mb-5 text-sm text-muted">Shown on your profile, the roster, and around the portal. You can change or remove it any time.</p>
         <AvatarForm name={me.displayName} current={avatarUrl(me)} />
       </Card>
@@ -136,12 +137,17 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                 <dd className="mt-1">{me.username}</dd>
               </div>
               <div>
+                <dt className="label">Alliance rank</dt>
+                <dd className="mt-1">
+                  <Badge tone={rank.tone}>{rank.label}</Badge>
+                </dd>
+              </div>
+              <div>
                 <dt className="label">{site.legionName}</dt>
-                <dd className="mt-1 flex flex-wrap items-center gap-1.5">
+                <dd className="mt-1">
                   <Badge tone={inLegion ? "success" : me.status === "DENIED" ? "danger" : me.appliedAt ? "warning" : "neutral"}>
                     {inLegion ? "In the legion" : me.appliedAt ? (STATUS_LABEL[me.status] ?? me.status) : "Not applied"}
                   </Badge>
-                  {inLegion && me.role !== "MEMBER" && <Badge tone="gold">{ROLE_LABEL[me.role as UserRole]}</Badge>}
                 </dd>
               </div>
             </dl>

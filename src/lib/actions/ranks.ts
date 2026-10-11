@@ -21,8 +21,8 @@ export async function setTierAction(formData: FormData) {
   const userId = clean(formData.get("userId"));
   const tier = clean(formData.get("tier"));
   if (!userId || !(TIERS as readonly string[]).includes(tier)) return;
-  const target = await db.user.findUnique({ where: { id: userId }, select: { id: true, role: true, tier: true } });
-  if (!target) return;
+  const target = await db.user.findUnique({ where: { id: userId }, select: { id: true, role: true, tier: true, discordLeftAt: true } });
+  if (!target || target.discordLeftAt) return; // hidden accounts (left the Discord) keep their rank but cannot have it changed
   // Generals are peers: only they can change their own tier.
   if (target.role === "LEADER" && target.id !== officer.id) return;
   if (officer.role !== "LEADER") {
@@ -47,7 +47,8 @@ export async function nominateAction(_prev: ActionState, formData: FormData): Pr
   if (reason.length < 10) return { ok: false, message: "Give the voters a reason (10+ characters)." };
 
   const target = await db.user.findUnique({ where: { id: userId } });
-  if (!target || target.status !== "APPROVED") return { ok: false, message: "Member not found." };
+  // The ladder is alliance-wide: legion status does not matter, only that the account is not hidden.
+  if (!target || target.discordLeftAt) return { ok: false, message: "Member not found." };
   if (tierRank(target.tier) >= tierRank(tier)) return { ok: false, message: `${target.displayName} is already ${target.tier.toLowerCase()} or higher.` };
 
   const open = await db.nomination.findFirst({ where: { userId, status: "OPEN" } });
@@ -70,7 +71,7 @@ export async function nominateAction(_prev: ActionState, formData: FormData): Pr
 
 export async function castVoteAction(formData: FormData) {
   const me = await requireUser();
-  if (me.status === "DENIED") return; // declined legion applicants do not vote
+  if (me.discordLeftAt) return; // hidden accounts (left the Discord) do not vote; a declined legion application does not block voting
   const nominationId = clean(formData.get("nominationId"));
   const choice = clean(formData.get("choice"));
   const comment = clean(formData.get("comment")).trim().slice(0, 300);
@@ -119,7 +120,7 @@ export async function finalizeNominationAction(formData: FormData) {
   const status = t.passing ? "PASSED" : "FAILED";
   await db.$transaction([
     db.nomination.update({ where: { id: nominationId }, data: { status, decidedAt: new Date(), decidedById: officer.id } }),
-    ...(t.passing ? [db.user.updateMany({ where: { id: nom.userId, tier: { in: TIERS.slice(0, tierRank(nom.tier)) as string[] } }, data: { tier: nom.tier } })] : []),
+    ...(t.passing ? [db.user.updateMany({ where: { id: nom.userId, discordLeftAt: null, tier: { in: TIERS.slice(0, tierRank(nom.tier)) as string[] } }, data: { tier: nom.tier } })] : []),
   ]);
   revalidateAll();
 }

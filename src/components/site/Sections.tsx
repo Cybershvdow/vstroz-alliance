@@ -2,8 +2,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { site, pillars, games, milestones, playingNow } from "@/lib/site";
 import { formatDateTime } from "@/lib/format";
-import { MATCH_TYPE_LABEL, ROLE_LABEL, type MatchType, type UserRole } from "@/lib/constants";
-import { Badge, ButtonLink, SectionHeading, Avatar, roleTone } from "@/components/ui";
+import { MATCH_TYPE_LABEL, type MatchType } from "@/lib/constants";
+import { Badge, ButtonLink, SectionHeading } from "@/components/ui";
 import { Countdown } from "./Countdown";
 import { ArrowIcon, DiscordIcon } from "./Icons";
 import { GameIcon } from "./GameTag";
@@ -241,7 +241,7 @@ export async function UpcomingMatches() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-24 md:px-6">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-        <SectionHeading eyebrow="Schedule" title="Upcoming operations" text="Sieges, scrims, and training nights. Members sign up from the portal." />
+        <SectionHeading eyebrow="Schedule" title="Upcoming operations" text="Sieges, scrims, and training nights. Vstroz Legion members sign up from the portal." />
         <ButtonLink href="/schedule" variant="secondary">
           Full schedule <ArrowIcon />
         </ButtonLink>
@@ -273,46 +273,6 @@ export async function UpcomingMatches() {
           );
         })}
       </ol>
-    </section>
-  );
-}
-
-/* ---------------- Leadership ---------------- */
-
-export async function Leadership() {
-  const leaders = await db.user.findMany({
-    where: { status: "APPROVED", role: { in: ["LEADER", "OFFICER"] } },
-    orderBy: [{ createdAt: "asc" }],
-    select: { id: true, displayName: true, role: true, title: true, gameClass: true, game: true, ign: true },
-  });
-  leaders.sort((a, b) => (a.role === "LEADER" ? -1 : b.role === "LEADER" ? 1 : 0));
-
-  return (
-    <section className="relative border-y border-line bg-bg-2 py-24">
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <SectionHeading eyebrow="Command" title="Leadership" text="The Generals and Captains who call the shots and sit at The Round Table." />
-          <ButtonLink href="/roster" variant="secondary">
-            Full roster <ArrowIcon />
-          </ButtonLink>
-        </div>
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {leaders.map((l) => (
-            <div key={l.id} className={`panel cut p-6 transition hover:-translate-y-1 ${l.role === "LEADER" ? "border-gold/50 shadow-[0_0_60px_-30px_rgba(155,77,255,0.6)]" : ""}`}>
-              <div className="flex items-center justify-between">
-                <Avatar name={l.displayName} size="lg" tone={roleTone(l.role)} />
-                <span />
-              </div>
-              <h3 className="display mt-5 text-3xl">{l.displayName}</h3>
-              <Badge tone={roleTone(l.role)} className="mt-2">
-                {ROLE_LABEL[l.role as UserRole]}
-              </Badge>
-              {l.title && <p className="mt-3 text-sm text-text">{l.title}</p>}
-              {(l.game || l.gameClass) && <p className="mt-1 text-xs text-muted">{[l.game, l.gameClass].filter(Boolean).join(" · ")}</p>}
-            </div>
-          ))}
-        </div>
-      </div>
     </section>
   );
 }
@@ -352,8 +312,9 @@ export function JoinCTA() {
               Earn the <span className="display-gold">banner.</span>
             </h2>
             <p className="mt-4 max-w-xl text-muted">
-              Create an account and you are in the alliance: pick your games, post content, vote, build your profile. Play Aion? Apply to
-              the Vstroz Legion from inside your account; an officer reviews it and unlocks match signups, roles, and the legion roster.
+              Create an account and you join the alliance as a Recruit: pick your games, post content, vote, build your profile. Show up
+              and an officer promotes you to Member. Veteran and Elite are voted in by the alliance. Play Aion? Apply to the Vstroz
+              Legion from inside your account. Approval unlocks match signups and guild roles.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">

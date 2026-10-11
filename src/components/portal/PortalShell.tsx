@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
-import { Avatar, Badge, roleTone } from "@/components/ui";
+import { Avatar, Badge } from "@/components/ui";
 import { logoutAction } from "@/lib/actions/auth";
-import { ROLE_LABEL, type UserRole } from "@/lib/constants";
+import { allianceRank } from "@/lib/constants";
 import type { CurrentUser } from "@/lib/auth";
 import { PortalNav } from "./PortalNav";
 import { avatarUrl } from "@/lib/avatar";
@@ -21,6 +21,7 @@ export function PortalShell({
   area: "Member portal" | "Command center";
   children: React.ReactNode;
 }) {
+  const rank = allianceRank(user);
   return (
     <div className="flex min-h-screen flex-col lg:flex-row" data-draft-scope={user.username}>
       <aside className="flex shrink-0 flex-col border-b border-line bg-bg-2 lg:w-72 lg:border-b-0 lg:border-r">
@@ -35,13 +36,18 @@ export function PortalShell({
 
         <div className="mt-auto border-t border-line p-5">
           <div className="flex items-center gap-3">
-            <Avatar name={user.displayName} tone={roleTone(user.role)} src={avatarUrl(user)} />
+            <Link href="/dashboard/profile#profile-picture" aria-label="Change your profile picture" title="Change your profile picture" className="shrink-0 rounded-full transition hover:opacity-80">
+              <Avatar name={user.displayName} tone={rank.tone} src={avatarUrl(user)} />
+            </Link>
             <div className="min-w-0">
               <p className="truncate font-display text-lg font-bold uppercase leading-tight">{user.displayName}</p>
               <div className="flex flex-wrap gap-1">
-                {user.status === "APPROVED" && user.role !== "MEMBER" && <Badge tone={roleTone(user.role)}>{ROLE_LABEL[user.role as UserRole] ?? user.role}</Badge>}
-                <Badge tone={user.status === "APPROVED" ? "success" : "neutral"}>{user.status === "APPROVED" ? "Legion" : "Alliance"}</Badge>
+                <Badge tone={rank.tone}>{rank.label}</Badge>
+                {user.status === "APPROVED" && <Badge tone="success">Legion</Badge>}
               </div>
+              <Link href="/dashboard/profile#profile-picture" className="mt-1 inline-block text-[0.7rem] text-muted underline-offset-4 hover:text-text hover:underline">
+                {user.avatarAt ? "Change picture" : "Add a picture"}
+              </Link>
             </div>
           </div>
           <div className="mt-4 flex gap-2">

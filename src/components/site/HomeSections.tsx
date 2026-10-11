@@ -2,11 +2,11 @@ import Link from "next/link";
 import { gridCols } from "@/components/site/Sections";
 import { db } from "@/lib/db";
 import { site, games, identity } from "@/lib/site";
-import { ENABLED_GAMES, ROLE_LABEL, TIER_LABEL, playedGamesOf, type UserRole } from "@/lib/constants";
+import { ENABLED_GAMES, allianceRank, playedGamesOf } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import { avatarUrl } from "@/lib/avatar";
 import { thumbnailFor, folderHref } from "@/lib/media";
-import { Avatar, Badge, ButtonLink, SectionHeading, roleTone } from "@/components/ui";
+import { Avatar, Badge, ButtonLink, SectionHeading } from "@/components/ui";
 import { ArrowIcon, DiscordIcon } from "./Icons";
 import { GameIcon, GameTag } from "./GameTag";
 
@@ -186,12 +186,14 @@ export async function LatestContent() {
 /* ---------------- Command (Vitality-style cards) ---------------- */
 
 export async function Command() {
+  // Captain and General are alliance ranks: legion status does not matter here, only hidden accounts are left out.
   const leaders = await db.user.findMany({
-    where: { status: "APPROVED", role: { in: ["LEADER", "OFFICER"] } },
-    orderBy: [{ createdAt: "asc" }],
+    where: { discordLeftAt: null, role: { in: ["LEADER", "OFFICER"] } },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     select: { id: true, displayName: true, role: true, title: true, tier: true, gameClass: true, game: true, playedGames: true, avatarAt: true },
   });
-  leaders.sort((a, b) => (a.role === "LEADER" ? -1 : b.role === "LEADER" ? 1 : 0));
+  // Generals before Captains; the sort is stable, so within a rank the earliest account comes first (same order as the roster).
+  leaders.sort((a, b) => allianceRank(a).order - allianceRank(b).order);
 
   return (
     <section className="relative border-y border-line bg-bg-2 py-24">
@@ -203,26 +205,31 @@ export async function Command() {
           </ButtonLink>
         </div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {leaders.map((l) => (
-            <div key={l.id} className={`panel cut group relative overflow-hidden p-6 transition hover:-translate-y-1 ${l.role === "LEADER" ? "border-gold/50 shadow-[0_0_60px_-30px_rgba(155,77,255,0.6)]" : ""}`}>
-              <div className="bg-glow-accent absolute inset-0 opacity-0 transition group-hover:opacity-60" />
-              <div className="relative">
-                <div className="flex items-start justify-between">
-                  <Avatar name={l.displayName} size="lg" tone={roleTone(l.role)} src={avatarUrl(l)} />
-                  <Badge tone={roleTone(l.role)}>{ROLE_LABEL[l.role as UserRole]}</Badge>
-                </div>
-                <h3 className="display mt-5 text-3xl">{l.displayName}</h3>
-                <p className="mt-1 text-sm text-text">{l.title ?? ROLE_LABEL[l.role as UserRole]}</p>
-                <div className="mt-4 flex flex-wrap gap-1.5 border-t border-line pt-4">
-                  <Badge tone="gold">{TIER_LABEL[l.tier as keyof typeof TIER_LABEL] ?? l.tier}</Badge>
-                  {playedGamesOf(l).map((t) => (
-                    <GameTag key={t} game={t} />
-                  ))}
-                  {l.gameClass && <Badge tone="neutral">{l.gameClass}</Badge>}
+          {leaders.map((l) => {
+            const rank = allianceRank(l);
+            const tags = playedGamesOf(l);
+            return (
+              <div key={l.id} className={`panel cut group relative overflow-hidden p-6 transition hover:-translate-y-1 ${l.role === "LEADER" ? "border-gold/50 shadow-[0_0_60px_-30px_rgba(155,77,255,0.6)]" : ""}`}>
+                <div className="bg-glow-accent absolute inset-0 opacity-0 transition group-hover:opacity-60" />
+                <div className="relative">
+                  <div className="flex items-start justify-between">
+                    <Avatar name={l.displayName} size="lg" tone={rank.tone} src={avatarUrl(l)} />
+                    <Badge tone={rank.tone}>{rank.label}</Badge>
+                  </div>
+                  <h3 className="display mt-5 text-3xl">{l.displayName}</h3>
+                  <p className="mt-1 text-sm text-text">{l.title ?? rank.label}</p>
+                  {(tags.length > 0 || l.gameClass) && (
+                    <div className="mt-4 flex flex-wrap gap-1.5 border-t border-line pt-4">
+                      {tags.map((t) => (
+                        <GameTag key={t} game={t} />
+                      ))}
+                      {l.gameClass && <Badge tone="neutral">{l.gameClass}</Badge>}
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

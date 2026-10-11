@@ -2,13 +2,12 @@ import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
 import { closeExpiredNominations } from "@/lib/ranks";
 import { setTierAction } from "@/lib/actions/ranks";
-import { TIERS, TIER_LABEL, VOTED_TIERS, VOTE_RULES, ROLE_LABEL, canVoteOn, type Tier, type UserRole } from "@/lib/constants";
-import { Avatar, Badge, Button, Card, EmptyState, PageHeader, roleTone } from "@/components/ui";
+import { site } from "@/lib/site";
+import { TIERS, TIER_LABEL, VOTED_TIERS, VOTE_RULES, allianceRank, canVoteOn, playedGamesOf, type Tier } from "@/lib/constants";
+import { Avatar, Badge, Button, Card, EmptyState, PageHeader } from "@/components/ui";
 import { avatarUrl } from "@/lib/avatar";
 import { VoteCard } from "@/components/portal/VoteCard";
 import { NominateForm } from "@/components/forms/RankForms";
-
-const TIER_ORDER: Record<string, number> = { ELITE: 0, VETERAN: 1, MEMBER: 2, RECRUIT: 3 };
 
 export default async function AdminRanksPage() {
   const me = await requireOfficer();
@@ -16,17 +15,23 @@ export default async function AdminRanksPage() {
   const isLeader = me.role === "LEADER";
 
   const include = {
-    user: { select: { id: true, displayName: true, tier: true, gameClass: true, role: true, avatarAt: true } },
+    // discordLeftAt lets avatarUrl skip the picture of a nominee who has since left the Discord.
+    user: { select: { id: true, displayName: true, tier: true, gameClass: true, role: true, avatarAt: true, discordLeftAt: true } },
     nominatedBy: { select: { displayName: true } },
     votes: { include: { voter: { select: { displayName: true } } }, orderBy: { createdAt: "asc" as const } },
   };
   const [members, open, recent] = await Promise.all([
-    db.user.findMany({ where: { status: "APPROVED" }, orderBy: { displayName: "asc" }, select: { id: true, displayName: true, tier: true, role: true, gameClass: true, avatarAt: true } }),
+    // Every alliance member holds a rank, in the legion or not. Accounts hidden after leaving the Discord are left out.
+    db.user.findMany({ where: { discordLeftAt: null }, orderBy: { displayName: "asc" }, select: { id: true, displayName: true, tier: true, role: true, status: true, game: true, playedGames: true, avatarAt: true } }),
     db.nomination.findMany({ where: { status: "OPEN" }, orderBy: { closesAt: "asc" }, include }),
     db.nomination.findMany({ where: { status: { not: "OPEN" } }, orderBy: { decidedAt: "desc" }, take: 10, include }),
   ]);
-  const sorted = [...members].sort((a, b) => TIER_ORDER[a.tier] - TIER_ORDER[b.tier] || a.displayName.localeCompare(b.displayName));
-  const counts = TIERS.map((t) => [t, members.filter((m) => m.tier === t).length] as const);
+  // Same order as the public roster: General, Captain, then the ladder from Elite down.
+  const sorted = members
+    .map((m) => ({ ...m, rank: allianceRank(m) }))
+    .sort((a, b) => a.rank.order - b.rank.order || a.displayName.localeCompare(b.displayName));
+  // The tiles count the ladder only. Generals and Captains sit above it, so their tier is not counted.
+  const counts = TIERS.map((t) => [t, members.filter((m) => m.role === "MEMBER" && m.tier === t).length] as const);
 
   return (
     <>
@@ -64,14 +69,16 @@ export default async function AdminRanksPage() {
             {sorted.map((m) => (
               <li key={m.id} className="grid gap-3 px-4 py-3 md:grid-cols-[1fr_auto] md:items-center">
                 <div className="flex items-center gap-3">
-                  <Avatar name={m.displayName} size="sm" tone={roleTone(m.role)} src={avatarUrl(m)} />
+                  <Avatar name={m.displayName} size="sm" tone={m.rank.tone} src={avatarUrl(m)} />
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="display text-lg">{m.displayName}</p>
-                      <Badge tone={m.tier === "ELITE" ? "gold" : m.tier === "VETERAN" ? "accent" : "neutral"}>{TIER_LABEL[m.tier as Tier]}</Badge>
-                      {m.role !== "MEMBER" && <Badge tone={roleTone(m.role)}>{ROLE_LABEL[m.role as UserRole]}</Badge>}
+                      <Badge tone={m.rank.tone}>{m.rank.label}</Badge>
+                      {/* Command sits above the ladder, but the buttons on this page edit the tier, so it is shown here. */}
+                      {m.role !== "MEMBER" && <Badge tone="neutral">Ladder: {TIER_LABEL[m.tier as Tier] ?? m.tier}</Badge>}
+                      {m.status === "APPROVED" && <Badge tone="success">{site.legionName}</Badge>}
                     </div>
-                    <p className="text-xs text-muted">{m.gameClass ?? "—"}</p>
+                    <p className="text-xs text-muted">{playedGamesOf(m).join(" · ") || "No games picked yet"}</p>
                   </div>
                 </div>
                 <form action={setTierAction} className="flex flex-wrap gap-1.5 md:justify-end">

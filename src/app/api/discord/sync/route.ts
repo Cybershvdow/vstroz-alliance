@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   let allowed = !!secret && req.headers.get("authorization") === `Bearer ${secret}`;
   if (!allowed) {
     const me = await getCurrentUser();
-    allowed = !!me && me.status === "APPROVED" && isOfficer(me.role);
+    allowed = !!me && !me.discordLeftAt && isOfficer(me.role);
   }
   if (!allowed) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!discordSyncConfigured()) return NextResponse.json({ error: "Discord sync is not configured" }, { status: 503 });

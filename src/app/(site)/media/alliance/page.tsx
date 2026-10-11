@@ -32,7 +32,7 @@ export default async function AllianceMediaPage({ searchParams }: { searchParams
     if (elsewhere) redirect(folderHref(elsewhere, v));
   }
 
-  const canPost = !!me && me.status === "APPROVED" && isOfficer(me.role);
+  const canPost = !!me && !me.discordLeftAt && isOfficer(me.role);
 
   return (
     <FolderView

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { formatDate } from "@/lib/format";
-import { TIER_LABEL, type Tier } from "@/lib/constants";
 import { Badge, ButtonLink, Card, PageHeader } from "@/components/ui";
 import { DiscordIcon } from "@/components/site/Icons";
 import { PlayerProfileForm } from "@/components/forms/PlayerProfileForm";
@@ -43,12 +42,12 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
         ? "Legion application under review"
         : `Join the ${site.legionName}`;
   const text = inLegion
-    ? "Match signups, guild roles, and the legion roster are open to you. Keep your player profile current so officers can build rosters."
+    ? "Match signups and guild roles are open to you. Keep your player profile current so officers can build rosters."
     : denied
-      ? "An officer reviewed your application and did not approve it for the legion. You are still part of the Vstroz Alliance: Discord, media, and The Round Table stay open to you."
+      ? "An officer reviewed your application and did not approve it for the legion. You are still part of the Vstroz Alliance and you keep your rank. Discord, media, and The Round Table stay open to you."
       : applied
         ? "Your application is in the officer queue. Most reviews happen within 48 hours. You can update your answers below until it is reviewed."
-        : `You are already in the alliance. The ${site.legionName} is our guild in ${site.legionGame}: join it in-game, fill in the application, and an officer reviews it within 48 hours. Don't play ${site.legionGame}? Skip this and just pick your games on your profile.`;
+        : `You are already in the alliance and you hold your rank there. The ${site.legionName} is our guild in ${site.legionGame}: join it in-game, fill in the application, and an officer reviews it within 48 hours. It unlocks match signups and guild roles. Don't play ${site.legionGame}? Skip this. Your rank does not depend on it.`;
 
   return (
     <>
@@ -71,10 +70,7 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
         <div className="space-y-6">
           {inLegion ? (
             <Card accent>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge tone="success">In the legion</Badge>
-                <Badge tone={me.tier === "ELITE" ? "gold" : me.tier === "VETERAN" ? "accent" : "neutral"}>{TIER_LABEL[me.tier as Tier] ?? me.tier}</Badge>
-              </div>
+              <Badge tone="success">In the legion</Badge>
               <p className="mt-4 text-sm text-muted">
                 {me.ign ? `In-game name: ${me.ign}` : "No in-game name set yet"}
                 {me.gameClass ? ` · ${me.gameClass}` : ""}
@@ -150,11 +146,10 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
             <p className="eyebrow">Alliance vs legion</p>
             <ul className="mt-2 space-y-2 text-sm text-muted">
               <li>
-                <span className="text-text">Alliance</span>: everyone with a Vstroz Alliance account, whatever they play. Pick your games, post content, vote, bring disputes.
+                <span className="text-text">Alliance</span>: everyone with a Vstroz Alliance account, whatever they play. Everyone starts as a Recruit and earns rank here. Pick your games, post content, vote, bring disputes.
               </li>
               <li>
-                <span className="text-text">{site.legionName}</span>: our guild in {site.legionGame} only. Join it in-game, then apply here; officers approve. Unlocks match signups, roles, and
-                the legion roster.
+                <span className="text-text">{site.legionName}</span>: our guild in {site.legionGame} only. Join it in-game, then apply here; officers approve. Unlocks match signups and guild roles. It does not change your rank.
               </li>
             </ul>
           </Card>

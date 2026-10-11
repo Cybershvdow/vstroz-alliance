@@ -79,7 +79,7 @@ async function main() {
   await db.announcement.create({
     data: {
       title: "Welcome to the Vstroz Alliance portal",
-      body: "Sign up for matches, apply for roles, and keep your profile current here. Officers review applications within 48 hours. Rank promotions to Veteran and Elite are decided by vote.",
+      body: "Everyone starts here as a Recruit. Show up and an officer promotes you to Member. Veteran and Elite are decided by an alliance vote. Play Aion? Apply to the Vstroz Legion from your account to unlock match signups and guild roles. Officers review applications within 48 hours.",
       pinned: true,
       authorId: cyber.id,
     },

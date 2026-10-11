@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
 import { resolveDisputeAction, reviewTryoutAction } from "@/lib/actions/community";
 import { rules } from "@/lib/site";
-import { TIER_LABEL, type Tier } from "@/lib/constants";
+import { allianceRank } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, ButtonLink, EmptyState, PageHeader, statusTone } from "@/components/ui";
@@ -11,7 +11,7 @@ export default async function AdminTablePage() {
   await requireOfficer();
   const [disputes, tryouts, openVotes] = await Promise.all([
     db.dispute.findMany({ orderBy: [{ status: "asc" }, { createdAt: "desc" }], take: 40, include: { raisedBy: { select: { displayName: true } }, against: { select: { displayName: true } } } }),
-    db.tryoutRequest.findMany({ orderBy: [{ createdAt: "desc" }], take: 40, include: { user: { select: { id: true, displayName: true, gameClass: true, discord: true, tier: true, avatarAt: true } } } }),
+    db.tryoutRequest.findMany({ orderBy: [{ createdAt: "desc" }], take: 40, include: { user: { select: { id: true, displayName: true, gameClass: true, discord: true, role: true, tier: true, avatarAt: true } } } }),
     db.nomination.count({ where: { status: "OPEN" } }),
   ]);
   const openDisputes = disputes.filter((d) => d.status === "OPEN");
@@ -81,7 +81,7 @@ export default async function AdminTablePage() {
                     <Badge tone={statusTone(t.status)}>{t.status}</Badge>
                   </div>
                   <p className="text-xs text-muted">
-                    {TIER_LABEL[t.user.tier as Tier] ?? t.user.tier} · {t.user.gameClass ?? "—"} · {t.user.discord ?? "no discord"} · {formatDate(t.createdAt)}
+                    {allianceRank(t.user).label} · {t.user.gameClass ?? "—"} · {t.user.discord ?? "no discord"} · {formatDate(t.createdAt)}
                   </p>
                   <p className="mt-2 text-sm text-muted">{t.message}</p>
                 </div>
@@ -100,7 +100,7 @@ export default async function AdminTablePage() {
                     Failed
                   </Button>
                 </div>
-                <p className="text-[0.7rem] text-dim">Passing a tryout does not promote by itself. Open an Elite vote on the Ranks page.</p>
+                <p className="text-[0.7rem] text-dim">A passed tryout does not change a rank. Elite is decided by a vote on the Ranks page, with or without a tryout.</p>
               </form>
             </li>
           ))}

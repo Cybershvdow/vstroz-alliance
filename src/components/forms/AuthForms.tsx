@@ -8,7 +8,7 @@ import { useFormDraft } from "@/lib/formDraft";
 import { DraftNotice } from "./DraftNotice";
 import { SubmitButton } from "./SubmitButton";
 
-/** Creates the account. That alone makes someone a community member; the legion is applied for from inside the account. */
+/** Creates the account. That alone makes someone an alliance member with the Recruit rank; the legion is applied for from inside the account. */
 export function RegisterForm() {
   const [state, formAction, pending] = useActionState(registerAction, undefined);
   const [formRef, draft] = useFormDraft("register", state);
@@ -103,7 +103,7 @@ export function RegisterForm() {
       </Button>
 
       <p className="text-center text-xs text-muted">
-        Your account makes you part of the alliance. You pick your games next. The Vstroz Legion (our Aion guild) is a separate application.
+        Your account makes you a Recruit in the alliance. Once you are signed in you can add a profile picture and pick your games. The Vstroz Legion (our Aion guild) is a separate application.
       </p>
       <p className="text-center text-sm text-muted">
         Already have an account?{" "}

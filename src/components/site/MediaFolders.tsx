@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Avatar, Badge, roleTone } from "@/components/ui";
+import { Avatar, Badge } from "@/components/ui";
 import { LogoMark } from "@/components/brand/Logo";
 import { MediaPlayer, type MediaItem } from "@/components/site/MediaPlayer";
 import { thumbnailFor } from "@/lib/media";
@@ -54,7 +54,7 @@ export function FolderCard({
   count,
   thumb,
   kind,
-  role = "MEMBER",
+  rank,
   avatar = null,
 }: {
   href: string;
@@ -63,11 +63,13 @@ export function FolderCard({
   count: number;
   thumb: string | null;
   kind: "alliance" | "member";
-  role?: string;
+  /** The member's alliance rank (from allianceRank). Not used for the official folder. */
+  rank?: { label: string; tone: "gold" | "accent" | "neutral" };
   /** The member's profile picture URL, when they have one. */
   avatar?: string | null;
 }) {
   const alliance = kind === "alliance";
+  const badge = alliance ? { label: "Official", tone: "gold" as const } : rank;
   return (
     <li>
       <Link
@@ -91,13 +93,15 @@ export function FolderCard({
                   <LogoMark className="h-24 w-24 drop-shadow-[0_0_24px_rgba(155,77,255,0.5)]" title="" />
                 </span>
               ) : (
-                <Avatar name={name} size="lg" tone={roleTone(role)} src={avatar} />
+                <Avatar name={name} size="lg" tone={rank?.tone} src={avatar} />
               )}
             </span>
           )}
-          <span className="absolute left-3 top-3">
-            <Badge tone={alliance ? "gold" : "neutral"}>{alliance ? "Official" : "Member"}</Badge>
-          </span>
+          {badge && (
+            <span className="absolute left-3 top-3">
+              <Badge tone={badge.tone}>{badge.label}</Badge>
+            </span>
+          )}
           <span className="absolute bottom-3 right-3 border border-line-strong bg-black/70 px-2 py-0.5 font-display text-[0.66rem] font-bold uppercase tracking-[0.2em] text-text">
             {count} {count === 1 ? "video" : "videos"}
           </span>
@@ -108,7 +112,7 @@ export function FolderCard({
               <LogoMark className="h-9 w-9" title="" />
             </span>
           ) : (
-            <Avatar name={name} size="sm" tone={roleTone(role)} src={avatar} />
+            <Avatar name={name} size="sm" tone={rank?.tone} src={avatar} />
           )}
           <span className="min-w-0 flex-1">
             <span className="display block truncate text-xl">{name}</span>

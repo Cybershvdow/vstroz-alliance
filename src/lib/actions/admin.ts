@@ -35,6 +35,7 @@ export async function reviewApplicantAction(formData: FormData) {
 
   const target = await db.user.findUnique({ where: { id: userId } });
   if (!target || target.id === officer.id) return;
+  if (target.discordLeftAt) return; // hidden accounts (left the Discord) cannot be put in or out of the legion
   // Generals are peers: nobody reviews a General's status. Captains cannot touch other Captains.
   if (target.role === "LEADER") return;
   if (target.role !== "MEMBER" && officer.role !== "LEADER") return;
@@ -60,8 +61,9 @@ export async function setMemberRoleAction(formData: FormData) {
   const role = clean(formData.get("role"));
   if (!userId || userId === leader.id) return;
   if (!(USER_ROLE as readonly string[]).includes(role) || role === "LEADER") return;
-  const target = await db.user.findUnique({ where: { id: userId }, select: { role: true } });
+  const target = await db.user.findUnique({ where: { id: userId }, select: { role: true, discordLeftAt: true } });
   if (!target || target.role === "LEADER") return; // Generals cannot demote each other
+  if (target.discordLeftAt && role !== "MEMBER") return; // hidden accounts (left the Discord) cannot be promoted
   await db.user.update({ where: { id: userId }, data: { role } });
   revalidateAll();
 }
