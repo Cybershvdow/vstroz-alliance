@@ -4,6 +4,12 @@ export const site = {
   name: "Vstroz Alliance",
   legionName: "Vstroz Legion", // the guild inside Aion that members apply to; an account alone makes someone an alliance member
   legionGame: "Aion",
+  /** Homepage intro film (files in public/video). Set to null to fall back to the still hero. */
+  introVideo: {
+    src: "/video/vstroz-intro-1080.mp4",
+    mobileSrc: "/video/vstroz-intro-720.mp4",
+    poster: "/video/vstroz-intro-poster.jpg",
+  } as { src: string; mobileSrc?: string; poster: string } | null,
   shortName: "Vstroz",
   tag: "VST",
   motto: "One banner. Every world.",

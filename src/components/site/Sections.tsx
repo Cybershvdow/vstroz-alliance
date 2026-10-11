@@ -7,6 +7,7 @@ import { Badge, ButtonLink, SectionHeading, Avatar, roleTone } from "@/component
 import { Countdown } from "./Countdown";
 import { ArrowIcon, DiscordIcon } from "./Icons";
 import { GameIcon } from "./GameTag";
+import { HeroVideo } from "./HeroVideo";
 import { LogoFull } from "@/components/brand/Logo";
 
 /* ---------------- Hero ---------------- */
@@ -22,14 +23,31 @@ export async function Hero() {
     db.match.count({ where: { status: "COMPLETED", result: { contains: "Victory" } } }),
   ]);
 
+  const film = site.introVideo;
+
   return (
     <section className="relative overflow-hidden pt-18">
-      <div className="bg-rays absolute inset-0" />
-      <div className="bg-glow-accent ember absolute inset-0" />
-      <div className="bg-grid absolute inset-0 opacity-70" />
-      <div className="hero-vignette absolute inset-0" />
+      {/* The first screen: the intro film plays behind the headline as soon as the page loads. */}
+      <div className={`relative ${film ? "flex min-h-[72svh] flex-col justify-end lg:min-h-[calc(100svh-4.5rem)]" : ""}`}>
+      {film ? (
+        <>
+          <HeroVideo src={film.src} mobileSrc={film.mobileSrc} poster={film.poster} />
+          {/* Scrims keep the headline readable over the film and blend it into the page. */}
+          <div className="absolute inset-0 bg-bg/55 lg:hidden" />
+          <div className="absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(5,5,7,0.9)_0%,rgba(5,5,7,0.6)_40%,rgba(5,5,7,0.08)_72%,rgba(5,5,7,0.3)_100%)] lg:block" />
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-bg/85 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent" />
+        </>
+      ) : (
+        <>
+          <div className="bg-rays absolute inset-0" />
+          <div className="bg-glow-accent ember absolute inset-0" />
+          <div className="bg-grid absolute inset-0 opacity-70" />
+          <div className="hero-vignette absolute inset-0" />
+        </>
+      )}
 
-      <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-20 pt-16 md:px-6 md:pt-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-center lg:pb-28 lg:pt-28">
+      <div className="relative mx-auto grid w-full max-w-7xl gap-12 px-4 pb-20 pt-16 md:px-6 md:pt-24 lg:grid-cols-[1.2fr_0.8fr] lg:items-end lg:pb-28 lg:pt-28">
         <div>
           <p className="eyebrow rise rise-1 flex items-center gap-3">
             Est. {site.founded} · Multi-game alliance · Every player welcome
@@ -56,7 +74,7 @@ export async function Hero() {
         </div>
 
         <div className="rise rise-3">
-          <LogoFull className="mx-auto mb-8 h-64 w-64 drop-shadow-[0_0_70px_rgba(155,77,255,0.5)] md:h-80 md:w-80" />
+          {!film && <LogoFull className="mx-auto mb-8 h-64 w-64 drop-shadow-[0_0_70px_rgba(155,77,255,0.5)] md:h-80 md:w-80" />}
           <div className="panel panel-accent cut relative p-6 md:p-8">
             <div className="flex items-center justify-between">
               <p className="eyebrow">Next match</p>
@@ -89,6 +107,7 @@ export async function Hero() {
             )}
           </div>
         </div>
+      </div>
       </div>
 
       <div className="relative border-y border-line bg-bg-2/80 backdrop-blur">
