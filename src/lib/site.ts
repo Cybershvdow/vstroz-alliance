@@ -6,9 +6,9 @@ export const site = {
   legionGame: "Aion",
   /** Homepage intro film (files in public/video). Set to null to fall back to the still hero. */
   introVideo: {
-    src: "/video/vstroz-intro-1080.mp4",
-    mobileSrc: "/video/vstroz-intro-720.mp4",
-    poster: "/video/vstroz-intro-poster.jpg",
+    src: "/video/vstroz-intro-1080.mp4?v=2",
+    mobileSrc: "/video/vstroz-intro-720.mp4?v=2",
+    poster: "/video/vstroz-intro-poster.jpg?v=2",
   } as { src: string; mobileSrc?: string; poster: string } | null,
   shortName: "Vstroz",
   tag: "VST",
