@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { APEX_PLATFORMS, apexConfigured, fetchApexStats } from "@/lib/apex";
-import { AVATAR_MAX_UPLOAD_BYTES, AVATAR_SIZE } from "@/lib/avatar";
+import { AVATAR_MAX_INPUT_PIXELS, AVATAR_MAX_UPLOAD_BYTES, AVATAR_SIZE, sniffImageType } from "@/lib/avatar";
 import type { ActionState } from "@/lib/validation";
 
 function clean(v: FormDataEntryValue | null) {
@@ -62,24 +62,27 @@ export async function unlinkSteamAction() {
 }
 
 /**
- * Save the member's profile picture. The browser sends a small square JPEG; whatever arrives is decoded and
- * re-encoded here to a `AVATAR_SIZE` WebP, so only a real, clean image is ever stored or served.
+ * Save the member's profile picture. The browser sends a small square JPEG; whatever arrives is checked by its
+ * first bytes, then decoded and re-encoded here to a 256px WebP, so only a real, clean photo is ever stored or served.
  */
 export async function saveAvatarAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const me = await getCurrentUser();
   if (!me) redirect("/login");
+  if (me.discordLeftAt) return { ok: false, message: "Rejoin the Discord and sign in again before setting a picture." };
   const file = formData.get("avatar");
   if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Choose a picture first." };
   if (file.size > AVATAR_MAX_UPLOAD_BYTES) return { ok: false, message: "That picture is too large. Try a smaller one." };
 
+  const NOT_A_PHOTO = "That file is not a picture we can read. Use a JPG, PNG, or WebP.";
+  const input = Buffer.from(await file.arrayBuffer());
+  // Photos only, decided from the file's own first bytes. Nothing else (SVG, PDF, TIFF…) reaches the image library.
+  if (!sniffImageType(input)) return { ok: false, message: NOT_A_PHOTO };
+
   let image: Uint8Array<ArrayBuffer>;
   try {
     const sharp = (await import("sharp")).default;
-    const input = Buffer.from(await file.arrayBuffer());
-    // Photos only. Anything else the decoder understands (SVG, PDF pages, TIFF…) is refused before it is rendered.
-    const { format } = await sharp(input, { limitInputPixels: 4096 * 4096 }).metadata();
-    if (!format || !["jpeg", "png", "webp", "gif"].includes(format)) throw new Error("unsupported format");
-    const out = await sharp(input, { failOn: "error", limitInputPixels: 4096 * 4096 })
+    const out = await sharp(input, { failOn: "error", limitInputPixels: AVATAR_MAX_INPUT_PIXELS })
+      .timeout({ seconds: 10 })
       .rotate() // honour the camera's orientation, then drop the metadata
       .resize(AVATAR_SIZE, AVATAR_SIZE, { fit: "cover", position: "centre" })
       .flatten({ background: "#0b0a10" })
@@ -87,7 +90,7 @@ export async function saveAvatarAction(_prev: ActionState, formData: FormData): 
       .toBuffer();
     image = new Uint8Array(out);
   } catch {
-    return { ok: false, message: "That file is not a picture we can read. Use a JPG, PNG, or WebP." };
+    return { ok: false, message: NOT_A_PHOTO };
   }
 
   await db.$transaction([

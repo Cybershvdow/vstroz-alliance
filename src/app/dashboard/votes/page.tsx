@@ -11,7 +11,7 @@ export default async function VotesPage() {
 
   const meFull = await db.user.findUnique({ where: { id: me.id }, select: { role: true, tier: true } });
   const include = {
-    user: { select: { id: true, displayName: true, tier: true, gameClass: true, role: true } },
+    user: { select: { id: true, displayName: true, tier: true, gameClass: true, role: true, avatarAt: true } },
     nominatedBy: { select: { displayName: true } },
     votes: { include: { voter: { select: { displayName: true } } }, orderBy: { createdAt: "asc" as const } },
   };

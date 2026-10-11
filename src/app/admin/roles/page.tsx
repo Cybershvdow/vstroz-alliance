@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
 import { reviewRoleApplicationAction, toggleGuildRoleAction, deleteGuildRoleAction } from "@/lib/actions/admin";
 import { formatDate } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, Card, EmptyState, PageHeader, statusTone } from "@/components/ui";
 import { CreateRoleForm } from "@/components/forms/AdminForms";
 import { ConfirmSubmit } from "@/components/forms/SubmitButton";
@@ -11,7 +12,7 @@ export default async function AdminRolesPage() {
   const [pending, roles] = await Promise.all([
     db.roleApplication.findMany({
       where: { status: "PENDING" },
-      include: { role: true, user: { select: { displayName: true, gameClass: true, discord: true } } },
+      include: { role: true, user: { select: { id: true, displayName: true, gameClass: true, discord: true, avatarAt: true } } },
       orderBy: { createdAt: "asc" },
     }),
     db.guildRole.findMany({
@@ -34,7 +35,7 @@ export default async function AdminRolesPage() {
           {pending.map((a) => (
             <li key={a.id} className="panel panel-accent cut grid gap-4 p-5 md:grid-cols-[1fr_260px]">
               <div className="flex gap-3">
-                <Avatar name={a.user.displayName} />
+                <Avatar name={a.user.displayName} src={avatarUrl(a.user)} />
                 <div>
                   <p className="display text-2xl">
                     {a.user.displayName} <span className="text-muted">→</span> {a.role.name}

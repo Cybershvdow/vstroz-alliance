@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
 import { formatDateTime } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { updateMatchStatusAction, deleteMatchAction, reviewSignupAction } from "@/lib/actions/admin";
 import { MATCH_TYPE_LABEL, POSITION, type MatchType } from "@/lib/constants";
 import { Avatar, Badge, Button, Card, PageHeader, statusTone, roleTone } from "@/components/ui";
@@ -13,7 +14,7 @@ export default async function AdminMatchDetail({ params }: { params: Promise<{ i
   const { id } = await params;
   const match = await db.match.findUnique({
     where: { id },
-    include: { signups: { include: { user: { select: { displayName: true, gameClass: true, role: true, discord: true } } }, orderBy: { createdAt: "asc" } } },
+    include: { signups: { include: { user: { select: { id: true, displayName: true, gameClass: true, role: true, discord: true, avatarAt: true } } }, orderBy: { createdAt: "asc" } } },
   });
   if (!match) notFound();
 
@@ -57,7 +58,7 @@ export default async function AdminMatchDetail({ params }: { params: Promise<{ i
             {match.signups.map((s) => (
               <li key={s.id} className="grid gap-3 px-4 py-3 md:grid-cols-[1fr_auto] md:items-center">
                 <div className="flex items-center gap-3">
-                  <Avatar name={s.user.displayName} size="sm" tone={roleTone(s.user.role)} />
+                  <Avatar name={s.user.displayName} size="sm" tone={roleTone(s.user.role)} src={avatarUrl(s.user)} />
                   <div className="min-w-0">
                     <p className="display text-lg">
                       {s.user.displayName} <span className="text-sm text-muted">· {s.position}</span>

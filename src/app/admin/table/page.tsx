@@ -4,13 +4,14 @@ import { resolveDisputeAction, reviewTryoutAction } from "@/lib/actions/communit
 import { rules } from "@/lib/site";
 import { TIER_LABEL, type Tier } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, ButtonLink, EmptyState, PageHeader, statusTone } from "@/components/ui";
 
 export default async function AdminTablePage() {
   await requireOfficer();
   const [disputes, tryouts, openVotes] = await Promise.all([
     db.dispute.findMany({ orderBy: [{ status: "asc" }, { createdAt: "desc" }], take: 40, include: { raisedBy: { select: { displayName: true } }, against: { select: { displayName: true } } } }),
-    db.tryoutRequest.findMany({ orderBy: [{ createdAt: "desc" }], take: 40, include: { user: { select: { displayName: true, gameClass: true, discord: true, tier: true } } } }),
+    db.tryoutRequest.findMany({ orderBy: [{ createdAt: "desc" }], take: 40, include: { user: { select: { id: true, displayName: true, gameClass: true, discord: true, tier: true, avatarAt: true } } } }),
     db.nomination.count({ where: { status: "OPEN" } }),
   ]);
   const openDisputes = disputes.filter((d) => d.status === "OPEN");
@@ -72,7 +73,7 @@ export default async function AdminTablePage() {
           {activeTryouts.map((t) => (
             <li key={t.id} className="panel cut grid gap-4 p-5 md:grid-cols-[1fr_320px]">
               <div className="flex gap-3">
-                <Avatar name={t.user.displayName} />
+                <Avatar name={t.user.displayName} src={avatarUrl(t.user)} />
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="display text-xl">{t.user.displayName}</p>

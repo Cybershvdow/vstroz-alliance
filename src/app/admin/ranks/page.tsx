@@ -4,6 +4,7 @@ import { closeExpiredNominations } from "@/lib/ranks";
 import { setTierAction } from "@/lib/actions/ranks";
 import { TIERS, TIER_LABEL, VOTED_TIERS, VOTE_RULES, ROLE_LABEL, canVoteOn, type Tier, type UserRole } from "@/lib/constants";
 import { Avatar, Badge, Button, Card, EmptyState, PageHeader, roleTone } from "@/components/ui";
+import { avatarUrl } from "@/lib/avatar";
 import { VoteCard } from "@/components/portal/VoteCard";
 import { NominateForm } from "@/components/forms/RankForms";
 
@@ -15,12 +16,12 @@ export default async function AdminRanksPage() {
   const isLeader = me.role === "LEADER";
 
   const include = {
-    user: { select: { id: true, displayName: true, tier: true, gameClass: true, role: true } },
+    user: { select: { id: true, displayName: true, tier: true, gameClass: true, role: true, avatarAt: true } },
     nominatedBy: { select: { displayName: true } },
     votes: { include: { voter: { select: { displayName: true } } }, orderBy: { createdAt: "asc" as const } },
   };
   const [members, open, recent] = await Promise.all([
-    db.user.findMany({ where: { status: "APPROVED" }, orderBy: { displayName: "asc" }, select: { id: true, displayName: true, tier: true, role: true, gameClass: true } }),
+    db.user.findMany({ where: { status: "APPROVED" }, orderBy: { displayName: "asc" }, select: { id: true, displayName: true, tier: true, role: true, gameClass: true, avatarAt: true } }),
     db.nomination.findMany({ where: { status: "OPEN" }, orderBy: { closesAt: "asc" }, include }),
     db.nomination.findMany({ where: { status: { not: "OPEN" } }, orderBy: { decidedAt: "desc" }, take: 10, include }),
   ]);
@@ -63,7 +64,7 @@ export default async function AdminRanksPage() {
             {sorted.map((m) => (
               <li key={m.id} className="grid gap-3 px-4 py-3 md:grid-cols-[1fr_auto] md:items-center">
                 <div className="flex items-center gap-3">
-                  <Avatar name={m.displayName} size="sm" tone={roleTone(m.role)} />
+                  <Avatar name={m.displayName} size="sm" tone={roleTone(m.role)} src={avatarUrl(m)} />
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="display text-lg">{m.displayName}</p>

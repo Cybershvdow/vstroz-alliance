@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { startTransition, useEffect, useRef, useState, useTransition } from "react";
+import { unstable_rethrow } from "next/navigation";
 import { removeAvatarAction, saveAvatarAction } from "@/lib/actions/accounts";
 import { Button } from "@/components/ui";
 
 const MAX_SOURCE_BYTES = 20 * 1024 * 1024; // what we are willing to open in the browser
 const OUT = 512; // the browser sends a 512px square; the server stores 256px
+const OFFLINE = "Could not reach the server. Check your connection, or sign in again, then try once more.";
 
 /** Crop the picture to a centred square and shrink it, so even a large phone photo uploads in a moment. */
 async function toSquareJpeg(file: File): Promise<Blob> {
@@ -49,9 +51,13 @@ async function toSquareJpeg(file: File): Promise<Blob> {
 export function AvatarForm({ name, current }: { name: string; current: string | null }) {
   const [pending, setPending] = useState<{ url: string; blob: Blob } | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [preparing, setPreparing] = useState(false);
   const [busy, start] = useTransition();
   const input = useRef<HTMLInputElement>(null);
+  const saveButton = useRef<HTMLButtonElement>(null);
   const lastUrl = useRef<string | null>(null);
+  const pick = useRef(0); // the latest file chosen; older decodes are ignored
+  const hadPending = useRef(false);
 
   // Free the preview image when the form goes away.
   useEffect(
@@ -60,6 +66,13 @@ export function AvatarForm({ name, current }: { name: string; current: string | 
     },
     [],
   );
+
+  // Keep keyboard focus on the next sensible control as the buttons swap.
+  useEffect(() => {
+    if (pending && !hadPending.current) saveButton.current?.focus();
+    if (!pending && hadPending.current) input.current?.focus();
+    hadPending.current = !!pending;
+  }, [pending]);
 
   const drop = () => {
     if (lastUrl.current) URL.revokeObjectURL(lastUrl.current);
@@ -70,17 +83,22 @@ export function AvatarForm({ name, current }: { name: string; current: string | 
 
   const choose = async (file: File | undefined) => {
     if (!file) return;
+    const mine = ++pick.current;
     setMessage(null);
     if (!file.type.startsWith("image/")) return setMessage({ ok: false, text: "That is not a picture. Choose a JPG, PNG, or WebP." });
     if (file.size > MAX_SOURCE_BYTES) return setMessage({ ok: false, text: "That picture is over 20 MB. Choose a smaller one." });
+    setPreparing(true);
     try {
       const blob = await toSquareJpeg(file);
+      if (mine !== pick.current) return; // a newer pick replaced this one
       if (lastUrl.current) URL.revokeObjectURL(lastUrl.current);
       const url = URL.createObjectURL(blob);
       lastUrl.current = url;
       setPending({ url, blob });
     } catch {
-      setMessage({ ok: false, text: "This browser could not open that picture. Try a JPG or PNG." });
+      if (mine === pick.current) setMessage({ ok: false, text: "This browser could not open that picture. Try a JPG or PNG (iPhone HEIC photos need converting first)." });
+    } finally {
+      if (mine === pick.current) setPreparing(false);
     }
   };
 
@@ -89,17 +107,30 @@ export function AvatarForm({ name, current }: { name: string; current: string | 
     const fd = new FormData();
     fd.set("avatar", pending.blob, "avatar.jpg");
     start(async () => {
-      const r = await saveAvatarAction(undefined, fd);
-      setMessage(r ? { ok: r.ok, text: r.message ?? (r.ok ? "Saved." : "Could not save that picture.") } : null);
-      if (r?.ok) drop();
+      try {
+        const r = await saveAvatarAction(undefined, fd);
+        // Commit together with the page refresh, so the preview hands straight over to the saved picture.
+        startTransition(() => {
+          setMessage(r ? { ok: r.ok, text: r.message ?? (r.ok ? "Saved." : "Could not save that picture.") } : null);
+          if (r?.ok) drop();
+        });
+      } catch (e) {
+        unstable_rethrow(e); // a redirect to sign-in must still go through
+        setMessage({ ok: false, text: OFFLINE });
+      }
     });
   };
 
   const removeIt = () => {
     if (!window.confirm("Remove your profile picture?")) return;
     start(async () => {
-      const r = await removeAvatarAction();
-      setMessage(r ? { ok: r.ok, text: r.message ?? "" } : null);
+      try {
+        const r = await removeAvatarAction();
+        startTransition(() => setMessage(r ? { ok: r.ok, text: r.message ?? "" } : null));
+      } catch (e) {
+        unstable_rethrow(e);
+        setMessage({ ok: false, text: OFFLINE });
+      }
     });
   };
 
@@ -120,7 +151,7 @@ export function AvatarForm({ name, current }: { name: string; current: string | 
         <div className="flex flex-wrap gap-2">
           {pending ? (
             <>
-              <Button type="button" onClick={save} disabled={busy} aria-busy={busy}>
+              <Button ref={saveButton} type="button" onClick={save} disabled={busy} aria-busy={busy}>
                 {busy ? "Saving…" : "Save picture"}
               </Button>
               <Button type="button" variant="ghost" onClick={drop} disabled={busy}>
@@ -130,27 +161,29 @@ export function AvatarForm({ name, current }: { name: string; current: string | 
           ) : (
             <>
               {/* The file input sits inside the label so the button works with a click, a tap, or the keyboard. */}
-              <label className="cut-sm inline-flex cursor-pointer items-center border border-gold/35 bg-white/[0.03] px-5 py-2.5 font-display text-sm font-bold uppercase tracking-[0.14em] text-text transition focus-within:border-gold focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent hover:border-gold/70">
+              <label
+                className={`cut-sm inline-flex items-center border border-gold/35 bg-white/[0.03] px-5 py-2.5 font-display text-sm font-bold uppercase tracking-[0.14em] text-text transition focus-within:border-gold focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent hover:border-gold/70 ${preparing || busy ? "pointer-events-none opacity-60" : "cursor-pointer"}`}
+              >
                 <input
                   ref={input}
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/gif"
                   className="sr-only"
-                  disabled={busy}
+                  disabled={busy || preparing}
                   onChange={(e) => choose(e.target.files?.[0])}
                 />
-                {current ? "Change picture" : "Upload a picture"}
+                {preparing ? "Preparing…" : current ? "Change picture" : "Upload a picture"}
               </label>
               {current && (
-                <Button type="button" variant="ghost" onClick={removeIt} disabled={busy}>
-                  {busy ? "Removing…" : "Remove"}
+                <Button type="button" variant="ghost" onClick={removeIt} disabled={busy || preparing}>
+                  Remove
                 </Button>
               )}
             </>
           )}
         </div>
-        <p className="mt-3 text-xs text-dim">
-          {pending ? "This is how it will look. Save it to make it your picture." : "JPG, PNG, WebP, or GIF. It is cropped to a square and shown as a circle."}
+        <p aria-live="polite" className="mt-3 text-xs text-dim">
+          {pending ? "Preview ready. This is how it will look. Save it to make it your picture." : "JPG, PNG, WebP, or GIF. It is cropped to a square and shown as a circle."}
         </p>
         {message && (
           <p role="status" className={`mt-2 text-sm ${message.ok ? "text-success" : "text-danger"}`}>

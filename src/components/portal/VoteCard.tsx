@@ -2,6 +2,7 @@ import { castVoteAction, finalizeNominationAction } from "@/lib/actions/ranks";
 import { tally } from "@/lib/ranks";
 import { TIER_LABEL, VOTE_RULES, type Tier } from "@/lib/constants";
 import { formatDateTime } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, statusTone } from "@/components/ui";
 import { ConfirmSubmit } from "@/components/forms/SubmitButton";
 import { Countdown } from "@/components/site/Countdown";
@@ -13,7 +14,7 @@ export type NominationView = {
   status: string;
   closesAt: Date;
   createdAt: Date;
-  user: { id: string; displayName: string; tier: string; gameClass: string | null; role: string };
+  user: { id: string; displayName: string; tier: string; gameClass: string | null; role: string; avatarAt?: Date | null };
   nominatedBy: { displayName: string };
   votes: { id: string; voterId: string; choice: string; comment: string | null; voter: { displayName: string } }[];
 };
@@ -43,7 +44,7 @@ export function VoteCard({
     <article className={`panel cut p-5 md:p-6 ${nom.status === "OPEN" ? "border-gold/40" : ""}`}>
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div className="flex gap-4">
-          <Avatar name={nom.user.displayName} size="lg" tone={nom.tier === "ELITE" ? "gold" : "accent"} />
+          <Avatar name={nom.user.displayName} size="lg" tone={nom.tier === "ELITE" ? "gold" : "accent"} src={avatarUrl(nom.user)} />
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="display text-2xl">{nom.user.displayName}</h3>

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireApproved } from "@/lib/auth";
 import { formatDateTime } from "@/lib/format";
+import { avatarUrl } from "@/lib/avatar";
 import { withdrawSignupAction } from "@/lib/actions/member";
 import { MATCH_TYPE_LABEL, POSITION, type MatchType } from "@/lib/constants";
 import { Avatar, Badge, Card, PageHeader, statusTone, roleTone } from "@/components/ui";
@@ -21,7 +22,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
     where: { id },
     include: {
       signups: {
-        include: { user: { select: { id: true, displayName: true, gameClass: true, role: true } } },
+        include: { user: { select: { id: true, displayName: true, gameClass: true, role: true, avatarAt: true } } },
         orderBy: { createdAt: "asc" },
       },
     },
@@ -82,7 +83,7 @@ export default async function MatchDetailPage({ params }: { params: Promise<{ id
               {match.signups.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted">No signups yet. Be the first.</li>}
               {match.signups.map((s) => (
                 <li key={s.id} className={`flex items-center gap-3 px-4 py-3 ${s.userId === me.id ? "bg-accent/5" : ""}`}>
-                  <Avatar name={s.user.displayName} size="sm" tone={roleTone(s.user.role)} />
+                  <Avatar name={s.user.displayName} size="sm" tone={roleTone(s.user.role)} src={avatarUrl(s.user)} />
                   <div className="min-w-0 flex-1">
                     <p className="display truncate text-lg">
                       {s.user.displayName} {s.userId === me.id && <span className="text-xs text-accent">(you)</span>}
