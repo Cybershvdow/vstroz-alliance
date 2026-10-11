@@ -1,6 +1,8 @@
 /* First-boot bootstrap for production: if the database has no users yet, run the live seed
    (creates the leadership accounts from SEED_* env vars). Safe to run on every start. */
 import { execSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 
 const db = new PrismaClient();
@@ -11,6 +13,19 @@ try {
     execSync("npx tsx prisma/seed.live.ts", { stdio: "inherit" });
   } else {
     console.log(`[bootstrap] database ready (${users} users)`);
+  }
+  // Founding members (2026-10-11): everyone who already had an account when the rank ladder became alliance-wide
+  // is a Member. Recruit is for people who join after that. This runs ONCE: a marker file next to the database
+  // records it, so an officer who later sets one of them back to Recruit is not overruled on the next boot.
+  const FOUNDING_CUTOFF = new Date("2026-10-11T03:00:00Z");
+  const dbFile = (process.env.DATABASE_URL || "").replace(/^file:/, "");
+  if (dbFile) {
+    const marker = path.join(path.dirname(path.isAbsolute(dbFile) ? dbFile : path.resolve("prisma", dbFile)), ".fixup-founding-members");
+    if (!fs.existsSync(marker)) {
+      const founding = await db.user.updateMany({ where: { role: "MEMBER", tier: "RECRUIT", createdAt: { lt: FOUNDING_CUTOFF } }, data: { tier: "MEMBER" } });
+      fs.writeFileSync(marker, `${new Date().toISOString()} set ${founding.count} existing accounts to Member\n`);
+      console.log(`[bootstrap] founding members: ${founding.count} existing accounts set to Member`);
+    }
   }
   // Accounts reviewed before the legion flow existed count as applied. Never touches unreviewed accounts.
   const backfilled = await db.$executeRawUnsafe(
