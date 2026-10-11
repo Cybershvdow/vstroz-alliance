@@ -164,7 +164,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       <div id="player-profile" className="scroll-mt-8">
       <Card className="mt-6">
         <h2 className="display mb-1 text-2xl">Player profile</h2>
-        <p className="mb-6 text-sm text-muted">The games you tick show as tags on your public profile. Officers use the rest to get to know you and build rosters.</p>
+        <p className="mb-6 text-sm text-muted">The games you tick show as tags on your public profile and list you on each game&apos;s page. Officers use the rest to get to know you and build rosters.</p>
         <PlayerProfileForm
           mode="profile"
           initial={{

@@ -42,7 +42,8 @@ export async function gameCounts(game: string) {
 /** Everything shown on a game's page. */
 export async function gameActivity(game: string) {
   const now = new Date();
-  const [members, posts, upcoming, results] = await Promise.all([
+  const upcomingWhere: Prisma.MatchWhereInput = { ...eventsWhere(game), startsAt: { gte: now }, status: { in: ["OPEN", "LOCKED"] } };
+  const [members, posts, upcoming, upcomingTotal, results] = await Promise.all([
     db.user.findMany({
       where: playsWhere(game),
       select: { id: true, username: true, displayName: true, role: true, tier: true, title: true, status: true, game: true, playedGames: true, avatarAt: true, discordLeftAt: true },
@@ -54,11 +55,12 @@ export async function gameActivity(game: string) {
       include: { postedBy: { select: { displayName: true, username: true } } },
     }),
     db.match.findMany({
-      where: { ...eventsWhere(game), startsAt: { gte: now }, status: { in: ["OPEN", "LOCKED"] } },
+      where: upcomingWhere,
       orderBy: { startsAt: "asc" },
       take: 6,
       include: { _count: { select: { signups: { where: { status: { not: "DECLINED" } } } } } },
     }),
+    db.match.count({ where: upcomingWhere }),
     db.match.findMany({ where: { ...eventsWhere(game), status: "COMPLETED" }, orderBy: { startsAt: "desc" }, take: 5 }),
   ]);
 
@@ -68,5 +70,5 @@ export async function gameActivity(game: string) {
     .map((m) => ({ ...m, rank: allianceRank(m) }))
     .sort((a, b) => a.rank.order - b.rank.order);
 
-  return { players, posts, upcoming, results };
+  return { players, posts, upcoming, upcomingTotal, results };
 }

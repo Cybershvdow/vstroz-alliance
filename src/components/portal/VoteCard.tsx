@@ -1,6 +1,6 @@
 import { castVoteAction, finalizeNominationAction } from "@/lib/actions/ranks";
 import { tally } from "@/lib/ranks";
-import { TIER_LABEL, VOTE_RULES, type Tier } from "@/lib/constants";
+import { TIER_LABEL, VOTE_RULES, allianceRank, type Tier } from "@/lib/constants";
 import { formatDateTime } from "@/lib/format";
 import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, statusTone } from "@/components/ui";
@@ -48,6 +48,13 @@ export function VoteCard({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="display text-2xl">{nom.user.displayName}</h3>
+              {/* Command sits above the ladder: show their rank, and label the ladder step the vote is about. */}
+              {nom.user.role !== "MEMBER" && (
+                <>
+                  <Badge tone={allianceRank(nom.user).tone}>{allianceRank(nom.user).label}</Badge>
+                  <span className="text-xs text-muted">ladder</span>
+                </>
+              )}
               <Badge tone="neutral">{TIER_LABEL[nom.user.tier as Tier] ?? nom.user.tier}</Badge>
               <span className="text-muted">→</span>
               <Badge tone={nom.tier === "ELITE" ? "gold" : "accent"}>{TIER_LABEL[nom.tier as Tier] ?? nom.tier}</Badge>

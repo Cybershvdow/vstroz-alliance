@@ -179,8 +179,8 @@ export const membershipPath = [
   { n: "01", title: "Recruit", text: "Create your Vstroz Alliance account. You join the alliance as a Recruit, whatever you play. Pick your games, post content, vote, and get a public profile and a place on the roster." },
   { n: "02", title: "Member", text: "Show up consistently and an officer promotes you to Member." },
   { n: "03", title: "Veteran", text: "Voted in by the alliance. Officers can veto." },
-  { n: "04", title: "Elite", text: "The competitive roster. Voted in by the alliance; officers can veto. Every competitive spot is tried out for." },
-  { n: "05", title: "Play Aion?", text: "Optional, and separate from your rank. Join the Vstroz Legion in-game, then apply from your account. An officer replies within 48 hours. Approval unlocks match signups and guild roles. Every other game needs no application." },
+  { n: "04", title: "Elite", text: "The competitive roster. Voted in by the alliance; officers can veto." },
+  { n: "+", title: "Play Aion?", text: "Optional at any rank, and separate from it. Join the Vstroz Legion in-game, then apply from your account. An officer replies within 48 hours. Approval unlocks match signups and guild roles. Every other game needs no application." },
 ];
 
 /* Rules & The Round Table */
@@ -212,7 +212,7 @@ export const rules = {
         "Every account starts as a Recruit. Ranks belong to the alliance, not to one game.",
         "Recruit → Member is decided by officers after consistent attendance and attitude.",
         "Veteran and Elite are decided by a vote of the alliance. Officers and leaders can veto or override.",
-        "Elite is the competitive roster. Every competitive spot is tried out for and can be lost.",
+        "Elite is the competitive roster. A spot is earned by vote and can be lost.",
         "Captain and General are command ranks above the ladder.",
         "The Vstroz Legion is our Aion guild. Joining it unlocks match signups and guild roles. It does not change your rank.",
         "Anyone who holds a guild role must keep it up to remain part of the crew.",
@@ -222,7 +222,7 @@ export const rules = {
   table: {
     title: "The Round Table",
     text:
-      "The Round Table is command. Every General and Captain has a seat. Decisions, orders, rank votes, disputes, no-show reviews, and rule breaks are brought to The Round Table and settled there, professionally and on the record. Members vote where the rules call for it. Any member can bring a dispute. Decisions are final.",
+      "The Round Table is command. Every General and Captain has a seat. Decisions, orders, rank votes, disputes, no-show reviews, and rule breaks are brought to The Round Table and settled there, professionally and on the record. Everyone in the alliance votes where the rules call for it, and anyone can bring a dispute. Decisions are final.",
   },
 };
 

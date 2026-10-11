@@ -7,8 +7,8 @@ import { db } from "@/lib/db";
   Discord integration.
   - Sign in / create an account with Discord (OAuth2). Only members of the alliance server can create an account:
     being in the Discord IS being in the community.
-  - Membership sync via the bot: leaving the server removes you from the legion, hides your account, and withdraws
-    any open rank vote for you; rejoining restores a community account with the rank you had.
+  - Membership sync via the bot: leaving the server removes you from the legion, hides your account, withdraws any open
+    rank vote for you, and drops your ballots on votes still open; rejoining restores a community account with the rank you had.
     Command (Generals/Captains) is never auto-removed.
   Everything is driven by env vars; when they are missing the site falls back to username/password only.
 */
@@ -169,6 +169,8 @@ export async function reconcileDiscord(): Promise<SyncResult> {
           data: { discordLeftAt: at, status: "DENIED", appliedAt: null, reviewedAt: at, reviewNote: "Left the Discord server." },
         }),
         db.nomination.updateMany({ where: { userId: u.id, status: "OPEN" }, data: { status: "WITHDRAWN", decidedAt: at } }),
+        // Hidden accounts do not vote: ballots they cast on votes that are still open no longer count.
+        db.vote.deleteMany({ where: { voterId: u.id, nomination: { status: "OPEN" } } }),
       ]);
       removed++;
     } else if (inGuild && u.discordLeftAt) {

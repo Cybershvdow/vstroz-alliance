@@ -49,7 +49,7 @@ export default async function RosterPage() {
       <SectionHeading
         eyebrow="Roster"
         title={site.name}
-        text={`${total} ${total === 1 ? "member" : "members"}, grouped by rank. Everyone starts as a Recruit. The tags show the games each one plays. Open a profile for the full picture.`}
+        text={`${total} in the alliance, grouped by rank. Everyone starts as a Recruit. The tags show the games each one plays. Open a profile for the full picture.`}
       />
 
       <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">

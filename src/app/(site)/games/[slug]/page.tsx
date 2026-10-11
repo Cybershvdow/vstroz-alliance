@@ -32,7 +32,7 @@ export default async function GamePage({ params, searchParams }: Props) {
   const game = gameBySlug(slug);
   if (!game) notFound();
 
-  const { players, posts, upcoming, results } = await gameActivity(game.name);
+  const { players, posts, upcoming, upcomingTotal, results } = await gameActivity(game.name);
   const parent = new URL(process.env.APP_URL || "http://localhost:3000").hostname;
   const isLegionGame = LEGION_GAMES.some((g) => g.name === game.name);
   const short = game.short ?? game.name;
@@ -53,7 +53,7 @@ export default async function GamePage({ params, searchParams }: Props) {
   const stats: [string, number][] = [
     ["Players", players.length],
     ["Videos", posts.length],
-    ["Upcoming", upcoming.length],
+    ["Upcoming", upcomingTotal],
   ];
 
   return (
@@ -230,6 +230,15 @@ export default async function GamePage({ params, searchParams }: Props) {
             </li>
           ))}
         </ol>
+        {upcomingTotal > upcoming.length && (
+          <p className="mt-3 text-sm text-muted">
+            {upcomingTotal - upcoming.length} more on the{" "}
+            <Link href="/schedule" className="text-text underline underline-offset-4 hover:text-gold">
+              full schedule
+            </Link>
+            .
+          </p>
+        )}
 
         {results.length > 0 && (
           <>

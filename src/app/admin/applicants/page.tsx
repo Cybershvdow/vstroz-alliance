@@ -44,7 +44,7 @@ function GameAnswers({ game, json }: { game: string | null; json: string | null 
 }
 
 export default async function ApplicantsPage() {
-  await requireOfficer();
+  const me = await requireOfficer();
   const [pending, notApplied, recent] = await Promise.all([
     db.user.findMany({ where: { status: "PENDING", appliedAt: { not: null } }, orderBy: { appliedAt: "asc" } }),
     db.user.findMany({ where: { status: "PENDING", appliedAt: null }, select: { id: true, displayName: true, username: true, createdAt: true, role: true, tier: true }, orderBy: { createdAt: "desc" } }),
@@ -128,21 +128,31 @@ export default async function ApplicantsPage() {
                   </div>
                 </div>
 
-                <form action={reviewApplicantAction} className="flex w-full flex-col gap-2 md:w-64">
-                  <input type="hidden" name="userId" value={u.id} />
-                  <label className="label" htmlFor={`note-${u.id}`}>
-                    Note to applicant (optional)
-                  </label>
-                  <input id={`note-${u.id}`} name="note" className="input" placeholder="e.g. Welcome! Join voice Saturday." maxLength={300} />
-                  <div className="mt-1 grid grid-cols-2 gap-2">
-                    <Button type="submit" name="decision" value="APPROVED" size="sm">
-                      Approve
-                    </Button>
-                    <Button type="submit" name="decision" value="DENIED" size="sm" variant="danger">
-                      Deny
-                    </Button>
-                  </div>
-                </form>
+                {u.id === me.id ? (
+                  // Same rules as reviewApplicantAction: nobody reviews their own application,
+                  // and a Captain's or General's application goes to a General.
+                  <p className="w-full text-sm text-muted md:w-64">This is your own application. Another officer has to review it.</p>
+                ) : u.role === "LEADER" ? (
+                  <p className="w-full text-sm text-muted md:w-64">Generals are peers. Nobody reviews a General&apos;s application.</p>
+                ) : u.role !== "MEMBER" && me.role !== "LEADER" ? (
+                  <p className="w-full text-sm text-muted md:w-64">Only a General can review a Captain&apos;s application.</p>
+                ) : (
+                  <form action={reviewApplicantAction} className="flex w-full flex-col gap-2 md:w-64">
+                    <input type="hidden" name="userId" value={u.id} />
+                    <label className="label" htmlFor={`note-${u.id}`}>
+                      Note to applicant (optional)
+                    </label>
+                    <input id={`note-${u.id}`} name="note" className="input" placeholder="e.g. Welcome. Join voice Saturday." maxLength={300} />
+                    <div className="mt-1 grid grid-cols-2 gap-2">
+                      <Button type="submit" name="decision" value="APPROVED" size="sm">
+                        Approve
+                      </Button>
+                      <Button type="submit" name="decision" value="DENIED" size="sm" variant="danger">
+                        Deny
+                      </Button>
+                    </div>
+                  </form>
+                )}
               </div>
             </li>
           ))}

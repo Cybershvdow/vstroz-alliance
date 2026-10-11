@@ -16,8 +16,9 @@ export default async function VotesPage() {
     votes: { include: { voter: { select: { displayName: true } } }, orderBy: { createdAt: "asc" as const } },
   };
   const [open, recent] = await Promise.all([
-    db.nomination.findMany({ where: { status: "OPEN" }, orderBy: { closesAt: "asc" }, include }),
-    db.nomination.findMany({ where: { status: { not: "OPEN" } }, orderBy: { decidedAt: "desc" }, take: 8, include }),
+    // Votes for members who have since left the Discord (hidden accounts) are not shown to members.
+    db.nomination.findMany({ where: { status: "OPEN", user: { discordLeftAt: null } }, orderBy: { closesAt: "asc" }, include }),
+    db.nomination.findMany({ where: { status: { not: "OPEN" }, user: { discordLeftAt: null } }, orderBy: { decidedAt: "desc" }, take: 8, include }),
   ]);
 
   const mine = meFull ?? me;

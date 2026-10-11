@@ -39,19 +39,21 @@ export function MobileNav({
       </button>
 
       {open && (
-        <div className="fixed inset-x-0 top-18 bottom-0 z-40 bg-bg/95 backdrop-blur-xl">
-          <nav className="flex flex-col p-6" aria-label="Mobile">
+        // The header blurs what is behind it, which makes it the box this fixed panel is measured against.
+        // So the panel gets its own height (screen minus header) instead of stretching to a bottom edge, and it scrolls.
+        <div className="fixed inset-x-0 top-18 z-40 h-[calc(100dvh-4.5rem)] overflow-y-auto overscroll-contain bg-bg">
+          <nav className="flex flex-col px-6 pb-10 pt-4" aria-label="Mobile">
             {items.map((item, i) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={close}
-                className={`rise border-b border-line py-4 font-display text-3xl font-bold uppercase tracking-wide rise-${Math.min(i + 1, 4)}`}
+                className={`rise border-b border-line py-3 font-display text-2xl font-bold uppercase tracking-wide rise-${Math.min(i + 1, 4)}`}
               >
                 {item.label}
               </Link>
             ))}
-            <div className="mt-6 flex flex-col gap-3">
+            <div className="mt-5 flex flex-col gap-3">
               <Link href={portalHref} onClick={close} className="cut-sm bg-accent px-5 py-3 text-center font-display text-base font-bold uppercase tracking-[0.14em] text-white">
                 {portalLabel}
               </Link>
