@@ -72,8 +72,11 @@ export async function TeamsGrid() {
                     ))}
                   </ul>
                   <div className="mt-auto pt-6">
-                    <Link href="/games" className="font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition group-hover:text-gold-bright">
-                      Learn more →
+                    <Link
+                      href={`/games/${g.slug}`}
+                      className="font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition after:absolute after:inset-0 after:content-[''] group-hover:text-gold-bright"
+                    >
+                      Open {g.short ?? g.name} →
                     </Link>
                   </div>
                 </div>

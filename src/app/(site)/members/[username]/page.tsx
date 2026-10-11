@@ -129,7 +129,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
                 <Badge tone={rank.tone}>{rank.label}</Badge>
                 {inLegion && <Badge tone="success">{site.legionName}</Badge>}
                 {tags.map((t) => (
-                  <GameTag key={t} game={t} />
+                  <GameTag key={t} game={t} link />
                 ))}
               </div>
             </div>

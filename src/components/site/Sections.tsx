@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { site, pillars, games, milestones, playingNow } from "@/lib/site";
+import { site, pillars, milestones, playingNow } from "@/lib/site";
 import { formatDateTime } from "@/lib/format";
 import { MATCH_TYPE_LABEL, type MatchType } from "@/lib/constants";
 import { Badge, ButtonLink, SectionHeading } from "@/components/ui";
 import { Countdown } from "./Countdown";
 import { ArrowIcon, DiscordIcon } from "./Icons";
-import { GameIcon } from "./GameTag";
 import { HeroVideo } from "./HeroVideo";
 import { LogoFull } from "@/components/brand/Logo";
 
@@ -167,66 +166,10 @@ export function Pillars() {
   );
 }
 
-/* ---------------- Games ---------------- */
-
-const statusBadge = { active: "success", voting: "gold", upcoming: "neutral" } as const;
-const statusLabel = { active: "Active", voting: "Voting", upcoming: "Upcoming" } as const;
+/* ---------------- Game grids ---------------- */
 
 /** One game = one wide featured card; two or three = columns. */
 export const gridCols = (n: number) => (n >= 3 ? "lg:grid-cols-3" : n === 2 ? "lg:grid-cols-2" : "mx-auto w-full max-w-3xl lg:grid-cols-1");
-
-export function GamesGrid({ full = false }: { full?: boolean }) {
-  return (
-    <section className="relative border-y border-line bg-bg-2 py-24">
-      <div className="bg-stripes absolute inset-0 opacity-40" />
-      <div className="relative mx-auto max-w-7xl px-4 md:px-6">
-        {!full && (
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <SectionHeading eyebrow="Our games" title="Every game we play, we play together." />
-            <ButtonLink href="/games" variant="secondary">
-              All games <ArrowIcon />
-            </ButtonLink>
-          </div>
-        )}
-        <div className={`${full ? "" : "mt-12"} grid gap-4 ${gridCols(games.length)}`}>
-          {games.map((g) => (
-            <article
-              key={g.slug}
-              className={`panel cut relative flex flex-col p-6 ${g.status === "active" ? "border-gold/40" : ""}`}
-            >
-              {g.status === "active" && <div className="bg-glow-accent absolute inset-0 opacity-70" />}
-              <div className="relative">
-                <div className="flex items-center justify-between">
-                  <Badge tone={statusBadge[g.status]}>{statusLabel[g.status]}</Badge>
-                  <span className="label">{g.badge}</span>
-                </div>
-                <GameIcon game={g.name} className="mt-6 h-11 w-11" />
-                <h3 className="display mt-3 text-3xl xl:text-4xl">{g.name}</h3>
-                <p className="mt-1 text-sm text-muted">{g.genre}</p>
-                <p className="mt-5 text-sm leading-relaxed text-muted">{g.desc}</p>
-                <dl className="mt-6 grid grid-cols-2 gap-3 border-t border-line pt-4 text-sm">
-                  {g.facts.map(([k, v]) => (
-                    <div key={k}>
-                      <dt className="label">{k}</dt>
-                      <dd className="mt-1">{v}</dd>
-                    </div>
-                  ))}
-                </dl>
-                <ul className="mt-5 flex flex-wrap gap-2">
-                  {g.focus.map((f) => (
-                    <li key={f} className="border border-line-strong px-2 py-1 text-xs text-muted">
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ---------------- Upcoming matches ---------------- */
 

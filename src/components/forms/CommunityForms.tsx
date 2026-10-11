@@ -79,7 +79,7 @@ export function MediaForm({ official = false }: { official?: boolean }) {
         <input id="media-url" name="url" className="input" placeholder="https://youtube.com/watch?v=…" required />
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Game (optional)" name="media-game">
+        <Field label="Game (optional)" name="media-game" hint="Pick the game and the video also shows on that game's page.">
           <select id="media-game" name="game" className="input" defaultValue="">
             <option value="">—</option>
             {ENABLED_GAMES.map((g) => (

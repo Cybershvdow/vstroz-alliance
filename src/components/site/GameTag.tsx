@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
+import { gameHref } from "@/lib/site";
 
 /*
   Game icons and tags. Each listed game has its own colour and an original icon drawn for this site.
@@ -86,17 +88,30 @@ export function GameIcon({ game, className = "h-5 w-5" }: { game: string; classN
   );
 }
 
-/** A game tag for profiles and roster cards: icon plus name. */
-export function GameTag({ game, compact = false }: { game: string; compact?: boolean }) {
+/**
+ * A game tag for profiles and roster cards: icon plus name. With `link`, the tag opens that game's page
+ * (only use it where the tag is not already inside another link).
+ */
+export function GameTag({ game, compact = false, link = false }: { game: string; compact?: boolean; link?: boolean }) {
   const color = LOOKS[game]?.color ?? FALLBACK_COLOR;
-  return (
-    <span
-      title={game}
-      className={`inline-flex items-center gap-1.5 rounded-[2px] border bg-white/[0.03] font-sans font-bold uppercase tracking-[0.16em] text-text ${compact ? "px-1 py-0.5 text-[0.56rem]" : "py-0.5 pl-1 pr-2 text-[0.62rem]"}`}
-      style={{ borderColor: `${color}55` }}
-    >
+  const href = link ? gameHref(game) : null;
+  const className = `inline-flex items-center gap-1.5 rounded-[2px] border bg-white/[0.03] font-sans font-bold uppercase tracking-[0.16em] text-text ${compact ? "px-1 py-0.5 text-[0.56rem]" : "py-0.5 pl-1 pr-2 text-[0.62rem]"}`;
+  const body = (
+    <>
       <GameIcon game={game} className={compact ? "h-4 w-4" : "h-5 w-5"} />
       <span className="whitespace-nowrap">{game}</span>
+    </>
+  );
+  if (href) {
+    return (
+      <Link href={href} title={`See what the alliance does in ${game}`} className={`${className} transition hover:bg-white/[0.08]`} style={{ borderColor: `${color}55` }}>
+        {body}
+      </Link>
+    );
+  }
+  return (
+    <span title={game} className={className} style={{ borderColor: `${color}55` }}>
+      {body}
     </span>
   );
 }

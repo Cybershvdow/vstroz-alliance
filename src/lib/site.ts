@@ -32,6 +32,7 @@ export const site = {
 
 export const nav = [
   { href: "/", label: "Home" },
+  { href: "/games", label: "Games" },
   { href: "/media", label: "Media" },
   { href: "/roster", label: "Roster" },
   { href: "/schedule", label: "Schedule" },
@@ -240,3 +241,16 @@ export const milestones = [
   { date: "2024 – 2026", title: "The community grows", text: "Friends bring friends. The server builds slowly, one group at a time, into a community that shows up for each other in every game it plays." },
   { date: "Aion", title: "The first guild website", text: "Aion is the first game the alliance officially builds a guild website for. Recruitment is open, and the alliance grows from here." },
 ];
+
+/* ---------- Game pages ---------- */
+
+/** A listed game from its URL slug ("aion"), or null. */
+export function gameBySlug(slug: string) {
+  return games.find((g) => g.slug === slug) ?? null;
+}
+
+/** The page for a listed game, from its name ("Aion" gives "/games/aion"). Null when the game has no page. */
+export function gameHref(name: string) {
+  const g = games.find((x) => x.name === name);
+  return g ? `/games/${g.slug}` : null;
+}

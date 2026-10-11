@@ -23,7 +23,7 @@ export async function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className="relative px-4 py-2 font-sans text-[0.72rem] font-bold uppercase tracking-[0.24em] text-muted transition hover:text-gold-bright after:absolute after:inset-x-4 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-gold after:transition-transform hover:after:scale-x-100"
+              className="relative px-3 py-2 font-sans text-[0.72rem] font-bold uppercase tracking-[0.2em] text-muted transition hover:text-gold-bright after:absolute after:inset-x-3 after:-bottom-0.5 xl:px-4 xl:tracking-[0.24em] xl:after:inset-x-4 after:h-px after:origin-left after:scale-x-0 after:bg-gold after:transition-transform hover:after:scale-x-100"
             >
               {item.label}
             </Link>
