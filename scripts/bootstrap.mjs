@@ -26,6 +26,13 @@ try {
       fs.writeFileSync(marker, `${new Date().toISOString()} set ${founding.count} existing accounts to Member\n`);
       console.log(`[bootstrap] founding members: ${founding.count} existing accounts set to Member`);
     }
+    // Second pass (2026-10-12): the owner confirmed everyone registered so far is a Member. Also runs once.
+    const marker2 = path.join(path.dirname(marker), ".fixup-members-2026-10-12");
+    if (!fs.existsSync(marker2)) {
+      const more = await db.user.updateMany({ where: { role: "MEMBER", tier: "RECRUIT", createdAt: { lt: new Date("2026-10-12T21:20:00Z") } }, data: { tier: "MEMBER" } });
+      fs.writeFileSync(marker2, `${new Date().toISOString()} set ${more.count} existing accounts to Member\n`);
+      console.log(`[bootstrap] members as of 2026-10-12: ${more.count} existing accounts set to Member`);
+    }
   }
   // Accounts reviewed before the legion flow existed count as applied. Never touches unreviewed accounts.
   const backfilled = await db.$executeRawUnsafe(
