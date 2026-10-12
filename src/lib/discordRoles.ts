@@ -168,16 +168,19 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
 
     const adding = [...want].filter((r) => !current.has(r));
     const removing = [...current].filter((r) => !want.has(r));
-    const nick = u && m.user.id !== ownerId && norm(label) !== norm(u.displayName) ? u.displayName.slice(0, 32) : null;
-    if (!adding.length && !removing.length && !nick && !(apply && !rankIds.size)) continue;
+    const wantsNick = u && m.user.id !== ownerId && norm(label) !== norm(u.displayName) ? u.displayName.slice(0, 32) : null;
+    const nick = site.discordRenameMembers ? wantsNick : null;
+    if (wantsNick && !nick) out.skipped.push(`${label}: website name is "${wantsNick}" (renaming is switched off)`);
+    const missingRole = names.some((n) => !idOf(n)); // in a dry run the roles may not exist yet
+    if (!adding.length && !removing.length && !nick && !missingRole) continue;
     // In a dry run the roles may not exist yet, so describe by name.
     const nameOf = (id: string) => roles.find((r) => r.id === id)?.name ?? [...byName.values()].find((r) => r.id === id)?.name ?? id;
     const plan = `${label}${u ? ` (site: ${u.displayName})` : ""}: ${apply ? "" : "would "}set ${names.join(", ") || "no managed roles"}${removing.length ? `; remove ${removing.map(nameOf).join(", ")}` : ""}${nick ? `; rename to "${nick}"` : ""}`;
     if (!apply) {
-      if (adding.length || removing.length || nick || names.some((n) => !idOf(n))) out.changes.push(plan);
+      out.changes.push(plan);
       continue;
     }
-    if (onlyDiscordIds && !onlyDiscordIds.includes(m.user.id)) continue;
+    if (onlyDiscordIds && !onlyDiscordIds.includes(m.user.id) && !(onlyDiscordIds.includes("owner") && m.user.id === ownerId)) continue;
     if (adding.length || removing.length) {
       const res = await api(`/guilds/${c.guildId}/members/${m.user.id}`, { method: "PATCH", body: JSON.stringify({ roles: [...want] }) });
       if (!res.ok) {
