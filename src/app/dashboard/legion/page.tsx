@@ -1,3 +1,4 @@
+import { guildRankOf } from "@/lib/constants";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { site } from "@/lib/site";
@@ -70,7 +71,7 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
         <div className="space-y-6">
           {inLegion ? (
             <Card accent>
-              <Badge tone="success">In the legion</Badge>
+              <Badge tone="success">In the legion · {guildRankOf(me)?.label}</Badge>
               <p className="mt-4 text-sm text-muted">
                 {me.ign ? `In-game name: ${me.ign}` : "No in-game name set yet"}
                 {me.gameClass ? ` · ${me.gameClass}` : ""}

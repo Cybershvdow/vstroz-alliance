@@ -1,7 +1,7 @@
 import "server-only";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { allianceRank, playedGamesOf } from "@/lib/constants";
+import { LEGION_GAMES, allianceRank, guildRankOf, playedGamesOf } from "@/lib/constants";
 
 /*
   What the alliance does in one listed game: who plays it, what content is tagged with it, what is on the calendar.
@@ -70,5 +70,19 @@ export async function gameActivity(game: string) {
     .map((m) => ({ ...m, rank: allianceRank(m) }))
     .sort((a, b) => a.rank.order - b.rank.order);
 
-  return { players, posts, upcoming, upcomingTotal, results };
+  // The game's guild, when it has one: its own roster with its own ranks, apart from the alliance ranks.
+  const hasGuild = LEGION_GAMES.some((g) => g.name === game);
+  const guild = hasGuild
+    ? (
+        await db.user.findMany({
+          where: { status: "APPROVED", discordLeftAt: null },
+          select: { id: true, username: true, displayName: true, role: true, tier: true, status: true, guildRank: true, ign: true, gameClass: true, avatarAt: true, discordLeftAt: true },
+          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+        })
+      )
+        .map((m) => ({ ...m, rank: allianceRank(m), guild: guildRankOf(m)! }))
+        .sort((a, b) => a.guild.order - b.guild.order)
+    : [];
+
+  return { players, posts, upcoming, upcomingTotal, results, guild };
 }

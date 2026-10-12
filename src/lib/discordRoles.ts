@@ -104,7 +104,6 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
   }
   const idOf = (name: string) => byName.get(name.toLowerCase())?.id;
   const managedIds = new Set(managedNames.map(idOf).filter((x): x is string => !!x));
-  const rankIds = new Set(rankNames.map(idOf).filter((x): x is string => !!x));
 
   /* ---- members ---- */
   const members: Member[] = [];

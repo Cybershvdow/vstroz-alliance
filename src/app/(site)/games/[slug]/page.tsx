@@ -32,7 +32,7 @@ export default async function GamePage({ params, searchParams }: Props) {
   const game = gameBySlug(slug);
   if (!game) notFound();
 
-  const { players, posts, upcoming, upcomingTotal, results } = await gameActivity(game.name);
+  const { players, posts, upcoming, upcomingTotal, results, guild } = await gameActivity(game.name);
   const parent = new URL(process.env.APP_URL || "http://localhost:3000").hostname;
   const isLegionGame = LEGION_GAMES.some((g) => g.name === game.name);
   const short = game.short ?? game.name;
@@ -155,6 +155,46 @@ export default async function GamePage({ params, searchParams }: Props) {
           )}
         </div>
       </section>
+
+      {/* ---------- The game's guild: its own roster and ranks ---------- */}
+      {isLegionGame && (
+        <section aria-labelledby="game-guild" className="mx-auto max-w-7xl px-4 pb-16 md:px-6">
+          <div className="flex items-end justify-between gap-6 border-b border-line pb-3">
+            <h2 id="game-guild" className="display flex items-baseline gap-3 text-2xl">
+              {site.legionName}
+              <span className="font-sans text-sm font-normal normal-case tracking-normal text-muted">{guild.length}</span>
+            </h2>
+            <Link href="/dashboard/legion" className="-my-2 inline-block py-2 font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
+              Apply →
+            </Link>
+          </div>
+          <p className="mt-3 max-w-2xl text-sm text-muted">
+            Our guild inside {game.name}. It has its own ranks, separate from alliance rank: holding a rank in the alliance does not give you one here. Join the alliance first,
+            then apply to the guild.
+          </p>
+          {guild.length === 0 ? (
+            <p className="mt-6 text-sm text-muted">Nobody is in the guild yet.</p>
+          ) : (
+            <ul aria-labelledby="game-guild" className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {guild.map((m) => (
+                <li key={m.id} className="min-w-0">
+                  <Link
+                    href={`/members/${encodeURIComponent(m.username)}`}
+                    className="cut-sm flex min-w-0 items-center gap-3 border border-line-strong bg-white/[0.02] px-3 py-2.5 transition hover:border-text"
+                  >
+                    <Avatar name={m.displayName} size="sm" tone={m.guild.tone} src={avatarUrl(m)} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-display font-bold uppercase tracking-wider">{m.displayName}</span>
+                      <span className="block truncate text-xs text-muted">{[m.ign, m.gameClass].filter(Boolean).join(" · ") || `Alliance rank: ${m.rank.label}`}</span>
+                    </span>
+                    <Badge tone={m.guild.tone}>{m.guild.label}</Badge>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       {/* ---------- Members who play it ---------- */}
       <section aria-labelledby="game-players" className="mx-auto max-w-7xl px-4 pb-16 md:px-6">

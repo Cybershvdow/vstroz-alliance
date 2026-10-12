@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { formatDate } from "@/lib/format";
-import { allianceRank, specialtiesOf, playedGamesOf } from "@/lib/constants";
+import { allianceRank, guildRankOf, specialtiesOf, playedGamesOf } from "@/lib/constants";
 import { folderHref } from "@/lib/media";
 import { avatarUrl, bannerUrl } from "@/lib/avatar";
 import { SOCIAL_PLATFORMS, parseSocials, socialHandle } from "@/lib/social";
@@ -40,6 +40,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
         username: true,
         displayName: true,
         bannerAt: true,
+        guildRank: true,
         specialties: true,
         role: true,
         tier: true,
@@ -140,7 +141,11 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
                     {s.label} · {s.plain}
                   </Badge>
                 ))}
-                {inLegion && <Badge tone="success">{site.legionName}</Badge>}
+                {inLegion && (
+                  <Badge tone="success">
+                    {site.legionName} · {guildRankOf(user)?.label}
+                  </Badge>
+                )}
                 {tags.map((t) => (
                   <GameTag key={t} game={t} link />
                 ))}

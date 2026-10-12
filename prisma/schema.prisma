@@ -47,6 +47,7 @@ model User {
   apexStats       String?   // JSON ApexStats (normalized), refreshed every 15 min on view
   apexStatsAt     DateTime?
   apexError       String?   // last stats error, shown to the member only
+  guildRank       String?   // rank inside the Aion guild only: LEADER | OFFICER | MEMBER (null = Member). Separate from the alliance rank.
   specialties     String?   // JSON array of specialty role keys (RECRUITER, HERALD, GAMES, GUARDIAN); a job, not a rank
   status          String    @default("PENDING") // PENDING | APPROVED | DENIED
   role            String    @default("MEMBER")  // MEMBER | OFFICER (Centurion) | TRIBUNE | LEADER (Legatus)

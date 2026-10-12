@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { rules, identity, site } from "@/lib/site";
-import { CHAIN_OF_COMMAND, SPECIALTIES } from "@/lib/constants";
+import { CHAIN_OF_COMMAND, GUILD_RANKS, SPECIALTIES } from "@/lib/constants";
 import { Badge, ButtonLink, SectionHeading } from "@/components/ui";
 import { DiscordIcon } from "@/components/site/Icons";
 
@@ -80,6 +80,19 @@ export default function RulesPage() {
                   </span>
                 </li>
               ))}
+            </ul>
+            <h3 className="display mt-10 text-2xl">Three layers</h3>
+            <ul className="mt-4 divide-y divide-line border-y border-line text-sm text-muted">
+              <li className="py-3">
+                <span className="text-text">The Discord.</span> Anyone who joins the server is part of the community. No rank.
+              </li>
+              <li className="py-3">
+                <span className="text-text">The alliance.</span> Make an account here and you join as a Tiro. Alliance ranks are the same in every game.
+              </li>
+              <li className="py-3">
+                <span className="text-text">A game&apos;s guild.</span> Today that is the {site.legionName} in {site.legionGame}. You apply to it separately and it has its own ranks:{" "}
+                {GUILD_RANKS.map((r) => r.label).join(", ")}. An alliance rank does not carry over.
+              </li>
             </ul>
             <p className="mt-4 text-sm text-muted">
               The alliance runs like a business. You take a question or an issue to the level above you, not straight to the top. A Centurion

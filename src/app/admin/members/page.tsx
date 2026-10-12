@@ -1,11 +1,11 @@
 import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
-import { setMemberRoleAction, setMemberSpecialtiesAction, setMemberTitleAction, removeMemberAction } from "@/lib/actions/admin";
+import { setGuildRankAction, setMemberRoleAction, setMemberSpecialtiesAction, setMemberTitleAction, removeMemberAction } from "@/lib/actions/admin";
 import { formatDate } from "@/lib/format";
 import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, PageHeader } from "@/components/ui";
 import { site } from "@/lib/site";
-import { ROLE_LABEL, SPECIALTIES, allianceRank, playedGamesOf, specialtiesOf } from "@/lib/constants";
+import { GUILD_RANKS, ROLE_LABEL, SPECIALTIES, allianceRank, guildRankOf, playedGamesOf, specialtiesOf } from "@/lib/constants";
 import { ConfirmSubmit } from "@/components/forms/SubmitButton";
 
 export default async function MembersPage() {
@@ -15,6 +15,7 @@ export default async function MembersPage() {
   // Rank first; the sort is stable, so within a rank the earliest account comes first.
   members.sort((a, b) => allianceRank(a).order - allianceRank(b).order);
   const isLeader = me.role === "LEADER";
+  const canSetGuildRank = isLeader || me.role === "TRIBUNE" || (me.status === "APPROVED" && me.guildRank === "LEADER");
 
   return (
     <>
@@ -38,7 +39,11 @@ export default async function MembersPage() {
                         {s.label}
                       </Badge>
                     ))}
-                    {u.status === "APPROVED" && <Badge tone="success">{site.legionName}</Badge>}
+                    {u.status === "APPROVED" && (
+                      <Badge tone="success">
+                        {site.legionName} · {guildRankOf(u)?.label}
+                      </Badge>
+                    )}
                     {self && <Badge tone="neutral">You</Badge>}
                   </div>
                   <p className="text-xs text-muted">
@@ -81,6 +86,25 @@ export default async function MembersPage() {
                   </form>
                 )}
               </div>
+              {canSetGuildRank && u.status === "APPROVED" && (
+                <form action={setGuildRankAction} className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line pt-3 lg:col-span-3">
+                  <input type="hidden" name="userId" value={u.id} />
+                  <label className="label" htmlFor={`guild-${u.id}`}>
+                    {site.legionGame} guild rank
+                  </label>
+                  <select id={`guild-${u.id}`} name="guildRank" defaultValue={guildRankOf(u)?.key ?? "MEMBER"} className="input w-auto py-1.5 text-sm">
+                    {GUILD_RANKS.map((r) => (
+                      <option key={r.key} value={r.key}>
+                        {r.label}
+                      </option>
+                    ))}
+                  </select>
+                  <Button type="submit" size="sm" variant="secondary">
+                    Set guild rank
+                  </Button>
+                  <span className="text-xs text-dim">Only inside the {site.legionGame} guild. Their alliance rank is separate.</span>
+                </form>
+              )}
               {isLeader && (
                 <form action={setMemberSpecialtiesAction} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-3 lg:col-span-3">
                   <input type="hidden" name="userId" value={u.id} />

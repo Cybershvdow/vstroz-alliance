@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { notifyDecision } from "@/lib/email";
 import { site } from "@/lib/site";
 import { requireOfficer, requireLeader } from "@/lib/auth";
-import { MATCH_STATUS, SIGNUP_STATUS, SPECIALTIES, USER_ROLE } from "@/lib/constants";
+import { GUILD_RANKS, MATCH_STATUS, SIGNUP_STATUS, SPECIALTIES, USER_ROLE } from "@/lib/constants";
 import {
   matchSchema,
   guildRoleSchema,
@@ -78,6 +78,20 @@ export async function setMemberSpecialtiesAction(formData: FormData) {
   const target = await db.user.findUnique({ where: { id: userId }, select: { discordLeftAt: true } });
   if (!target || target.discordLeftAt) return;
   await db.user.update({ where: { id: userId }, data: { specialties: keys.length ? JSON.stringify(keys) : null } });
+  revalidateAll();
+}
+
+/** Set someone's rank inside the Aion guild. It has nothing to do with their alliance rank. */
+export async function setGuildRankAction(formData: FormData) {
+  const officer = await requireOfficer();
+  const allowed = officer.role === "LEADER" || officer.role === "TRIBUNE" || (officer.status === "APPROVED" && officer.guildRank === "LEADER");
+  if (!allowed) return;
+  const userId = clean(formData.get("userId"));
+  const rank = clean(formData.get("guildRank"));
+  if (!userId || !GUILD_RANKS.some((r) => r.key === rank)) return;
+  const target = await db.user.findUnique({ where: { id: userId }, select: { status: true, discordLeftAt: true } });
+  if (!target || target.discordLeftAt || target.status !== "APPROVED") return; // only people in the guild hold a guild rank
+  await db.user.update({ where: { id: userId }, data: { guildRank: rank === "MEMBER" ? null : rank } });
   revalidateAll();
 }
 

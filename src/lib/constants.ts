@@ -346,3 +346,22 @@ export const CHAIN_OF_COMMAND: { rank: string; tone: "gold" | "accent" | "neutra
   { rank: "Socius · Member", tone: "neutral", does: "Trusted regular. Takes questions and issues to a Centurion, who answers or sends it up.", goesTo: "A Centurion" },
   { rank: "Tiro · Recruit", tone: "neutral", does: "New to the alliance. Takes questions and issues to a Centurion, who answers or sends it up.", goesTo: "A Centurion" },
 ];
+
+/* ---------- Guild ranks: inside one game's guild only (today: the Vstroz Legion in Aion) ---------- */
+
+/**
+ * Three layers, kept apart: the Discord community (no rank), the alliance (Tiro to Legatus, the same in every game),
+ * and a game's guild, which has its own short ladder. An alliance rank does not carry into a guild: a Centurion
+ * applies to the legion like anyone else and holds a guild rank there.
+ */
+export const GUILD_RANKS = [
+  { key: "LEADER", label: "Guild Leader", order: 0, tone: "gold" },
+  { key: "OFFICER", label: "Guild Officer", order: 1, tone: "accent" },
+  { key: "MEMBER", label: "Guild Member", order: 2, tone: "neutral" },
+] as const;
+
+/** A legion member's guild rank (Guild Member unless set), or null when they are not in the legion. */
+export function guildRankOf(u: { status: string; guildRank?: string | null }) {
+  if (u.status !== "APPROVED") return null;
+  return GUILD_RANKS.find((r) => r.key === u.guildRank) ?? GUILD_RANKS[2];
+}
