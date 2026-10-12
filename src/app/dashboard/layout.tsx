@@ -12,7 +12,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const items: NavItem[] = [
     { href: "/dashboard", label: "Overview" },
-    { href: "/dashboard/legion", label: inLegion ? "Vstroz Legion" : "Join the legion" },
     // Matches and guild roles belong to the legion, so alliance-only members do not get links that bounce.
     ...(inLegion
       ? [
@@ -24,6 +23,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { href: "/dashboard/votes", label: "Rank votes" },
     { href: "/dashboard/media", label: "Post content" },
     { href: "/dashboard/profile", label: "Profile" },
+    // The Aion guild is one game among many, so it sits at the end of the menu.
+    { href: "/dashboard/legion", label: inLegion ? "Vstroz Legion" : "Aion guild" },
   ];
   // Captain and General are alliance ranks: the command center does not depend on legion status.
   if (!user.discordLeftAt && isOfficer(user.role)) items.push({ href: "/admin", label: "Command center" });

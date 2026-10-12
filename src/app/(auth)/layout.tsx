@@ -22,7 +22,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </h2>
             <p className="mt-4 max-w-md text-muted">{site.tagline}</p>
           </div>
-          <p className="text-xs text-dim">Your account makes you a Recruit in the alliance. The Vstroz Legion (Aion) application is separate. An officer reviews it within 48 hours.</p>
+          <p className="text-xs text-dim">Your account makes you part of the alliance, whatever you play. Pick your games once you are in.</p>
         </div>
       </aside>
 

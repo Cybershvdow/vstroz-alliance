@@ -12,6 +12,20 @@ export const AVATAR_MAX_UPLOAD_BYTES = 900 * 1024;
 /** The form sends at most 512x512; anything much larger is refused before it is decoded. */
 export const AVATAR_MAX_INPUT_PIXELS = 1024 * 1024;
 
+/* Profile banners work the same way: the Banner table holds the image, User.bannerAt says one exists. */
+
+/** URL of a member's profile banner, or null when they have none (or their account is hidden). */
+export function bannerUrl(u: { id: string; bannerAt?: Date | null; discordLeftAt?: Date | null } | null | undefined): string | null {
+  if (!u?.bannerAt || u.discordLeftAt) return null;
+  return `/api/banner/${u.id}?v=${new Date(u.bannerAt).getTime()}`;
+}
+
+/** Stored banner size (3:1). The browser crops and shrinks to this before sending. */
+export const BANNER_WIDTH = 1500;
+export const BANNER_HEIGHT = 500;
+export const BANNER_MAX_UPLOAD_BYTES = 900 * 1024;
+export const BANNER_MAX_INPUT_PIXELS = 1600 * 600;
+
 /**
  * Identify a photo by its first bytes. This runs before any image library touches the upload, so formats with heavy
  * parsers (SVG, PDF, TIFF…) are turned away without being opened.

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { APEX_PLATFORMS, apexConfigured, fetchApexStats } from "@/lib/apex";
-import { AVATAR_MAX_INPUT_PIXELS, AVATAR_MAX_UPLOAD_BYTES, AVATAR_SIZE, sniffImageType } from "@/lib/avatar";
+import { AVATAR_MAX_INPUT_PIXELS, AVATAR_MAX_UPLOAD_BYTES, AVATAR_SIZE, BANNER_HEIGHT, BANNER_MAX_INPUT_PIXELS, BANNER_MAX_UPLOAD_BYTES, BANNER_WIDTH, sniffImageType } from "@/lib/avatar";
 import type { ActionState } from "@/lib/validation";
 
 function clean(v: FormDataEntryValue | null) {
@@ -108,4 +108,52 @@ export async function removeAvatarAction(): Promise<ActionState> {
   await db.$transaction([db.avatar.deleteMany({ where: { userId: me.id } }), db.user.update({ where: { id: me.id }, data: { avatarAt: null } })]);
   revalidatePath("/", "layout");
   return { ok: true, message: "Profile picture removed." };
+}
+
+/**
+ * Save the member's profile banner. Same handling as the profile picture: checked by its first bytes, then decoded
+ * and re-encoded here to a 1500x500 WebP, so only a real, clean photo is ever stored or served.
+ */
+export async function saveBannerAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const me = await getCurrentUser();
+  if (!me) redirect("/login");
+  if (me.discordLeftAt) return { ok: false, message: "Rejoin the Discord and sign in again before setting a banner." };
+  const file = formData.get("banner");
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Choose an image first." };
+  if (file.size > BANNER_MAX_UPLOAD_BYTES) return { ok: false, message: "That image is too large. Try a smaller one." };
+
+  const NOT_A_PHOTO = "That file is not a picture we can read. Use a JPG, PNG, or WebP.";
+  const input = Buffer.from(await file.arrayBuffer());
+  if (!sniffImageType(input)) return { ok: false, message: NOT_A_PHOTO };
+
+  let image: Uint8Array<ArrayBuffer>;
+  try {
+    const sharp = (await import("sharp")).default;
+    const out = await sharp(input, { failOn: "error", limitInputPixels: BANNER_MAX_INPUT_PIXELS })
+      .timeout({ seconds: 10 })
+      .rotate()
+      .resize(BANNER_WIDTH, BANNER_HEIGHT, { fit: "cover", position: "centre" })
+      .flatten({ background: "#0b0a10" })
+      .webp({ quality: 80 })
+      .toBuffer();
+    image = new Uint8Array(out);
+  } catch {
+    return { ok: false, message: NOT_A_PHOTO };
+  }
+
+  await db.$transaction([
+    db.banner.upsert({ where: { userId: me.id }, create: { userId: me.id, data: image, mime: "image/webp" }, update: { data: image, mime: "image/webp" } }),
+    db.user.update({ where: { id: me.id }, data: { bannerAt: new Date() } }),
+  ]);
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Banner updated." };
+}
+
+/** Remove the member's profile banner. */
+export async function removeBannerAction(): Promise<ActionState> {
+  const me = await getCurrentUser();
+  if (!me) redirect("/login");
+  await db.$transaction([db.banner.deleteMany({ where: { userId: me.id } }), db.user.update({ where: { id: me.id }, data: { bannerAt: null } })]);
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Banner removed." };
 }

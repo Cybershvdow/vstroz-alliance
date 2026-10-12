@@ -31,7 +31,7 @@ export async function TeamsGrid() {
       <div className="bg-stripes absolute inset-0 opacity-40" />
       <div className="relative mx-auto max-w-7xl px-4 md:px-6">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <SectionHeading eyebrow="Games" title="Ride under the banner." text="Tick the games you play on your profile and they show as your tags. Aion is home to the Vstroz Legion; every other game is open to the whole alliance." />
+          <SectionHeading eyebrow="Games" title="Ride under the banner." text="Tick the games you play on your profile and they show as your tags. Every game has its own page with its videos, players, and events." />
           <ButtonLink href="/games" variant="secondary">
             All games <ArrowIcon />
           </ButtonLink>

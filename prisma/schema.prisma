@@ -31,6 +31,7 @@ model User {
   appliedAt       DateTime? // when they first applied to the legion (status tracks that application)
   socials         String?   // JSON { youtube, twitch, tiktok, x, instagram } of normalized profile URLs
   avatarAt        DateTime? // set when they upload a profile picture; also versions its URL
+  bannerAt        DateTime? // set when they upload a profile banner; also versions its URL
   discordId       String?   // Discord user id once they signed in / connected with Discord (uniqueness enforced in code; no unique index so db push never warns at boot)
   discordUsername String?
   discordLinkedAt DateTime?
@@ -64,6 +65,7 @@ model User {
   tryouts          TryoutRequest[]
   mediaPosts       MediaPost[]
   avatar           Avatar?
+  banner           Banner?
   nominations      Nomination[] @relation("Nominee")
   nominationsMade  Nomination[] @relation("Nominator")
   votes            Vote[]
@@ -211,6 +213,15 @@ model Avatar {
   userId    String   @id
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   data      Bytes    // 256x256 WebP, re-encoded on the server
+  mime      String   @default("image/webp")
+  updatedAt DateTime @updatedAt
+}
+
+/// A member's profile banner (wide image across the top of their public profile), stored like the profile picture.
+model Banner {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data      Bytes    // 1500x500 WebP, re-encoded on the server
   mime      String   @default("image/webp")
   updatedAt DateTime @updatedAt
 }

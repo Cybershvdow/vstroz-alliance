@@ -14,7 +14,7 @@ export const site = {
   tag: "VST",
   motto: "One banner. Every world.",
   tagline:
-    "Friends who became a community. A competitive, multi-game alliance for adults who play to win and look after their own. Aion is where we start.",
+    "Friends who became a community. A competitive, multi-game alliance for adults who play to win and look after their own.",
   founded: "2024",
   discordInvite: "https://discord.gg/Ydjz54qsp",
   contactEmail: "gdiazmarine@gmail.com",

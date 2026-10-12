@@ -15,8 +15,7 @@ export default function RegisterPage() {
         <h1 className="display mt-3 text-4xl">Join the alliance</h1>
         <p className="mt-3 text-muted">
           The Vstroz Alliance lives in Discord. Everyone in the server is part of it, whatever they play, and your website account comes
-          from your Discord. Every account starts as a Recruit. The {site.legionName} is our {site.legionGame} guild; applying to it is a
-          separate step from inside your account and does not change your rank.
+          from your Discord. Every account starts as a Recruit. Once you are in, you pick the games you play.
         </p>
         <ol className="mt-8 space-y-4">
           <li className="panel cut p-5">
@@ -41,8 +40,8 @@ export default function RegisterPage() {
             <p className="label">Then</p>
             <p className="display mt-1 text-2xl">Pick your games</p>
             <p className="mt-1 text-sm text-muted">
-              Tick the games you play and they show as tags on your profile. Play {site.legionGame}? Join the {site.legionName} in-game and apply
-              from your account. An officer reviews it within 48 hours.
+              Tick every game you play. They show as tags on your profile and put you on each game&apos;s page, so people who play the same
+              games can find you.
             </p>
           </li>
         </ol>
@@ -61,9 +60,8 @@ export default function RegisterPage() {
       <p className="eyebrow">Recruitment · Your account</p>
       <h1 className="display mt-3 text-4xl">Join the alliance</h1>
       <p className="mt-3 text-muted">
-        Create your Vstroz Alliance account and you join the alliance as a Recruit, whatever you play. Next you pick your games and they
-        show as tags on your profile. The {site.legionName} is our {site.legionGame} guild; applying to it is a separate step from inside
-        your account and does not change your rank.
+        Create your Vstroz Alliance account and you join the alliance as a Recruit, whatever you play. Next you pick the games you play. They
+        show as tags on your profile and put you on each game&apos;s page.
       </p>
       <div className="mt-8">
         <RegisterForm />

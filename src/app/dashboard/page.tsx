@@ -11,6 +11,9 @@ import { GameTag } from "@/components/site/GameTag";
 export default async function DashboardPage() {
   const me = await requireUser();
   const inLegion = me.status === "APPROVED";
+  const myGames = playedGamesOf(me);
+  // The Aion guild card only shows to people it concerns: they play Aion or have applied.
+  const showLegion = !inLegion && (!!me.appliedAt || me.status === "DENIED" || myGames.includes(site.legionGame));
   const now = new Date();
 
   const [announcements, upcoming, mySignups, myRoleApps, memberCount] = await Promise.all([
@@ -29,7 +32,7 @@ export default async function DashboardPage() {
       <PageHeader
         title={<>Welcome back, <span className="text-accent">{me.displayName}</span></>}
         text={[allianceRank(me).label, me.playerType, playedGamesOf(me).join(" · ") || null, `With the alliance since ${formatDate(me.createdAt)}`].filter(Boolean).join(" · ")}
-        actions={inLegion ? <ButtonLink href="/dashboard/matches">Match signups</ButtonLink> : <ButtonLink href="/dashboard/legion">{me.appliedAt ? "Your legion application" : "Join the legion"}</ButtonLink>}
+        actions={inLegion ? <ButtonLink href="/dashboard/matches">Match signups</ButtonLink> : <ButtonLink href="/dashboard/profile#player-profile">{myGames.length ? "Edit your games" : "Pick your games"}</ButtonLink>}
       />
 
       {!me.avatarAt && (
@@ -46,13 +49,25 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {!inLegion && (
+      {!inLegion && myGames.length === 0 && (
         <Card accent className="mb-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="display text-xl">Pick the games you play</h2>
+              <p className="mt-1 max-w-xl text-sm text-muted">They show as tags on your profile and put you on each game&apos;s page, so people who play the same games can find you.</p>
+            </div>
+            <ButtonLink href="/dashboard/profile#player-profile">Pick your games</ButtonLink>
+          </div>
+        </Card>
+      )}
+
+      {showLegion && (
+        <Card className="mb-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="eyebrow">{site.legionName}</p>
               <h2 className="display mt-2 text-2xl">
-                {me.status === "DENIED" ? "Legion application declined" : me.appliedAt ? "Legion application under review" : "You're in the alliance. Play Aion? Join the Vstroz Legion."}
+                {me.status === "DENIED" ? "Legion application declined" : me.appliedAt ? "Legion application under review" : "You play Aion. The Vstroz Legion is our guild there."}
               </h2>
               <p className="mt-2 max-w-xl text-sm text-muted">
                 {me.status === "DENIED"
@@ -78,7 +93,7 @@ export default async function DashboardPage() {
         ) : (
           <>
             <Stat label="Games you play" value={playedGamesOf(me).length} tone="accent" />
-            <Stat label={site.legionName} value={me.status === "DENIED" ? "Declined" : me.appliedAt ? "In review" : "Not applied"} />
+            <Stat label="Your rank" value={allianceRank(me).label} />
           </>
         )}
         <Stat label="Alliance members" value={memberCount} tone="gold" />

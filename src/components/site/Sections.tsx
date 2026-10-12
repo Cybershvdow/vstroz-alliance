@@ -13,7 +13,7 @@ import { LogoFull } from "@/components/brand/Logo";
 
 export async function Hero() {
   const [memberCount, nextMatch, wins] = await Promise.all([
-    db.user.count({ where: { status: "APPROVED" } }),
+    db.user.count({ where: { discordLeftAt: null } }),
     db.match.findFirst({
       where: { isPublic: true, status: { in: ["OPEN", "LOCKED"] }, startsAt: { gte: new Date() } },
       orderBy: { startsAt: "asc" },
@@ -112,7 +112,7 @@ export async function Hero() {
       <div className="relative border-y border-line bg-bg-2/80 backdrop-blur">
         <div className="mx-auto grid max-w-7xl grid-cols-2 divide-line md:grid-cols-4 md:divide-x">
           {[
-            ["Legion members", `${memberCount}`],
+            ["Alliance members", `${memberCount}`],
             ["Playing now", playingNow],
             ["Matches won", `${wins}`],
             ["Recruiting", "Open"],
@@ -256,8 +256,7 @@ export function JoinCTA() {
             </h2>
             <p className="mt-4 max-w-xl text-muted">
               Create an account and you join the alliance as a Recruit: pick your games, post content, vote, build your profile. Show up
-              and an officer promotes you to Member. Veteran and Elite are voted in by the alliance. Play Aion? Apply to the Vstroz
-              Legion from inside your account. Approval unlocks match signups and guild roles.
+              and an officer promotes you to Member. Veteran and Elite are voted in by the alliance.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">

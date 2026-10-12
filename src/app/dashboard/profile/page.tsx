@@ -3,14 +3,15 @@ import { site } from "@/lib/site";
 import { parseSocials } from "@/lib/social";
 import { discordConfigured } from "@/lib/discord";
 import { Badge, Button, ButtonLink, Card, PageHeader } from "@/components/ui";
-import { STATUS_LABEL, allianceRank } from "@/lib/constants";
+import { STATUS_LABEL, allianceRank, playedGamesOf } from "@/lib/constants";
 import { ProfileForm, PasswordForm } from "@/components/forms/MemberForms";
 import { PlayerProfileForm } from "@/components/forms/PlayerProfileForm";
 import { DiscordButton } from "@/components/site/DiscordButton";
 import { ClearDraft } from "@/components/forms/DraftNotice";
 import { ApexAccountForm } from "@/components/forms/ApexAccountForm";
 import { AvatarForm } from "@/components/forms/AvatarForm";
-import { avatarUrl } from "@/lib/avatar";
+import { BannerForm } from "@/components/forms/BannerForm";
+import { avatarUrl, bannerUrl } from "@/lib/avatar";
 import { unlinkSteamAction } from "@/lib/actions/accounts";
 import { steamConfigured } from "@/lib/steam";
 import { apexConfigured } from "@/lib/apex";
@@ -31,6 +32,8 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
               ? "Steam linking is not set up yet."
               : undefined;
   const inLegion = me.status === "APPROVED";
+  // The Aion guild only comes up for people it concerns: they play Aion, applied, or are in it.
+  const showLegion = inLegion || !!me.appliedAt || playedGamesOf(me).includes(site.legionGame);
   const rank = allianceRank(me);
   const discordMsg =
     discord === "linked" ? "Discord connected." : discord === "taken" ? "That Discord account is already connected to another member." : undefined;
@@ -46,15 +49,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           <ClearDraft names={["register"]} scope="anon" />
           <div className="panel mb-6 flex flex-col gap-3 border-accent/50 p-4 text-sm md:flex-row md:items-center md:justify-between">
             <p>
-              <span className="font-semibold">Welcome to the alliance, {me.displayName}.</span> You start as a Recruit. Add a profile picture below, then tick the games you play and they show as tags on your profile. Play{" "}
-              {site.legionGame}? The {site.legionName} is our guild there, with its own application.
+              <span className="font-semibold">Welcome to the alliance, {me.displayName}.</span> You start as a Recruit. Add a profile picture and a banner below, then tick the games you play. They show as tags on your profile and list you on each game&apos;s page.
             </p>
             <div className="flex shrink-0 flex-wrap gap-2">
               <ButtonLink href="#player-profile" size="sm">
                 Pick your games
-              </ButtonLink>
-              <ButtonLink href="/dashboard/legion" size="sm" variant="secondary">
-                {site.legionName}
               </ButtonLink>
             </div>
           </div>
@@ -64,6 +63,11 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         <h2 id="profile-picture" className="display mb-1 scroll-mt-28 text-2xl">Profile picture</h2>
         <p className="mb-5 text-sm text-muted">Shown on your profile, the roster, and around the portal. You can change or remove it any time.</p>
         <AvatarForm name={me.displayName} current={avatarUrl(me)} />
+      </Card>
+      <Card className="mb-6">
+        <h2 id="profile-banner" className="display mb-1 scroll-mt-28 text-2xl">Profile banner</h2>
+        <p className="mb-5 text-sm text-muted">A wide image across the top of your public profile. Make it yours. You can change or remove it any time.</p>
+        <BannerForm current={bannerUrl(me)} />
       </Card>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -142,6 +146,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                   <Badge tone={rank.tone}>{rank.label}</Badge>
                 </dd>
               </div>
+              {showLegion && (
               <div>
                 <dt className="label">{site.legionName}</dt>
                 <dd className="mt-1">
@@ -150,8 +155,9 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                   </Badge>
                 </dd>
               </div>
+              )}
             </dl>
-            {!inLegion && (
+            {showLegion && !inLegion && (
               <div className="mt-4">
                 <ButtonLink href="/dashboard/legion" size="sm" variant="secondary">
                   {me.appliedAt ? "Your legion application" : "Apply to the legion"}

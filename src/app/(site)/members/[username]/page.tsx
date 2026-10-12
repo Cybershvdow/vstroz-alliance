@@ -7,7 +7,7 @@ import { site } from "@/lib/site";
 import { formatDate } from "@/lib/format";
 import { allianceRank, playedGamesOf } from "@/lib/constants";
 import { folderHref } from "@/lib/media";
-import { avatarUrl } from "@/lib/avatar";
+import { avatarUrl, bannerUrl } from "@/lib/avatar";
 import { SOCIAL_PLATFORMS, parseSocials } from "@/lib/social";
 import { Avatar, Badge, ButtonLink } from "@/components/ui";
 import { ArrowIcon, DiscordIcon } from "@/components/site/Icons";
@@ -39,6 +39,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
         id: true,
         username: true,
         displayName: true,
+        bannerAt: true,
         role: true,
         tier: true,
         status: true,
@@ -115,6 +116,12 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
         <Link href="/roster" className="-my-3 inline-flex items-center gap-2 py-3 font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
           ← Roster
         </Link>
+        {bannerUrl(user) && (
+          <div className="cut mt-6 overflow-hidden border border-line-strong">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={bannerUrl(user)!} alt="" className="aspect-[3/1] w-full object-cover" />
+          </div>
+        )}
         <div className="mt-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
             <Avatar name={user.displayName} size="lg" tone={rank.tone} src={avatarUrl(user)} />

@@ -22,7 +22,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <div>
       <p className="eyebrow">Members</p>
       <h1 className="display mt-3 text-4xl">Sign in</h1>
-      <p className="mt-3 text-muted">Your alliance portal: your profile and profile picture, game tags, content, votes, and The Round Table. Match signups open once you are in the Vstroz Legion.</p>
+      <p className="mt-3 text-muted">Your alliance portal: your profile and profile picture, game tags, content, votes, and The Round Table.</p>
 
       {message && (
         <div className="panel mt-6 border-danger/50 p-4 text-sm">

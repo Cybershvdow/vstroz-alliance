@@ -28,6 +28,7 @@ export const getCurrentUser = cache(async () => {
       appliedAt: true,
       socials: true,
       avatarAt: true,
+      bannerAt: true,
       discordId: true,
       discordUsername: true,
       discordLeftAt: true,
