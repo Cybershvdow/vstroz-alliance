@@ -71,6 +71,8 @@ export const profileSchema = z.object({
   socialTiktok: z.string().trim().max(200).optional().or(z.literal("")),
   socialX: z.string().trim().max(200).optional().or(z.literal("")),
   socialInstagram: z.string().trim().max(200).optional().or(z.literal("")),
+  socialKick: z.string().trim().max(200).optional().or(z.literal("")),
+  socialFacebook: z.string().trim().max(200).optional().or(z.literal("")),
 });
 
 export const matchSchema = z.object({

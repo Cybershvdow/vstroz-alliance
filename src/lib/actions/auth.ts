@@ -230,6 +230,8 @@ export async function updateProfileAction(_prev: ActionState, formData: FormData
     socialTiktok: clean(formData.get("socialTiktok")),
     socialX: clean(formData.get("socialX")),
     socialInstagram: clean(formData.get("socialInstagram")),
+    socialKick: clean(formData.get("socialKick")),
+    socialFacebook: clean(formData.get("socialFacebook")),
   });
   if (!parsed.success) return { ok: false, errors: flattenErrors(parsed.error) };
 
@@ -239,7 +241,7 @@ export async function updateProfileAction(_prev: ActionState, formData: FormData
   if (taken) return { ok: false, errors: { email: ["That email is already used by another account"] } };
 
   // Social links: handle or URL in, normalized https URL out.
-  const fieldFor: Record<SocialKey, keyof typeof d> = { youtube: "socialYoutube", twitch: "socialTwitch", tiktok: "socialTiktok", x: "socialX", instagram: "socialInstagram" };
+  const fieldFor: Record<SocialKey, keyof typeof d> = { youtube: "socialYoutube", twitch: "socialTwitch", kick: "socialKick", tiktok: "socialTiktok", x: "socialX", instagram: "socialInstagram", facebook: "socialFacebook" };
   const socials: Partial<Record<SocialKey, string>> = {};
   const errors: FieldErrors = {};
   for (const p of SOCIAL_PLATFORMS) {

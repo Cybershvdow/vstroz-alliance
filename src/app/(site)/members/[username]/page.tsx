@@ -8,7 +8,7 @@ import { formatDate } from "@/lib/format";
 import { allianceRank, playedGamesOf } from "@/lib/constants";
 import { folderHref } from "@/lib/media";
 import { avatarUrl, bannerUrl } from "@/lib/avatar";
-import { SOCIAL_PLATFORMS, parseSocials } from "@/lib/social";
+import { SOCIAL_PLATFORMS, parseSocials, socialHandle } from "@/lib/social";
 import { Avatar, Badge, ButtonLink } from "@/components/ui";
 import { ArrowIcon, DiscordIcon } from "@/components/site/Icons";
 import { MediaPlayer } from "@/components/site/MediaPlayer";
@@ -197,9 +197,12 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
                       href={socials[p.key]}
                       target="_blank"
                       rel="noreferrer"
-                      className="cut-sm border border-gold/35 bg-white/[0.03] px-4 py-2 font-display text-[0.72rem] font-bold uppercase tracking-[0.18em] hover:border-gold/70"
+                      title={`Open ${user.displayName} on ${p.label}`}
+                      className="cut-sm inline-flex max-w-full items-center gap-2 border border-gold/35 bg-white/[0.03] px-4 py-2.5 text-sm transition hover:border-gold/70 hover:bg-white/[0.06]"
                     >
-                      {p.label}
+                      <span className="shrink-0 font-display text-[0.7rem] font-bold uppercase tracking-[0.18em] text-gold">{p.label}</span>
+                      <span className="truncate text-text">{socialHandle(socials[p.key]!)}</span>
+                      <span aria-hidden className="shrink-0 text-muted">↗</span>
                     </a>
                   ))}
                 </div>

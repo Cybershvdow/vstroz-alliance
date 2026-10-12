@@ -4,8 +4,10 @@ export const SOCIAL_PLATFORMS = [
   { key: "youtube", label: "YouTube", domains: ["youtube.com", "youtu.be"], placeholder: "@yourchannel or link", handleUrl: (h: string) => `https://www.youtube.com/@${h}` },
   { key: "twitch", label: "Twitch", domains: ["twitch.tv"], placeholder: "yourname or link", handleUrl: (h: string) => `https://www.twitch.tv/${h}` },
   { key: "tiktok", label: "TikTok", domains: ["tiktok.com"], placeholder: "@yourname or link", handleUrl: (h: string) => `https://www.tiktok.com/@${h}` },
-  { key: "x", label: "X", domains: ["x.com", "twitter.com"], placeholder: "@yourname or link", handleUrl: (h: string) => `https://x.com/${h}` },
+  { key: "kick", label: "Kick", domains: ["kick.com"], placeholder: "yourname or link", handleUrl: (h: string) => `https://kick.com/${h}` },
+  { key: "x", label: "X (Twitter)", domains: ["x.com", "twitter.com"], placeholder: "@yourname or link", handleUrl: (h: string) => `https://x.com/${h}` },
   { key: "instagram", label: "Instagram", domains: ["instagram.com"], placeholder: "@yourname or link", handleUrl: (h: string) => `https://www.instagram.com/${h}` },
+  { key: "facebook", label: "Facebook", domains: ["facebook.com", "fb.com"], placeholder: "yourname or link", handleUrl: (h: string) => `https://www.facebook.com/${h}` },
 ] as const;
 
 export type SocialKey = (typeof SOCIAL_PLATFORMS)[number]["key"];
@@ -40,5 +42,20 @@ export function parseSocials(json: string | null | undefined): Socials {
     return o && typeof o === "object" ? (o as Socials) : {};
   } catch {
     return {};
+  }
+}
+
+/** The handle to show for a saved link: "@name" from the last part of the address, or the bare address when there is none. */
+export function socialHandle(url: string): string {
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.split("/").filter(Boolean);
+    const last = decodeURIComponent(parts[parts.length - 1] ?? "");
+    // Links that end in an id or a generic word (a YouTube channel id, a Facebook profile.php) read better as the address.
+    const generic = !last || parts.length > 1 || last.toLowerCase() === "profile.php";
+    if (generic && !last.startsWith("@")) return u.hostname.replace(/^www\./, "") + u.pathname.replace(/\/$/, "");
+    return last.startsWith("@") ? last : `@${last}`;
+  } catch {
+    return url;
   }
 }

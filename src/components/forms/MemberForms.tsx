@@ -18,7 +18,7 @@ export function ProfileForm({
   const [state, action] = useActionState(updateProfileAction, undefined);
   const [formRef, draft] = useFormDraft("account", state);
   const err = state && !state.ok ? state.errors : undefined;
-  const fieldFor: Record<string, string> = { youtube: "socialYoutube", twitch: "socialTwitch", tiktok: "socialTiktok", x: "socialX", instagram: "socialInstagram" };
+  const fieldFor: Record<string, string> = { youtube: "socialYoutube", twitch: "socialTwitch", kick: "socialKick", tiktok: "socialTiktok", x: "socialX", instagram: "socialInstagram", facebook: "socialFacebook" };
   return (
     <form ref={formRef} action={action} className="space-y-5" noValidate>
       <DraftNotice draft={draft} />
