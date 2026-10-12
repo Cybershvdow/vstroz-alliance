@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser, requireApproved, requireOfficer } from "@/lib/auth";
-import { LEGION_GAMES } from "@/lib/constants";
+import { LEGION_GAMES, canAddressTable } from "@/lib/constants";
 import { parseMediaUrl } from "@/lib/media";
 import type { ActionState } from "@/lib/validation";
 
@@ -27,9 +27,15 @@ export async function raiseDisputeAction(_prev: ActionState, formData: FormData)
     const target = await db.user.findUnique({ where: { id: againstUserId }, select: { id: true } });
     if (!target) return { ok: false, message: "That member was not found." };
   }
-  await db.dispute.create({ data: { raisedById: me.id, againstUserId, subject, details } });
+  // Chain of command: Recruits and Members go to a Captain. Veterans, Elite and command may go straight to The Round Table.
+  const wantsTable = clean(formData.get("level")) === "TABLE";
+  const level = canAddressTable(me) && (wantsTable || me.role !== "MEMBER") ? "TABLE" : "CAPTAIN";
+  await db.dispute.create({ data: { raisedById: me.id, againstUserId, subject, details, level } });
   revalidateAll();
-  return { ok: true, message: "Brought to The Round Table. Officers will review it and record a decision." };
+  return {
+    ok: true,
+    message: level === "TABLE" ? "Brought to The Round Table. A General will review it and record a decision." : "Sent to the Captains. One of them will answer it, or send it up to The Round Table.",
+  };
 }
 
 export async function resolveDisputeAction(formData: FormData) {
@@ -38,7 +44,20 @@ export async function resolveDisputeAction(formData: FormData) {
   const status = clean(formData.get("status"));
   const resolution = clean(formData.get("resolution")).trim().slice(0, 1000);
   if (!id || !["RESOLVED", "DISMISSED"].includes(status)) return;
+  const matter = await db.dispute.findUnique({ where: { id }, select: { level: true, status: true } });
+  if (!matter || matter.status !== "OPEN") return;
+  // What sits at The Round Table is decided by a General. Captains settle the first line.
+  if (matter.level === "TABLE" && officer.role !== "LEADER") return;
   await db.dispute.update({ where: { id }, data: { status, resolution: resolution || null, resolvedById: officer.id, resolvedAt: new Date() } });
+  revalidateAll();
+}
+
+/** A Captain (or General) sends a first-line matter up to The Round Table. */
+export async function escalateDisputeAction(formData: FormData) {
+  const officer = await requireOfficer();
+  const id = clean(formData.get("id"));
+  if (!id) return;
+  await db.dispute.updateMany({ where: { id, status: "OPEN", level: "CAPTAIN" }, data: { level: "TABLE", escalatedAt: new Date(), escalatedById: officer.id } });
   revalidateAll();
 }
 

@@ -184,6 +184,9 @@ model Dispute {
   subject       String
   details       String
   status        String    @default("OPEN") // OPEN | RESOLVED | DISMISSED
+  level         String    @default("TABLE") // CAPTAIN (first line) | TABLE (The Round Table: Generals decide)
+  escalatedAt   DateTime? // when a Captain sent it up to The Round Table
+  escalatedById String?
   resolution    String?
   resolvedById  String?
   resolvedAt    DateTime?

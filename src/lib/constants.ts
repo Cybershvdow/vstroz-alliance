@@ -276,3 +276,26 @@ export function questionsFor(gameName: string): Question[] {
     return [q];
   });
 }
+
+/* ---------- Chain of command ---------- */
+
+/**
+ * Who a member takes a question or an issue to. The alliance runs like a business: you go to the level above you,
+ * and only what that level cannot settle moves up. Recruits and Members go to a Captain. Veterans and Elite have
+ * earned a direct line to The Round Table. Captains bring matters to the Generals.
+ */
+export function canAddressTable(u: { role: string; tier: string }) {
+  return u.role !== "MEMBER" || u.tier === "VETERAN" || u.tier === "ELITE";
+}
+
+export const CHAIN_LEVEL_LABEL: Record<string, string> = { CAPTAIN: "With the Captains", TABLE: "At The Round Table" };
+
+/** The chain of command, highest first. Shown on the Rules page and in the portal. */
+export const CHAIN_OF_COMMAND: { rank: string; tone: "gold" | "accent" | "neutral"; does: string; goesTo: string }[] = [
+  { rank: "General", tone: "gold", does: "Runs the alliance and sits at the head of The Round Table. Decides what Captains send up. Final say.", goesTo: "The other Generals" },
+  { rank: "Captain", tone: "accent", does: "The first stop for Recruits and Members. Answers questions, settles day-to-day issues, and sends up only what needs a General.", goesTo: "A General, at The Round Table" },
+  { rank: "Elite", tone: "gold", does: "Senior rank. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Captain, or The Round Table directly" },
+  { rank: "Veteran", tone: "accent", does: "Senior rank. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Captain, or The Round Table directly" },
+  { rank: "Member", tone: "neutral", does: "Trusted regular. Takes questions and issues to a Captain, who answers or sends it up.", goesTo: "A Captain" },
+  { rank: "Recruit", tone: "neutral", does: "New to the alliance. Takes questions and issues to a Captain, who answers or sends it up.", goesTo: "A Captain" },
+];

@@ -1,14 +1,15 @@
 import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
-import { resolveDisputeAction, reviewTryoutAction } from "@/lib/actions/community";
+import { escalateDisputeAction, resolveDisputeAction, reviewTryoutAction } from "@/lib/actions/community";
 import { rules } from "@/lib/site";
-import { allianceRank } from "@/lib/constants";
+import { CHAIN_LEVEL_LABEL, allianceRank } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, ButtonLink, EmptyState, PageHeader, statusTone } from "@/components/ui";
 
 export default async function AdminTablePage() {
-  await requireOfficer();
+  const me = await requireOfficer();
+  const isGeneral = me.role === "LEADER";
   const [disputes, tryouts, openVotes] = await Promise.all([
     db.dispute.findMany({ orderBy: [{ status: "asc" }, { createdAt: "desc" }], take: 40, include: { raisedBy: { select: { displayName: true } }, against: { select: { displayName: true } } } }),
     db.tryoutRequest.findMany({ orderBy: [{ createdAt: "desc" }], take: 40, include: { user: { select: { id: true, displayName: true, gameClass: true, discord: true, role: true, tier: true, avatarAt: true } } } }),
@@ -21,10 +22,10 @@ export default async function AdminTablePage() {
 
   return (
     <>
-      <PageHeader title={rules.table.title} text="Disputes and tryouts land here. Rank votes have their own page." actions={<ButtonLink href="/admin/ranks">Rank votes{openVotes ? ` (${openVotes} open)` : ""}</ButtonLink>} />
+      <PageHeader title={rules.table.title} text="Questions and issues come up the chain: Captains take the first line and send up what needs a General. Generals decide what sits at The Round Table." actions={<ButtonLink href="/admin/ranks">Rank votes{openVotes ? ` (${openVotes} open)` : ""}</ButtonLink>} />
 
       <h2 className="display mb-3 text-2xl">
-        Open disputes <span className="text-muted">({openDisputes.length})</span>
+        Open matters <span className="text-muted">({openDisputes.length})</span>
       </h2>
       {openDisputes.length === 0 ? (
         <EmptyState title="The Round Table is clear" />
@@ -35,7 +36,8 @@ export default async function AdminTablePage() {
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="display text-2xl">{d.subject}</h3>
-                  <Badge tone="warning">OPEN</Badge>
+                  <Badge tone={d.level === "TABLE" ? "gold" : "accent"}>{CHAIN_LEVEL_LABEL[d.level] ?? d.level}</Badge>
+                  {d.escalatedAt && <Badge tone="neutral">Sent up by a Captain</Badge>}
                 </div>
                 <p className="text-xs text-muted">
                   Brought by {d.raisedBy.displayName} · {formatDate(d.createdAt)}
@@ -43,12 +45,16 @@ export default async function AdminTablePage() {
                 </p>
                 <p className="mt-3 whitespace-pre-line text-sm text-muted">{d.details}</p>
               </div>
+              {d.level === "TABLE" && !isGeneral ? (
+                <p className="text-sm text-muted">This sits at The Round Table. A General records the decision.</p>
+              ) : (
+              <div className="flex flex-col gap-3">
               <form action={resolveDisputeAction} className="flex flex-col gap-2">
                 <input type="hidden" name="id" value={d.id} />
                 <label className="label" htmlFor={`res-${d.id}`}>
-                  Decision (recorded and shown to the member)
+                  Answer or decision (recorded and shown to the member)
                 </label>
-                <textarea id={`res-${d.id}`} name="resolution" className="input min-h-20" maxLength={1000} placeholder="What The Round Table decided and why." />
+                <textarea id={`res-${d.id}`} name="resolution" className="input min-h-20" maxLength={1000} placeholder="The answer or decision, and why." />
                 <div className="grid grid-cols-2 gap-2">
                   <Button type="submit" name="status" value="RESOLVED" size="sm">
                     Resolve
@@ -58,6 +64,16 @@ export default async function AdminTablePage() {
                   </Button>
                 </div>
               </form>
+              {d.level === "CAPTAIN" && (
+                <form action={escalateDisputeAction}>
+                  <input type="hidden" name="id" value={d.id} />
+                  <Button type="submit" size="sm" variant="ghost" className="w-full">
+                    Send up to The Round Table
+                  </Button>
+                </form>
+              )}
+              </div>
+              )}
             </li>
           ))}
         </ul>

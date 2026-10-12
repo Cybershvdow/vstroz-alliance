@@ -8,7 +8,7 @@ import { useFormDraft } from "@/lib/formDraft";
 import { DraftNotice } from "./DraftNotice";
 import { SubmitButton } from "./SubmitButton";
 
-export function DisputeForm({ members }: { members: { id: string; displayName: string }[] }) {
+export function DisputeForm({ members, canTable = false, commandOnly = false }: { members: { id: string; displayName: string }[]; canTable?: boolean; commandOnly?: boolean }) {
   const [state, action] = useActionState(raiseDisputeAction, undefined);
   const [formRef, draft] = useFormDraft("dispute", state);
   const err = state && !state.ok ? state.errors : undefined;
@@ -16,8 +16,16 @@ export function DisputeForm({ members }: { members: { id: string; displayName: s
     <form ref={formRef} action={action} className="space-y-4" noValidate>
       <DraftNotice draft={draft} />
       <FormMessage state={state} />
+      {canTable && !commandOnly && (
+        <Field label="Send it to" name="level" hint="Start with a Captain when you can. The Round Table is for what a Captain cannot settle.">
+          <select id="level" name="level" className="input" defaultValue="CAPTAIN">
+            <option value="CAPTAIN">A Captain</option>
+            <option value="TABLE">The Round Table</option>
+          </select>
+        </Field>
+      )}
       <Field label="Subject" name="subject" error={err?.subject}>
-        <input id="subject" name="subject" className="input" placeholder="e.g. No-show on Saturday siege" maxLength={120} required />
+        <input id="subject" name="subject" className="input" placeholder="e.g. Question about squad nights" maxLength={120} required />
       </Field>
       <Field label="About a member (optional)" name="againstUserId">
         <select id="againstUserId" name="againstUserId" className="input" defaultValue="">
@@ -29,10 +37,10 @@ export function DisputeForm({ members }: { members: { id: string; displayName: s
           ))}
         </select>
       </Field>
-      <Field label="What happened" name="details" error={err?.details} hint="Facts, dates, who was there. Officers read this and record a decision.">
+      <Field label="Details" name="details" error={err?.details} hint="A question, a request, or a problem. Give facts, dates, and who was there. The answer is recorded and shown to you.">
         <textarea id="details" name="details" className="input min-h-28" maxLength={3000} required />
       </Field>
-      <SubmitButton pendingText="Sending…">Bring it to The Round Table</SubmitButton>
+      <SubmitButton pendingText="Sending…">{commandOnly ? "Bring it to The Round Table" : canTable ? "Send it up" : "Send it to a Captain"}</SubmitButton>
     </form>
   );
 }

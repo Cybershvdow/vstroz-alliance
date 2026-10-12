@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { rules, identity, site } from "@/lib/site";
-import { TIERS, TIER_LABEL, TIER_BLURB, VOTED_TIERS, ROLE_LABEL } from "@/lib/constants";
+import { CHAIN_OF_COMMAND } from "@/lib/constants";
 import { Badge, ButtonLink, SectionHeading } from "@/components/ui";
 import { DiscordIcon } from "@/components/site/Icons";
 
@@ -53,25 +53,25 @@ export default function RulesPage() {
           <div>
             <h3 className="display text-2xl">Ranks &amp; chain of command</h3>
             <ul className="mt-4 divide-y divide-line border-y border-line">
-              <li className="flex items-start gap-4 py-3">
-                <Badge tone="gold" className="mt-0.5 w-24 justify-center">{ROLE_LABEL.LEADER}</Badge>
-                <span className="text-sm text-muted">Leads the alliance. Final say at The Round Table. Can veto or override.</span>
-              </li>
-              <li className="flex items-start gap-4 py-3">
-                <Badge tone="accent" className="mt-0.5 w-24 justify-center">{ROLE_LABEL.OFFICER}</Badge>
-                <span className="text-sm text-muted">Runs recruitment, events, and reviews. Sits at The Round Table.</span>
-              </li>
-              {[...TIERS].reverse().map((t) => (
-                <li key={t} className="flex items-start gap-4 py-3">
-                  <Badge tone={t === "ELITE" ? "gold" : t === "VETERAN" ? "accent" : "neutral"} className="mt-0.5 w-24 justify-center">
-                    {TIER_LABEL[t]}
+              {CHAIN_OF_COMMAND.map((c) => (
+                <li key={c.rank} className="flex items-start gap-4 py-3">
+                  <Badge tone={c.tone} className="mt-0.5 w-24 shrink-0 justify-center">
+                    {c.rank}
                   </Badge>
                   <span className="text-sm text-muted">
-                    {TIER_BLURB[t]} {(VOTED_TIERS as readonly string[]).includes(t) ? "Decided by vote." : ""}
+                    {c.does}
+                    <span className="mt-1 block text-xs text-dim">
+                      Goes to: <span className="text-text">{c.goesTo}</span>
+                    </span>
                   </span>
                 </li>
               ))}
             </ul>
+            <p className="mt-4 text-sm text-muted">
+              The alliance runs like a business. You take a question or an issue to the level above you, not straight to the top. A Captain
+              answers it or sends it up. Veterans and Elite have earned a direct line to The Round Table. Recruit to Member is an officer
+              decision; Veteran and Elite are voted in by the alliance.
+            </p>
           </div>
         </div>
       </section>

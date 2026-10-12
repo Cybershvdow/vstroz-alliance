@@ -265,7 +265,7 @@ export const rules = {
   table: {
     title: "The Round Table",
     text:
-      "The Round Table is command. Every General and Captain has a seat. Decisions, orders, rank votes, disputes, no-show reviews, and rule breaks are brought to The Round Table and settled there, professionally and on the record. Everyone in the alliance votes where the rules call for it, and anyone can bring a dispute. Decisions are final.",
+      "The Round Table is command. Every General and Captain has a seat. Decisions, orders, rank votes, disputes, no-show reviews, and rule breaks are brought to The Round Table and settled there, professionally and on the record. Everyone in the alliance votes where the rules call for it. Questions and issues come up the chain of command: Recruits and Members go to a Captain, Veterans and Elite can come to The Round Table directly, and Captains send up what needs a General. Decisions are final.",
   },
 };
 

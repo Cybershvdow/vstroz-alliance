@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { closeExpiredNominations } from "@/lib/ranks";
 import { rules } from "@/lib/site";
+import { CHAIN_LEVEL_LABEL, CHAIN_OF_COMMAND, allianceRank, canAddressTable } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import { Badge, ButtonLink, Card, EmptyState, PageHeader, statusTone } from "@/components/ui";
 import { DisputeForm, TryoutForm } from "@/components/forms/CommunityForms";
@@ -10,6 +11,9 @@ import { DisputeForm, TryoutForm } from "@/components/forms/CommunityForms";
 export default async function TablePage() {
   const me = await requireUser();
   await closeExpiredNominations();
+  const rank = allianceRank(me);
+  const canTable = canAddressTable(me);
+  const command = me.role !== "MEMBER";
 
   const [openVotes, members, myDisputes, myTryouts] = await Promise.all([
     db.nomination.count({ where: { status: "OPEN" } }),
@@ -25,14 +29,20 @@ export default async function TablePage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
           <Card accent>
-            <h2 className="display text-2xl">Bring a dispute</h2>
-            <p className="mb-4 mt-1 text-sm text-muted">No-shows, rule breaks, conflicts. Officers review it and record a decision.</p>
-            <DisputeForm members={members} />
+            <h2 className="display text-2xl">{command ? "Bring it to The Round Table" : canTable ? "Bring it up the chain" : "Ask a Captain"}</h2>
+            <p className="mb-4 mt-1 text-sm text-muted">
+              {command
+                ? "Captains and Generals bring matters straight to The Round Table. A General records the decision."
+                : canTable
+                  ? `As ${rank.label === "Elite" ? "an" : "a"} ${rank.label} you can go to a Captain or straight to The Round Table. Start with a Captain when you can.`
+                  : `As a ${rank.label} your first stop is a Captain. They answer it or send it up to The Round Table. Veterans and Elite can go to The Round Table directly.`}
+            </p>
+            <DisputeForm members={members} canTable={canTable} commandOnly={command} />
           </Card>
           <div>
-            <h3 className="display mb-3 text-xl">Your disputes</h3>
+            <h3 className="display mb-3 text-xl">What you have sent</h3>
             {myDisputes.length === 0 ? (
-              <EmptyState title="Nothing brought yet" />
+              <EmptyState title="Nothing sent yet" />
             ) : (
               <ul className="panel divide-y divide-line">
                 {myDisputes.map((d) => (
@@ -44,6 +54,7 @@ export default async function TablePage() {
                     <p className="text-xs text-muted">
                       {formatDate(d.createdAt)}
                       {d.against ? ` · about ${d.against.displayName}` : ""}
+                      {d.status === "OPEN" ? ` · ${CHAIN_LEVEL_LABEL[d.level] ?? d.level}` : ""}
                     </p>
                     {d.resolution && <p className="mt-2 border-t border-line pt-2 text-sm text-muted">Decision: {d.resolution}</p>}
                   </li>
@@ -87,6 +98,18 @@ export default async function TablePage() {
               </ul>
             )}
           </div>
+          <Card>
+            <h2 className="display text-xl">Chain of command</h2>
+            <p className="mt-1 text-sm text-muted">Go to the level above you. Only what that level cannot settle moves up.</p>
+            <ul className="mt-3 divide-y divide-line border-y border-line">
+              {CHAIN_OF_COMMAND.map((c) => (
+                <li key={c.rank} className="flex items-center justify-between gap-4 py-2 text-sm">
+                  <Badge tone={c.tone}>{c.rank}</Badge>
+                  <span className="text-right text-muted">{c.goesTo}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
           <p className="text-xs text-dim">
             Rank promotions are voted on separately. <Link href="/dashboard/votes" className="text-gold hover:underline">Open rank votes →</Link>
           </p>
