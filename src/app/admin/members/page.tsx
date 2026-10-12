@@ -1,11 +1,11 @@
 import { db } from "@/lib/db";
 import { requireOfficer } from "@/lib/auth";
-import { setMemberRoleAction, setMemberTitleAction, removeMemberAction } from "@/lib/actions/admin";
+import { setMemberRoleAction, setMemberSpecialtiesAction, setMemberTitleAction, removeMemberAction } from "@/lib/actions/admin";
 import { formatDate } from "@/lib/format";
 import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, PageHeader } from "@/components/ui";
 import { site } from "@/lib/site";
-import { allianceRank, playedGamesOf } from "@/lib/constants";
+import { ROLE_LABEL, SPECIALTIES, allianceRank, playedGamesOf, specialtiesOf } from "@/lib/constants";
 import { ConfirmSubmit } from "@/components/forms/SubmitButton";
 
 export default async function MembersPage() {
@@ -18,7 +18,7 @@ export default async function MembersPage() {
 
   return (
     <>
-      <PageHeader title="Alliance members" text={`${members.length} in the alliance. ${isLeader ? "As a General you can promote and demote Captains." : "Only a General can promote or demote Captains. Ranks are managed on the Ranks page."}`} />
+      <PageHeader title="Alliance members" text={`${members.length} in the alliance. ${isLeader ? "As a Legatus you appoint Tribunes and Centurions and hand out specialty roles." : "Only a Legatus can appoint command or hand out specialty roles. Ladder ranks are managed on the Ranks page."}`} />
 
       <ul className="panel divide-y divide-line">
         {members.map((u) => {
@@ -32,7 +32,12 @@ export default async function MembersPage() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="display text-xl">{u.displayName}</p>
-                    <Badge tone={rank.tone}>{rank.label}</Badge>
+                    <Badge tone={rank.tone}>{rank.full}</Badge>
+                    {specialtiesOf(u).map((s) => (
+                      <Badge key={s.key} tone="cyan">
+                        {s.label}
+                      </Badge>
+                    ))}
                     {u.status === "APPROVED" && <Badge tone="success">{site.legionName}</Badge>}
                     {self && <Badge tone="neutral">You</Badge>}
                   </div>
@@ -52,11 +57,18 @@ export default async function MembersPage() {
 
               <div className="flex flex-wrap gap-2 lg:justify-end">
                 {isLeader && !self && u.role !== "LEADER" && (
-                  <form action={setMemberRoleAction}>
+                  <form action={setMemberRoleAction} className="flex gap-2">
                     <input type="hidden" name="userId" value={u.id} />
-                    <input type="hidden" name="role" value={u.role === "OFFICER" ? "MEMBER" : "OFFICER"} />
-                    <Button type="submit" size="sm" variant={u.role === "OFFICER" ? "ghost" : "gold"}>
-                      {u.role === "OFFICER" ? "Demote" : "Promote to officer"}
+                    <label className="sr-only" htmlFor={`role-${u.id}`}>
+                      Command rank for {u.displayName}
+                    </label>
+                    <select id={`role-${u.id}`} name="role" defaultValue={u.role} className="input w-auto py-1.5 text-sm">
+                      <option value="MEMBER">No command rank</option>
+                      <option value="OFFICER">{ROLE_LABEL.OFFICER} (Captain)</option>
+                      <option value="TRIBUNE">{ROLE_LABEL.TRIBUNE} (Lieutenant)</option>
+                    </select>
+                    <Button type="submit" size="sm" variant="gold">
+                      Set
                     </Button>
                   </form>
                 )}
@@ -69,6 +81,21 @@ export default async function MembersPage() {
                   </form>
                 )}
               </div>
+              {isLeader && (
+                <form action={setMemberSpecialtiesAction} className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-3 lg:col-span-3">
+                  <input type="hidden" name="userId" value={u.id} />
+                  <span className="label">Specialty roles</span>
+                  {SPECIALTIES.map((s) => (
+                    <label key={s.key} className="flex items-center gap-2 text-sm text-muted">
+                      <input type="checkbox" name="specialty" value={s.key} defaultChecked={specialtiesOf(u).some((x) => x.key === s.key)} className="h-4 w-4 accent-[#9b4dff]" />
+                      {s.label} <span className="text-dim">({s.plain})</span>
+                    </label>
+                  ))}
+                  <Button type="submit" size="sm" variant="secondary">
+                    Save roles
+                  </Button>
+                </form>
+              )}
             </li>
           );
         })}

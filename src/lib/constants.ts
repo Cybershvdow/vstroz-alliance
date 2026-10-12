@@ -3,7 +3,7 @@
 export const USER_STATUS = ["PENDING", "APPROVED", "DENIED"] as const;
 export type UserStatus = (typeof USER_STATUS)[number];
 
-export const USER_ROLE = ["MEMBER", "OFFICER", "LEADER"] as const;
+export const USER_ROLE = ["MEMBER", "OFFICER", "TRIBUNE", "LEADER"] as const;
 export type UserRole = (typeof USER_ROLE)[number];
 
 export const MATCH_TYPE = [
@@ -44,11 +44,23 @@ export const GAME_CLASSES = [
 /** Legion status labels (User.status). An account is always a community member; APPROVED means in the legion. */
 export const STATUS_LABEL: Record<string, string> = { PENDING: "Pending", APPROVED: "In the legion", DENIED: "Declined" };
 
-/* Militant officer titles, per the alliance. Change here and every page updates. */
+/* Rank names are Roman (the alliance's own style). Change here and every page updates. RANK_PLAIN gives the everyday word. */
 export const ROLE_LABEL: Record<UserRole, string> = {
-  LEADER: "General",
-  OFFICER: "Captain",
-  MEMBER: "Member",
+  LEADER: "Legatus",
+  TRIBUNE: "Tribune",
+  OFFICER: "Centurion",
+  MEMBER: "Socius",
+};
+
+/** The everyday word for each rank name, shown next to it so nobody has to guess. */
+export const RANK_PLAIN: Record<string, string> = {
+  Legatus: "General",
+  Tribune: "Lieutenant",
+  Centurion: "Captain",
+  Evocatus: "Elite",
+  Veteranus: "Veteran",
+  Socius: "Member",
+  Tiro: "Recruit",
 };
 
 export const MATCH_TYPE_LABEL: Record<MatchType, string> = {
@@ -62,7 +74,7 @@ export const MATCH_TYPE_LABEL: Record<MatchType, string> = {
 };
 
 export function isOfficer(role: string) {
-  return role === "OFFICER" || role === "LEADER";
+  return role === "OFFICER" || role === "TRIBUNE" || role === "LEADER";
 }
 
 /* ---------- Application questions ---------- */
@@ -92,10 +104,10 @@ export const TIERS = ["RECRUIT", "MEMBER", "VETERAN", "ELITE"] as const;
 export type Tier = (typeof TIERS)[number];
 
 export const TIER_LABEL: Record<Tier, string> = {
-  RECRUIT: "Recruit",
-  MEMBER: "Member",
-  VETERAN: "Veteran",
-  ELITE: "Elite",
+  RECRUIT: "Tiro",
+  MEMBER: "Socius",
+  VETERAN: "Veteranus",
+  ELITE: "Evocatus",
 };
 
 export const TIER_BLURB: Record<Tier, string> = {
@@ -125,13 +137,47 @@ export function tierRank(t: string) {
  * A member's one rank in the alliance, highest first: General, Captain, then the ladder (Elite, Veteran, Member,
  * Recruit). The ladder is alliance-wide: every account starts as a Recruit, whatever they play. The legion is separate.
  */
-export function allianceRank(u: { role: string; tier: string }): { label: string; order: number; tone: "gold" | "accent" | "neutral" } {
-  if (u.role === "LEADER") return { label: ROLE_LABEL.LEADER, order: 0, tone: "gold" };
-  if (u.role === "OFFICER") return { label: ROLE_LABEL.OFFICER, order: 1, tone: "accent" };
-  if (u.tier === "ELITE") return { label: TIER_LABEL.ELITE, order: 2, tone: "gold" };
-  if (u.tier === "VETERAN") return { label: TIER_LABEL.VETERAN, order: 3, tone: "accent" };
-  if (u.tier === "MEMBER") return { label: TIER_LABEL.MEMBER, order: 4, tone: "neutral" };
-  return { label: TIER_LABEL.RECRUIT, order: 5, tone: "neutral" };
+export type Rank = { label: string; plain: string; full: string; order: number; tone: "gold" | "accent" | "neutral"; command: boolean };
+const rank = (label: string, order: number, tone: Rank["tone"], command = false): Rank => ({ label, plain: RANK_PLAIN[label] ?? label, full: `${label} · ${RANK_PLAIN[label] ?? label}`, order, tone, command });
+
+/** Two tracks: command is appointed (Legatus, Tribune, Centurion); the ladder is earned (Evocatus down to Tiro). */
+export function allianceRank(u: { role: string; tier: string }): Rank {
+  if (u.role === "LEADER") return rank(ROLE_LABEL.LEADER, 0, "gold", true);
+  if (u.role === "TRIBUNE") return rank(ROLE_LABEL.TRIBUNE, 1, "gold", true);
+  if (u.role === "OFFICER") return rank(ROLE_LABEL.OFFICER, 2, "accent", true);
+  if (u.tier === "ELITE") return rank(TIER_LABEL.ELITE, 3, "gold");
+  if (u.tier === "VETERAN") return rank(TIER_LABEL.VETERAN, 4, "accent");
+  if (u.tier === "MEMBER") return rank(TIER_LABEL.MEMBER, 5, "neutral");
+  return rank(TIER_LABEL.RECRUIT, 6, "neutral");
+}
+
+/** Every rank, highest first. */
+export const ALL_RANKS: Rank[] = [
+  allianceRank({ role: "LEADER", tier: "ELITE" }),
+  allianceRank({ role: "TRIBUNE", tier: "ELITE" }),
+  allianceRank({ role: "OFFICER", tier: "ELITE" }),
+  ...(["ELITE", "VETERAN", "MEMBER", "RECRUIT"] as const).map((tier) => allianceRank({ role: "MEMBER", tier })),
+];
+
+/* ---------- Specialty roles: a job someone holds on top of their rank ---------- */
+
+export const SPECIALTIES = [
+  { key: "RECRUITER", label: "Conquisitor", plain: "Recruiter", does: "The recruiting officer. Finds players, welcomes new sign-ups, and gets them settled in." },
+  { key: "HERALD", label: "Praeco", plain: "Marketing and content", does: "The herald. Promotes the alliance: clips, posts, and the alliance's social channels." },
+  { key: "GAMES", label: "Magister Ludi", plain: "Events", does: "Master of the games. Plans and runs events, game nights, and tournaments." },
+  { key: "GUARDIAN", label: "Custos", plain: "Discord moderator", does: "The guardian. Keeps the Discord in order and enforces the rules there." },
+] as const;
+
+/** The specialty roles a member holds, in the order above. */
+export function specialtiesOf(u: { specialties?: string | null }) {
+  let keys: unknown = [];
+  try {
+    keys = u.specialties ? JSON.parse(u.specialties) : [];
+  } catch {
+    keys = [];
+  }
+  const set = new Set(Array.isArray(keys) ? keys : []);
+  return SPECIALTIES.filter((s) => set.has(s.key));
 }
 
 /** Can this user vote on a nomination to the given tier? */
@@ -292,10 +338,11 @@ export const CHAIN_LEVEL_LABEL: Record<string, string> = { CAPTAIN: "With the Ca
 
 /** The chain of command, highest first. Shown on the Rules page and in the portal. */
 export const CHAIN_OF_COMMAND: { rank: string; tone: "gold" | "accent" | "neutral"; does: string; goesTo: string }[] = [
-  { rank: "General", tone: "gold", does: "Runs the alliance and sits at the head of The Round Table. Decides what Captains send up. Final say.", goesTo: "The other Generals" },
-  { rank: "Captain", tone: "accent", does: "The first stop for Recruits and Members. Answers questions, settles day-to-day issues, and sends up only what needs a General.", goesTo: "A General, at The Round Table" },
-  { rank: "Elite", tone: "gold", does: "Senior rank. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Captain, or The Round Table directly" },
-  { rank: "Veteran", tone: "accent", does: "Senior rank. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Captain, or The Round Table directly" },
-  { rank: "Member", tone: "neutral", does: "Trusted regular. Takes questions and issues to a Captain, who answers or sends it up.", goesTo: "A Captain" },
-  { rank: "Recruit", tone: "neutral", does: "New to the alliance. Takes questions and issues to a Captain, who answers or sends it up.", goesTo: "A Captain" },
+  { rank: "Legatus · General", tone: "gold", does: "Runs the alliance and sits at the head of The Round Table. Final say. Can veto or override.", goesTo: "The other Legati" },
+  { rank: "Tribune · Lieutenant", tone: "gold", does: "Second to the Legati. Runs things day to day and decides what reaches The Round Table, so the Legati are not asked to do everything.", goesTo: "A Legatus" },
+  { rank: "Centurion · Captain", tone: "accent", does: "The first stop for the ranks. Answers questions, settles day-to-day issues, and sends up only what needs The Round Table.", goesTo: "A Tribune, at The Round Table" },
+  { rank: "Evocatus · Elite", tone: "gold", does: "Senior rank, voted in. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Centurion, or The Round Table directly" },
+  { rank: "Veteranus · Veteran", tone: "accent", does: "Senior rank, voted in. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Centurion, or The Round Table directly" },
+  { rank: "Socius · Member", tone: "neutral", does: "Trusted regular. Takes questions and issues to a Centurion, who answers or sends it up.", goesTo: "A Centurion" },
+  { rank: "Tiro · Recruit", tone: "neutral", does: "New to the alliance. Takes questions and issues to a Centurion, who answers or sends it up.", goesTo: "A Centurion" },
 ];

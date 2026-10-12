@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { site } from "@/lib/site";
-import { allianceRank, playedGamesOf } from "@/lib/constants";
+import { ALL_RANKS, allianceRank, playedGamesOf, specialtiesOf } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
 import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, SectionHeading } from "@/components/ui";
@@ -15,13 +15,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 /** The ranks in roster order: the key under the heading, and one section each. */
-const RANKS = [
-  allianceRank({ role: "LEADER", tier: "ELITE" }),
-  allianceRank({ role: "OFFICER", tier: "ELITE" }),
-  ...(["ELITE", "VETERAN", "MEMBER", "RECRUIT"] as const).map((tier) => allianceRank({ role: "MEMBER", tier })),
-];
-/** Section headings, by rank order. */
-const RANK_HEADING = ["Generals", "Captains", "Elite", "Veterans", "Members", "Recruits"];
+const RANKS = ALL_RANKS;
 
 /**
  * The whole alliance on one page, broken up by rank, highest first. Nothing is split by game: each card carries
@@ -32,7 +26,7 @@ export default async function RosterPage() {
   const [members, mediaCounts] = await Promise.all([
     db.user.findMany({
       where: { discordLeftAt: null },
-      select: { id: true, username: true, displayName: true, game: true, playedGames: true, role: true, tier: true, title: true, createdAt: true, avatarAt: true },
+      select: { id: true, username: true, displayName: true, game: true, playedGames: true, role: true, tier: true, title: true, specialties: true, createdAt: true, avatarAt: true },
       orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     }),
     db.mediaPost.groupBy({ by: ["postedById"], where: { approved: true, official: false }, _count: { _all: true } }),
@@ -40,7 +34,7 @@ export default async function RosterPage() {
 
   // One group per rank that has members. Within a rank, whoever joined earliest comes first (the query order).
   const ranked = members.map((m) => ({ ...m, rank: allianceRank(m) }));
-  const groups = RANKS.map((rank) => ({ rank, heading: RANK_HEADING[rank.order] ?? rank.label, members: ranked.filter((m) => m.rank.order === rank.order) })).filter((g) => g.members.length > 0);
+  const groups = RANKS.map((rank) => ({ rank, heading: rank.full, members: ranked.filter((m) => m.rank.order === rank.order) })).filter((g) => g.members.length > 0);
   const videos = new Map(mediaCounts.map((x) => [x.postedById, x._count._all]));
   const total = ranked.length;
 
@@ -49,7 +43,7 @@ export default async function RosterPage() {
       <SectionHeading
         eyebrow="Roster"
         title={site.name}
-        text={`${total} in the alliance, grouped by rank. New sign-ups start as Recruits. The tags show the games each one plays. Open a profile for the full picture.`}
+        text={`${total} in the alliance, grouped by rank. Command is appointed, the ranks are earned, and new sign-ups start as a Tiro. The tags show the games each one plays. Open a profile for the full picture.`}
       />
 
       <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -59,7 +53,7 @@ export default async function RosterPage() {
         <ol aria-labelledby="rank-key" className="flex flex-wrap items-center gap-1.5">
           {RANKS.map((r) => (
             <li key={r.label}>
-              <Badge tone={r.tone}>{r.label}</Badge>
+              <Badge tone={r.tone}>{r.full}</Badge>
             </li>
           ))}
         </ol>
@@ -85,6 +79,15 @@ export default async function RosterPage() {
                     <div className="min-w-0 flex-1">
                       <p className="display min-w-0 text-xl [overflow-wrap:anywhere]">{m.displayName}</p>
                       {m.title && <p className="truncate text-xs text-muted">{m.title}</p>}
+                      {specialtiesOf(m).length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {specialtiesOf(m).map((s) => (
+                            <Badge key={s.key} tone="cyan">
+                              {s.label} · {s.plain}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                       {tags.length > 0 ? (
                         <div className="mt-1.5 flex flex-wrap gap-1">
                           {tags.map((t) => (

@@ -9,7 +9,7 @@ import { Avatar, Badge, Button, ButtonLink, EmptyState, PageHeader, statusTone }
 
 export default async function AdminTablePage() {
   const me = await requireOfficer();
-  const isGeneral = me.role === "LEADER";
+  const isGeneral = me.role === "LEADER" || me.role === "TRIBUNE"; // who may decide what sits at The Round Table
   const [disputes, tryouts, openVotes] = await Promise.all([
     db.dispute.findMany({ orderBy: [{ status: "asc" }, { createdAt: "desc" }], take: 40, include: { raisedBy: { select: { displayName: true } }, against: { select: { displayName: true } } } }),
     db.tryoutRequest.findMany({ orderBy: [{ createdAt: "desc" }], take: 40, include: { user: { select: { id: true, displayName: true, gameClass: true, discord: true, role: true, tier: true, avatarAt: true } } } }),
@@ -46,7 +46,7 @@ export default async function AdminTablePage() {
                 <p className="mt-3 whitespace-pre-line text-sm text-muted">{d.details}</p>
               </div>
               {d.level === "TABLE" && !isGeneral ? (
-                <p className="text-sm text-muted">This sits at The Round Table. A General records the decision.</p>
+                <p className="text-sm text-muted">This sits at The Round Table. A Tribune or a Legatus records the decision.</p>
               ) : (
               <div className="flex flex-col gap-3">
               <form action={resolveDisputeAction} className="flex flex-col gap-2">

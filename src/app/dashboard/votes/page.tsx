@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { closeExpiredNominations } from "@/lib/ranks";
-import { TIERS, TIER_LABEL, TIER_BLURB, VOTED_TIERS, VOTE_RULES, allianceRank, canVoteOn } from "@/lib/constants";
+import { RANK_PLAIN, TIERS, TIER_LABEL, TIER_BLURB, VOTED_TIERS, VOTE_RULES, allianceRank, canVoteOn } from "@/lib/constants";
 import { Badge, EmptyState, PageHeader } from "@/components/ui";
 import { VoteCard } from "@/components/portal/VoteCard";
 
@@ -44,7 +44,9 @@ export default async function VotesPage() {
         {TIERS.map((t, i) => (
           <div key={t} className={`panel p-4 ${onLadder && t === myTier ? "border-gold/50" : ""}`}>
             <div className="flex items-center justify-between">
-              <span className="display text-xl">{TIER_LABEL[t]}</span>
+              <span className="display text-xl">
+                {TIER_LABEL[t]} <span className="font-sans text-xs font-normal normal-case tracking-normal text-muted">{RANK_PLAIN[TIER_LABEL[t]]}</span>
+              </span>
               <span className="flex items-center gap-2">
                 {(VOTED_TIERS as readonly string[]).includes(t) && <Badge tone="gold">Voted</Badge>}
                 {onLadder && t === myTier && <Badge tone="accent">You</Badge>}

@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { formatDate } from "@/lib/format";
-import { allianceRank, playedGamesOf } from "@/lib/constants";
+import { allianceRank, specialtiesOf, playedGamesOf } from "@/lib/constants";
 import { folderHref } from "@/lib/media";
 import { avatarUrl, bannerUrl } from "@/lib/avatar";
 import { SOCIAL_PLATFORMS, parseSocials, socialHandle } from "@/lib/social";
@@ -40,6 +40,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
         username: true,
         displayName: true,
         bannerAt: true,
+        specialties: true,
         role: true,
         tier: true,
         status: true,
@@ -133,7 +134,12 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
                 {user.title ? ` · ${user.title}` : ""} · with the alliance since {formatDate(user.createdAt)}
               </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
-                <Badge tone={rank.tone}>{rank.label}</Badge>
+                <Badge tone={rank.tone}>{rank.full}</Badge>
+                {specialtiesOf(user).map((s) => (
+                  <Badge key={s.key} tone="cyan">
+                    {s.label} · {s.plain}
+                  </Badge>
+                ))}
                 {inLegion && <Badge tone="success">{site.legionName}</Badge>}
                 {tags.map((t) => (
                   <GameTag key={t} game={t} link />

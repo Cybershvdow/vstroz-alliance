@@ -220,10 +220,10 @@ export const requirements = [
 ];
 
 export const membershipPath = [
-  { n: "01", title: "Recruit", text: "Create your Vstroz Alliance account. You join the alliance as a Recruit, whatever you play. Pick your games, post content, vote, and get a public profile and a place on the roster." },
-  { n: "02", title: "Member", text: "Show up consistently and an officer promotes you to Member." },
-  { n: "03", title: "Veteran", text: "Voted in by the alliance. Officers can veto." },
-  { n: "04", title: "Elite", text: "The competitive roster. Voted in by the alliance; officers can veto." },
+  { n: "01", title: "Tiro · Recruit", text: "Create your Vstroz Alliance account. You join the alliance as a Recruit, whatever you play. Pick your games, post content, vote, and get a public profile and a place on the roster." },
+  { n: "02", title: "Socius · Member", text: "Show up consistently and an officer promotes you to Member." },
+  { n: "03", title: "Veteranus · Veteran", text: "Voted in by the alliance. Officers can veto." },
+  { n: "04", title: "Evocatus · Elite", text: "The competitive roster. Voted in by the alliance; officers can veto." },
 ];
 
 /* Rules & The Round Table */

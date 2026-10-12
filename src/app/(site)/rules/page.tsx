@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { rules, identity, site } from "@/lib/site";
-import { CHAIN_OF_COMMAND } from "@/lib/constants";
+import { CHAIN_OF_COMMAND, SPECIALTIES } from "@/lib/constants";
 import { Badge, ButtonLink, SectionHeading } from "@/components/ui";
 import { DiscordIcon } from "@/components/site/Icons";
 
@@ -55,7 +55,7 @@ export default function RulesPage() {
             <ul className="mt-4 divide-y divide-line border-y border-line">
               {CHAIN_OF_COMMAND.map((c) => (
                 <li key={c.rank} className="flex items-start gap-4 py-3">
-                  <Badge tone={c.tone} className="mt-0.5 w-24 shrink-0 justify-center">
+                  <Badge tone={c.tone} className="mt-0.5 w-44 shrink-0 justify-center">
                     {c.rank}
                   </Badge>
                   <span className="text-sm text-muted">
@@ -67,8 +67,22 @@ export default function RulesPage() {
                 </li>
               ))}
             </ul>
+            <h3 className="display mt-10 text-2xl">Specialty roles</h3>
+            <p className="mt-2 text-sm text-muted">A job someone holds on top of their rank. A Legatus hands them out.</p>
+            <ul className="mt-4 divide-y divide-line border-y border-line">
+              {SPECIALTIES.map((s) => (
+                <li key={s.key} className="flex items-start gap-4 py-3">
+                  <Badge tone="cyan" className="mt-0.5 w-44 shrink-0 justify-center">
+                    {s.label}
+                  </Badge>
+                  <span className="text-sm text-muted">
+                    <span className="text-text">{s.plain}.</span> {s.does}
+                  </span>
+                </li>
+              ))}
+            </ul>
             <p className="mt-4 text-sm text-muted">
-              The alliance runs like a business. You take a question or an issue to the level above you, not straight to the top. A Captain
+              The alliance runs like a business. You take a question or an issue to the level above you, not straight to the top. A Centurion
               answers it or sends it up. Veterans and Elite have earned a direct line to The Round Table. Recruit to Member is an officer
               decision; Veteran and Elite are voted in by the alliance.
             </p>

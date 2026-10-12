@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { notifyDecision } from "@/lib/email";
 import { site } from "@/lib/site";
 import { requireOfficer, requireLeader } from "@/lib/auth";
-import { MATCH_STATUS, SIGNUP_STATUS, USER_ROLE } from "@/lib/constants";
+import { MATCH_STATUS, SIGNUP_STATUS, SPECIALTIES, USER_ROLE } from "@/lib/constants";
 import {
   matchSchema,
   guildRoleSchema,
@@ -65,6 +65,19 @@ export async function setMemberRoleAction(formData: FormData) {
   if (!target || target.role === "LEADER") return; // Generals cannot demote each other
   if (target.discordLeftAt && role !== "MEMBER") return; // hidden accounts (left the Discord) cannot be promoted
   await db.user.update({ where: { id: userId }, data: { role } });
+  revalidateAll();
+}
+
+/** A Legatus hands out specialty roles (recruiter, herald, events, Discord guardian). They are jobs, not ranks. */
+export async function setMemberSpecialtiesAction(formData: FormData) {
+  await requireLeader();
+  const userId = clean(formData.get("userId"));
+  if (!userId) return;
+  const picked = new Set(formData.getAll("specialty").map((v) => String(v)));
+  const keys = SPECIALTIES.map((s) => s.key).filter((k) => picked.has(k));
+  const target = await db.user.findUnique({ where: { id: userId }, select: { discordLeftAt: true } });
+  if (!target || target.discordLeftAt) return;
+  await db.user.update({ where: { id: userId }, data: { specialties: keys.length ? JSON.stringify(keys) : null } });
   revalidateAll();
 }
 

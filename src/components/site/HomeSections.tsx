@@ -207,7 +207,7 @@ export async function LatestContent() {
 export async function Command() {
   // Captain and General are alliance ranks: legion status does not matter here, only hidden accounts are left out.
   const leaders = await db.user.findMany({
-    where: { discordLeftAt: null, role: { in: ["LEADER", "OFFICER"] } },
+    where: { discordLeftAt: null, role: { in: ["LEADER", "TRIBUNE", "OFFICER"] } },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     select: { id: true, displayName: true, role: true, title: true, tier: true, gameClass: true, game: true, playedGames: true, avatarAt: true },
   });

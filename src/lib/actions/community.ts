@@ -46,8 +46,8 @@ export async function resolveDisputeAction(formData: FormData) {
   if (!id || !["RESOLVED", "DISMISSED"].includes(status)) return;
   const matter = await db.dispute.findUnique({ where: { id }, select: { level: true, status: true } });
   if (!matter || matter.status !== "OPEN") return;
-  // What sits at The Round Table is decided by a General. Captains settle the first line.
-  if (matter.level === "TABLE" && officer.role !== "LEADER") return;
+  // What sits at The Round Table is decided by a Legatus or a Tribune. Centurions settle the first line.
+  if (matter.level === "TABLE" && officer.role !== "LEADER" && officer.role !== "TRIBUNE") return;
   await db.dispute.update({ where: { id }, data: { status, resolution: resolution || null, resolvedById: officer.id, resolvedAt: new Date() } });
   revalidateAll();
 }
@@ -98,7 +98,7 @@ export async function submitMediaAction(_prev: ActionState, formData: FormData):
   const parsed = parseMediaUrl(url);
   if (!parsed) return { ok: false, errors: { url: ["Paste a YouTube or Twitch link (video, short, clip, or channel)"] } };
 
-  const isOfficer = me.role === "OFFICER" || me.role === "LEADER";
+  const isOfficer = me.role !== "MEMBER";
   // Only officers can post as the alliance; everyone else posts into their own folder.
   const official = isOfficer && clean(formData.get("official")) === "1";
   await db.mediaPost.create({
