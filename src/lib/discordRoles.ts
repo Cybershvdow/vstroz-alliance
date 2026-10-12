@@ -9,15 +9,12 @@ import { site } from "@/lib/site";
   - one role per rank (Legatus … Tiro), per listed game, and per specialty role, created if missing;
   - each Discord member matched to their website account gets the website's rank, game tags, and specialty roles,
     and their server nickname is set to their website display name;
-  - members with no website account keep whatever they have; if they have no rank role at all they become a
-    Socius when they were already in the server at the cutoff below, and a Tiro when they joined after it.
+  - members with no website account are in the Discord community but not in the alliance: they get no rank and
+    their roles are left exactly as they are.
   Only the roles named here are ever added or removed. Every other role in the server is left alone.
 */
 
 const API = "https://discord.com/api/v10";
-
-/** Everyone already in the Discord on this date is a Socius (owner's rule, 2026-10-12). Later joiners start as a Tiro. */
-const FOUNDING_CUTOFF = new Date("2026-10-13T00:00:00Z");
 
 const RANK_COLORS: Record<string, number> = { Legatus: 0xe0a94a, Tribune: 0xd4b06a, Centurion: 0x9b4dff, Evocatus: 0xf0c674, Veteranus: 0xb78bff, Socius: 0xc9ccd6, Tiro: 0x8a8d99 };
 
@@ -161,9 +158,10 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
       for (const s of specialtiesOf(u)) add(s.label);
       if (u.status === "APPROVED") add(legionName);
     } else {
-      // No website account: keep their roles. Give a rank only if they have none.
+      // No website account: they are in the Discord community but not in the alliance, so they hold no alliance
+      // rank (owner's rule, 2026-10-12). Joining the alliance means making a website account, which starts at Tiro.
+      // Whatever roles they already have are left exactly as they are.
       for (const r of m.roles) if (managedIds.has(r)) want.add(r);
-      if (![...current].some((r) => rankIds.has(r))) add(new Date(m.joined_at) < FOUNDING_CUTOFF ? "Socius" : "Tiro");
     }
 
     const adding = [...want].filter((r) => !current.has(r));
