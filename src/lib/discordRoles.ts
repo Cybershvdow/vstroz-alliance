@@ -1,0 +1,201 @@
+import "server-only";
+import { db } from "@/lib/db";
+import { discordConfig, discordSyncConfigured } from "@/lib/discord";
+import { ALL_RANKS, ENABLED_GAMES, SPECIALTIES, allianceRank, playedGamesOf, specialtiesOf } from "@/lib/constants";
+import { site } from "@/lib/site";
+
+/*
+  Keeps the Discord server in step with the website:
+  - one role per rank (Legatus … Tiro), per listed game, and per specialty role, created if missing;
+  - each Discord member matched to their website account gets the website's rank, game tags, and specialty roles,
+    and their server nickname is set to their website display name;
+  - members with no website account keep whatever they have; if they have no rank role at all they become a
+    Socius when they were already in the server at the cutoff below, and a Tiro when they joined after it.
+  Only the roles named here are ever added or removed. Every other role in the server is left alone.
+*/
+
+const API = "https://discord.com/api/v10";
+
+/** Everyone already in the Discord on this date is a Socius (owner's rule, 2026-10-12). Later joiners start as a Tiro. */
+const FOUNDING_CUTOFF = new Date("2026-10-13T00:00:00Z");
+
+const RANK_COLORS: Record<string, number> = { Legatus: 0xe0a94a, Tribune: 0xd4b06a, Centurion: 0x9b4dff, Evocatus: 0xf0c674, Veteranus: 0xb78bff, Socius: 0xc9ccd6, Tiro: 0x8a8d99 };
+
+type Role = { id: string; name: string; position: number; managed: boolean };
+type Member = { user: { id: string; username: string; global_name: string | null; bot?: boolean }; nick: string | null; roles: string[]; joined_at: string };
+
+export type RoleSyncMode = "off" | "dry" | "on";
+export type RoleSyncResult = {
+  ok: boolean;
+  mode: RoleSyncMode;
+  at: Date;
+  members: number;
+  matched: number;
+  rolesCreated: string[];
+  changes: string[];
+  skipped: string[];
+  error?: string;
+};
+
+const g = globalThis as unknown as { __vztLastRoleSync?: RoleSyncResult | null };
+export function lastRoleSync(): RoleSyncResult | null {
+  return g.__vztLastRoleSync ?? null;
+}
+
+async function api<T>(path: string, init?: RequestInit): Promise<{ ok: boolean; status: number; data: T | null; text: string }> {
+  const c = discordConfig();
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const res = await fetch(`${API}${path}`, {
+      ...init,
+      headers: { Authorization: `Bot ${c.botToken}`, "Content-Type": "application/json", ...(init?.headers ?? {}) },
+      cache: "no-store",
+    });
+    if (res.status === 429) {
+      const body = (await res.json().catch(() => ({}))) as { retry_after?: number };
+      await new Promise((r) => setTimeout(r, Math.min(10_000, Math.ceil((body.retry_after ?? 1) * 1000) + 100)));
+      continue;
+    }
+    const text = await res.text();
+    let data: T | null = null;
+    try {
+      data = text ? (JSON.parse(text) as T) : null;
+    } catch {
+      data = null;
+    }
+    return { ok: res.ok, status: res.status, data, text: text.slice(0, 200) };
+  }
+  return { ok: false, status: 429, data: null, text: "rate limited" };
+}
+
+const norm = (s: string | null | undefined) => (s ?? "").trim().replace(/^@/, "").toLowerCase();
+
+/**
+ * Bring Discord roles and nicknames in line with the website. `dry` only works out the plan and changes nothing.
+ * `onlyDiscordIds` limits real changes to those members (used to try it on one person first).
+ */
+export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: string[]): Promise<RoleSyncResult> {
+  const at = new Date();
+  const out: RoleSyncResult = { ok: false, mode, at, members: 0, matched: 0, rolesCreated: [], changes: [], skipped: [] };
+  const done = (r: RoleSyncResult) => (g.__vztLastRoleSync = r);
+  if (mode === "off" || !discordSyncConfigured()) return done({ ...out, error: "Discord role sync is off or the bot is not configured." });
+  const c = discordConfig();
+  const apply = mode === "on";
+
+  /* ---- roles: make sure every managed role exists ---- */
+  const rolesRes = await api<Role[]>(`/guilds/${c.guildId}/roles`);
+  if (!rolesRes.ok || !rolesRes.data) return done({ ...out, error: `Could not read the server's roles (${rolesRes.status}). Is the bot in the server?` });
+  const roles = rolesRes.data;
+  const rankNames = ALL_RANKS.map((r) => r.label);
+  const gameNames = ENABLED_GAMES.map((x) => x.name);
+  const specialtyNames = SPECIALTIES.map((s) => s.label as string);
+  const legionName = site.legionName;
+  const managedNames = [...rankNames, ...specialtyNames, legionName, ...gameNames];
+  const byName = new Map<string, Role>();
+  for (const r of roles) if (!r.managed && !byName.has(r.name.toLowerCase())) byName.set(r.name.toLowerCase(), r);
+
+  for (const name of managedNames) {
+    if (byName.has(name.toLowerCase())) continue;
+    out.rolesCreated.push(name);
+    if (!apply) continue;
+    const isRank = rankNames.includes(name);
+    const made = await api<Role>(`/guilds/${c.guildId}/roles`, {
+      method: "POST",
+      body: JSON.stringify({ name, hoist: isRank, mentionable: !isRank, permissions: "0", ...(RANK_COLORS[name] ? { color: RANK_COLORS[name] } : {}) }),
+    });
+    if (!made.ok || !made.data) return done({ ...out, error: `Could not create the role "${name}" (${made.status}): ${made.text}. The bot needs Manage Roles.` });
+    byName.set(name.toLowerCase(), made.data);
+  }
+  const idOf = (name: string) => byName.get(name.toLowerCase())?.id;
+  const managedIds = new Set(managedNames.map(idOf).filter((x): x is string => !!x));
+  const rankIds = new Set(rankNames.map(idOf).filter((x): x is string => !!x));
+
+  /* ---- members ---- */
+  const members: Member[] = [];
+  let after = "0";
+  for (let page = 0; page < 100; page++) {
+    const res = await api<Member[]>(`/guilds/${c.guildId}/members?limit=1000&after=${after}`);
+    if (!res.ok || !res.data) return done({ ...out, error: `Could not read the member list (${res.status}). Turn on the Server Members Intent.` });
+    members.push(...res.data);
+    if (res.data.length < 1000) break;
+    after = res.data[res.data.length - 1].user.id;
+  }
+  const people = members.filter((m) => !m.user.bot);
+  out.members = people.length;
+
+  const users = await db.user.findMany({
+    where: { discordLeftAt: null },
+    select: { id: true, username: true, displayName: true, discord: true, discordId: true, discordUsername: true, role: true, tier: true, status: true, game: true, playedGames: true, specialties: true },
+  });
+  const guild = await api<{ owner_id: string }>(`/guilds/${c.guildId}`);
+  const ownerId = guild.data?.owner_id;
+
+  const taken = new Set<string>();
+  const findUser = (m: Member) => {
+    const names = new Set([norm(m.user.username), norm(m.user.global_name), norm(m.nick)].filter(Boolean));
+    // 1. linked by signing in with Discord; 2. the Discord handle they typed on their profile; 3. same name on both.
+    const hit =
+      users.find((u) => u.discordId === m.user.id) ??
+      users.find((u) => !u.discordId && !taken.has(u.id) && !!norm(u.discord) && norm(u.discord) === norm(m.user.username)) ??
+      users.find((u) => !u.discordId && !taken.has(u.id) && !!norm(u.discord) && names.has(norm(u.discord))) ??
+      users.find((u) => !u.discordId && !taken.has(u.id) && (names.has(norm(u.username)) || names.has(norm(u.displayName))));
+    if (hit) taken.add(hit.id);
+    return hit ?? null;
+  };
+
+  for (const m of people) {
+    const label = m.nick ?? m.user.global_name ?? m.user.username;
+    const u = findUser(m);
+    const current = new Set(m.roles);
+    const want = new Set(m.roles.filter((r) => !managedIds.has(r))); // everything we do not manage stays
+    const names: string[] = [];
+    const add = (name: string) => {
+      const id = idOf(name);
+      if (id) want.add(id);
+      names.push(name);
+    };
+
+    if (u) {
+      out.matched++;
+      add(allianceRank(u).label);
+      for (const game of playedGamesOf(u)) add(game);
+      for (const s of specialtiesOf(u)) add(s.label);
+      if (u.status === "APPROVED") add(legionName);
+    } else {
+      // No website account: keep their roles. Give a rank only if they have none.
+      for (const r of m.roles) if (managedIds.has(r)) want.add(r);
+      if (![...current].some((r) => rankIds.has(r))) add(new Date(m.joined_at) < FOUNDING_CUTOFF ? "Socius" : "Tiro");
+    }
+
+    const adding = [...want].filter((r) => !current.has(r));
+    const removing = [...current].filter((r) => !want.has(r));
+    const nick = u && m.user.id !== ownerId && norm(label) !== norm(u.displayName) ? u.displayName.slice(0, 32) : null;
+    if (!adding.length && !removing.length && !nick && !(apply && !rankIds.size)) continue;
+    // In a dry run the roles may not exist yet, so describe by name.
+    const nameOf = (id: string) => roles.find((r) => r.id === id)?.name ?? [...byName.values()].find((r) => r.id === id)?.name ?? id;
+    const plan = `${label}${u ? ` (site: ${u.displayName})` : ""}: ${apply ? "" : "would "}set ${names.join(", ") || "no managed roles"}${removing.length ? `; remove ${removing.map(nameOf).join(", ")}` : ""}${nick ? `; rename to "${nick}"` : ""}`;
+    if (!apply) {
+      if (adding.length || removing.length || nick || names.some((n) => !idOf(n))) out.changes.push(plan);
+      continue;
+    }
+    if (onlyDiscordIds && !onlyDiscordIds.includes(m.user.id)) continue;
+    if (adding.length || removing.length) {
+      const res = await api(`/guilds/${c.guildId}/members/${m.user.id}`, { method: "PATCH", body: JSON.stringify({ roles: [...want] }) });
+      if (!res.ok) {
+        out.skipped.push(`${label}: roles not changed (${res.status}) ${res.text}`);
+        continue;
+      }
+    }
+    if (nick) {
+      const res = await api(`/guilds/${c.guildId}/members/${m.user.id}`, { method: "PATCH", body: JSON.stringify({ nick }) });
+      if (!res.ok) out.skipped.push(`${label}: name not changed (${res.status}). Discord does not let a bot rename someone ranked above it.`);
+    }
+    out.changes.push(plan);
+    // Remember the link when it came from the handle the member typed themselves, so later syncs do not depend on names.
+    if (u && !u.discordId && norm(u.discord) === norm(m.user.username)) {
+      const clash = await db.user.findFirst({ where: { discordId: m.user.id }, select: { id: true } });
+      if (!clash) await db.user.update({ where: { id: u.id }, data: { discordId: m.user.id, discordUsername: m.user.username, discordLinkedAt: new Date() } });
+    }
+  }
+
+  return done({ ...out, ok: true });
+}

@@ -6,6 +6,10 @@ export const site = {
   legionGame: "Aion",
   /** The alliance is only recruiting for now. Set to true to bring back the Schedule tab and the match sections. */
   showSchedule: false,
+  /** Discord roles and nicknames follow the website. "dry" only logs the plan, "on" applies it, "off" does nothing. */
+  discordRoleSync: "dry" as "off" | "dry" | "on",
+  /** While trying it out: limit real changes to these Discord user ids. Empty means everyone. */
+  discordRoleSyncOnly: [] as string[],
   /** Homepage intro film (files in public/video). Set to null to fall back to the still hero. */
   introVideo: {
     src: "/video/vstroz-intro-1080.mp4?v=2",
