@@ -158,7 +158,7 @@ export function FolderView({
       <section className="mx-auto max-w-7xl px-4 pb-10 pt-32 md:px-6 md:pt-40">
         <Link
           href="/media"
-          className="inline-flex items-center gap-2 font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright"
+          className="-my-3 inline-flex items-center gap-2 py-3 font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright"
         >
           ← All folders
         </Link>

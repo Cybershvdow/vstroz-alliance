@@ -125,7 +125,7 @@ export default async function MediaPage() {
         <section className="mx-auto max-w-7xl px-4 pb-24 md:px-6">
           <div className="flex items-end justify-between gap-6">
             <p className="eyebrow">Latest drops</p>
-            <Link href="/media/alliance" className="font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
+            <Link href="/media/alliance" className="-my-2 inline-block py-2 font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
               Alliance folder →
             </Link>
           </div>

@@ -112,7 +112,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
   return (
     <>
       <section className="mx-auto max-w-7xl px-4 pb-10 pt-32 md:px-6 md:pt-40">
-        <Link href="/roster" className="inline-flex items-center gap-2 font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
+        <Link href="/roster" className="-my-3 inline-flex items-center gap-2 py-3 font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
           ← Roster
         </Link>
         <div className="mt-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -203,7 +203,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
           <div>
             <div className="mb-4 flex items-end justify-between gap-4">
               <p className="eyebrow">Content · {posts.length}</p>
-              <Link href="/media" className="font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
+              <Link href="/media" className="-my-2 inline-block py-2 font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
                 All folders →
               </Link>
             </div>

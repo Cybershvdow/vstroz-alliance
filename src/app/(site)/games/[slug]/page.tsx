@@ -59,7 +59,7 @@ export default async function GamePage({ params, searchParams }: Props) {
   return (
     <>
       <section className="mx-auto max-w-7xl px-4 pb-10 pt-32 md:px-6 md:pt-40">
-        <Link href="/games" className="inline-flex items-center gap-2 font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
+        <Link href="/games" className="-my-3 inline-flex items-center gap-2 py-3 font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
           ← All games
         </Link>
 
@@ -135,7 +135,7 @@ export default async function GamePage({ params, searchParams }: Props) {
           <h2 id="game-content" className="display text-2xl">
             {short} content
           </h2>
-          <Link href="/media" className="font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
+          <Link href="/media" className="-my-2 inline-block py-2 font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
             All media →
           </Link>
         </div>
@@ -163,7 +163,7 @@ export default async function GamePage({ params, searchParams }: Props) {
             Who plays {short}
             <span className="font-sans text-sm font-normal normal-case tracking-normal text-muted">{players.length}</span>
           </h2>
-          <Link href="/roster" className="font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
+          <Link href="/roster" className="-my-2 inline-block py-2 font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
             Full roster →
           </Link>
         </div>
@@ -206,7 +206,7 @@ export default async function GamePage({ params, searchParams }: Props) {
           <h2 id="game-schedule" className="display text-2xl">
             {short} schedule
           </h2>
-          <Link href="/schedule" className="font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
+          <Link href="/schedule" className="-my-2 inline-block py-2 font-display text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold transition hover:text-gold-bright">
             Full schedule →
           </Link>
         </div>

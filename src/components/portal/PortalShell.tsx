@@ -45,7 +45,7 @@ export function PortalShell({
                 <Badge tone={rank.tone}>{rank.label}</Badge>
                 {user.status === "APPROVED" && <Badge tone="success">Legion</Badge>}
               </div>
-              <Link href="/dashboard/profile#profile-picture" className="mt-1 inline-block text-[0.7rem] text-muted underline-offset-4 hover:text-text hover:underline">
+              <Link href="/dashboard/profile#profile-picture" className="inline-block py-2 text-xs text-muted underline-offset-4 hover:text-text hover:underline">
                 {user.avatarAt ? "Change picture" : "Add a picture"}
               </Link>
             </div>
