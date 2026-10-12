@@ -40,7 +40,7 @@ try {
     db.tryoutRequest.updateMany({ where: { game: "Aion 2" }, data: { game: "Aion" } }),
   ]);
   // Profile tags (2026-10-10): members now tick several listed games. Carry the old single game over once.
-  const LISTED = ["Aion", "Apex Legends", "Enshrouded", "Project Zomboid", "Deadlock"];
+  const LISTED = ["Aion", "Apex Legends", "Enshrouded", "Project Zomboid", "Deadlock", "Battlefield 6", "Call of Duty", "Fortnite"];
   const LEGION = ["Aion"];
   const canonOf = (s) => LISTED.find((n) => n.toLowerCase() === String(s ?? "").trim().toLowerCase());
   const confirmedInGame = (json) => {

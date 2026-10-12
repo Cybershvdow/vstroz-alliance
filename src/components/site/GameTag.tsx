@@ -49,6 +49,37 @@ const LOOKS: Record<string, Look> = {
       />
     ),
   },
+  // Tank
+  "Battlefield 6": {
+    color: "#5aa9ff",
+    glyph: (
+      <>
+        <path d="M3 14.5h18a3 3 0 0 1 0 6H3a3 3 0 0 1 0-6Zm1 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm4 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" fillRule="evenodd" />
+        <path d="M6.5 13.5V10a1 1 0 0 1 1-1h6l1.2 1.8H22v1.6h-6.5v1.1Z" />
+      </>
+    ),
+  },
+  // Dog tags
+  "Call of Duty": {
+    color: "#9be15d",
+    glyph: (
+      <>
+        <path d="M7 3.5h6a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Zm3 1.8a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM7.3 10v1.4h5.4V10Zm0 3v1.4h5.4V13Z" fillRule="evenodd" />
+        <path d="M16.6 7.2 19 7.8a2 2 0 0 1 1.4 2.4l-2.3 9a2 2 0 0 1-2.4 1.5l-3-.8h.3a3.6 3.6 0 0 0 3.6-3.6Z" opacity="0.7" />
+      </>
+    ),
+  },
+  // Llama-free: a supply drop balloon
+  Fortnite: {
+    color: "#ff77c8",
+    glyph: (
+      <>
+        <path d="M12 2.5a6 6 0 0 1 6 6c0 3-2.4 5-4.6 6.3h-2.8C8.4 13.5 6 11.500 6 8.5a6 6 0 0 1 6-6Z" />
+        <path d="M10.800 15.500 9.5 17.500h5l-1.300-2Z" opacity="0.7" />
+        <path d="M9 17.500h6v3.500a.5.5 0 0 1-.5.5h-5a.5.5 0 0 1-.5-.5Z" />
+      </>
+    ),
+  },
   // Padlock
   Deadlock: {
     color: "#e0a94a",

@@ -161,6 +161,9 @@ export const GAME_CATALOG: readonly GameEntry[] = [
   { name: "Enshrouded", genre: "OTHER", enabled: true },
   { name: "Project Zomboid", genre: "OTHER", enabled: true },
   { name: "Deadlock", genre: "MOBA", enabled: true },
+  { name: "Battlefield 6", genre: "FPS", enabled: true },
+  { name: "Call of Duty", genre: "FPS", enabled: true },
+  { name: "Fortnite", genre: "BATTLE_ROYALE", enabled: true },
   // { name: "Valorant", genre: "FPS", enabled: false },
   // { name: "League of Legends", genre: "MOBA", enabled: false },
 ];

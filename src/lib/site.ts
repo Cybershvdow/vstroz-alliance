@@ -156,6 +156,48 @@ export const games: {
     desc: "Valve's lane-pushing hero shooter. Queue as a stack from the Discord and learn it together.",
     focus: ["Stack Queues", "Hero Pools", "Clips & Highlights", "Scrims later"],
   },
+  {
+    slug: "battlefield-6",
+    name: "Battlefield 6",
+    short: "Battlefield",
+    status: "active",
+    badge: "Alliance Game",
+    genre: "Large-scale shooter · EA",
+    facts: [
+      ["Style", "Squads and all-out war"],
+      ["Squad up", "In Discord"],
+    ],
+    desc: "Big maps, vehicles, and squad play. Fill a squad from the Discord and hold the objective together.",
+    focus: ["Squad Play", "Conquest Nights", "Vehicles", "Clips & Highlights"],
+  },
+  {
+    slug: "call-of-duty",
+    name: "Call of Duty",
+    short: "CoD",
+    status: "active",
+    badge: "Alliance Game",
+    genre: "Shooter · Activision",
+    facts: [
+      ["Modes", "Multiplayer, Warzone, Zombies"],
+      ["Squad up", "In Discord"],
+    ],
+    desc: "Multiplayer, Warzone, or Zombies. Find a stack in the Discord and post your best clips.",
+    focus: ["Warzone Squads", "Multiplayer Stacks", "Zombies Runs", "Clips & Highlights"],
+  },
+  {
+    slug: "fortnite",
+    name: "Fortnite",
+    short: "Fortnite",
+    status: "active",
+    badge: "Alliance Game",
+    genre: "Battle royale · Epic Games",
+    facts: [
+      ["Modes", "Build, Zero Build, Ranked"],
+      ["Platform", "Crossplay"],
+    ],
+    desc: "Drop in as a duo, trio, or squad. Crossplay means everyone in the alliance can queue together.",
+    focus: ["Squads", "Zero Build", "Ranked", "Clips & Highlights"],
+  },
 ];
 
 const activeGames = games.filter((g) => g.status === "active");
