@@ -15,6 +15,9 @@ import { GameIcon, GameTag } from "./GameTag";
 const statusBadge = { active: "success", voting: "gold", upcoming: "neutral" } as const;
 const statusLabel = { active: "Active", voting: "Member vote", upcoming: "Upcoming" } as const;
 
+/** How many game cards the home page shows before the expandable row. */
+const SHOWN = 3;
+
 export async function TeamsGrid() {
   const counts = await Promise.all(
     ENABLED_GAMES.map(async (g) => ({
@@ -26,6 +29,56 @@ export async function TeamsGrid() {
     })),
   );
 
+  // One game card. The home page shows the first few and tucks the rest behind an expandable row.
+  const card = (g: (typeof games)[number]) => {
+        const c = counts.find((x) => x.name === g.name);
+        const active = g.status === "active";
+        return (
+          <article key={g.slug} className={`panel cut group relative flex flex-col p-6 transition hover:-translate-y-1 ${active ? "border-gold/40" : ""}`}>
+            {active && <div className="bg-glow-accent absolute inset-0 opacity-60" />}
+            <div className="relative flex flex-1 flex-col">
+              <div className="flex items-center justify-between">
+                <Badge tone={statusBadge[g.status]}>{statusLabel[g.status]}</Badge>
+                <span className="label">{g.badge}</span>
+              </div>
+              <GameIcon game={g.name} className="mt-6 h-10 w-10" />
+              <h3 className="display mt-3 text-3xl xl:text-4xl">{g.name}</h3>
+              <p className="mt-1 text-sm text-muted">{g.genre}</p>
+              <p className="mt-4 text-sm leading-relaxed text-muted">{g.desc}</p>
+              {active && c && (
+                <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-4">
+                  <div>
+                    <dt className="label">Players</dt>
+                    <dd className="display display-gold mt-1 text-2xl">{c.players}</dd>
+                  </div>
+                  <div>
+                    <dt className="label">{c.legion ? "In the legion" : "Access"}</dt>
+                    {c.legion ? <dd className="display mt-1 text-2xl">{c.inLegion}</dd> : <dd className="mt-2 text-sm text-success">Open to all</dd>}
+                  </div>
+                </dl>
+              )}
+              <ul className="mt-5 flex flex-wrap gap-2">
+                {g.focus.map((f) => (
+                  <li key={f} className="border border-line-strong px-2 py-1 text-xs text-muted">
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-auto pt-6">
+                <Link
+                  href={`/games/${g.slug}`}
+                  className="font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition after:absolute after:inset-0 after:content-[''] group-hover:text-gold-bright"
+                >
+                  Open {g.short ?? g.name} →
+                </Link>
+              </div>
+            </div>
+          </article>
+        );
+  };
+  const first = games.slice(0, SHOWN);
+  const rest = games.slice(SHOWN);
+
   return (
     <section className="relative border-y border-line bg-bg-2 py-24">
       <div className="bg-stripes absolute inset-0 opacity-40" />
@@ -36,54 +89,17 @@ export async function TeamsGrid() {
             All games <ArrowIcon />
           </ButtonLink>
         </div>
-        <div className={`mt-12 grid gap-4 ${gridCols(games.length)}`}>
-          {games.map((g) => {
-            const c = counts.find((x) => x.name === g.name);
-            const active = g.status === "active";
-            return (
-              <article key={g.slug} className={`panel cut group relative flex flex-col p-6 transition hover:-translate-y-1 ${active ? "border-gold/40" : ""}`}>
-                {active && <div className="bg-glow-accent absolute inset-0 opacity-60" />}
-                <div className="relative flex flex-1 flex-col">
-                  <div className="flex items-center justify-between">
-                    <Badge tone={statusBadge[g.status]}>{statusLabel[g.status]}</Badge>
-                    <span className="label">{g.badge}</span>
-                  </div>
-                  <GameIcon game={g.name} className="mt-6 h-10 w-10" />
-                  <h3 className="display mt-3 text-3xl xl:text-4xl">{g.name}</h3>
-                  <p className="mt-1 text-sm text-muted">{g.genre}</p>
-                  <p className="mt-4 text-sm leading-relaxed text-muted">{g.desc}</p>
-                  {active && c && (
-                    <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-4">
-                      <div>
-                        <dt className="label">Players</dt>
-                        <dd className="display display-gold mt-1 text-2xl">{c.players}</dd>
-                      </div>
-                      <div>
-                        <dt className="label">{c.legion ? "In the legion" : "Access"}</dt>
-                        {c.legion ? <dd className="display mt-1 text-2xl">{c.inLegion}</dd> : <dd className="mt-2 text-sm text-success">Open to all</dd>}
-                      </div>
-                    </dl>
-                  )}
-                  <ul className="mt-5 flex flex-wrap gap-2">
-                    {g.focus.map((f) => (
-                      <li key={f} className="border border-line-strong px-2 py-1 text-xs text-muted">
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-auto pt-6">
-                    <Link
-                      href={`/games/${g.slug}`}
-                      className="font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition after:absolute after:inset-0 after:content-[''] group-hover:text-gold-bright"
-                    >
-                      Open {g.short ?? g.name} →
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+        <div className={`mt-12 grid gap-4 ${gridCols(first.length)}`}>{first.map(card)}</div>
+        {rest.length > 0 && (
+          <details className="group/more mt-4">
+            <summary className="cut-sm mx-auto flex w-fit cursor-pointer list-none items-center gap-2 border border-gold/35 bg-white/[0.03] px-6 py-3 font-display text-sm font-bold uppercase tracking-[0.14em] text-text transition hover:border-gold/70 [&::-webkit-details-marker]:hidden">
+              <span className="group-open/more:hidden">Show {rest.length} more {rest.length === 1 ? "game" : "games"}</span>
+              <span className="hidden group-open/more:inline">Show fewer games</span>
+              <span aria-hidden className="transition group-open/more:rotate-180">▾</span>
+            </summary>
+            <div className={`mt-4 grid gap-4 ${gridCols(rest.length)}`}>{rest.map(card)}</div>
+          </details>
+        )}
       </div>
     </section>
   );

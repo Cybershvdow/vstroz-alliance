@@ -53,7 +53,7 @@ export default async function GamePage({ params, searchParams }: Props) {
   const stats: [string, number][] = [
     ["Players", players.length],
     ["Videos", posts.length],
-    ["Upcoming", upcomingTotal],
+    ...(site.showSchedule || upcomingTotal > 0 ? ([["Upcoming", upcomingTotal]] as [string, number][]) : []),
   ];
 
   return (
@@ -112,7 +112,7 @@ export default async function GamePage({ params, searchParams }: Props) {
             </div>
           </div>
 
-          <dl className="panel grid grid-cols-3 divide-x divide-line">
+          <dl className={`panel grid divide-x divide-line ${stats.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
             {stats.map(([label, value]) => (
               <div key={label} className="p-4 text-center">
                 <dt className="label">{label}</dt>
@@ -120,7 +120,7 @@ export default async function GamePage({ params, searchParams }: Props) {
               </div>
             ))}
             {game.facts.map(([k, val]) => (
-              <div key={k} className="col-span-3 flex items-center justify-between gap-4 border-t border-line px-4 py-3 text-sm">
+              <div key={k} className="col-span-full flex items-center justify-between gap-4 border-t border-line px-4 py-3 text-sm">
                 <dt className="label">{k}</dt>
                 <dd className="text-right">{val}</dd>
               </div>
@@ -200,7 +200,8 @@ export default async function GamePage({ params, searchParams }: Props) {
         )}
       </section>
 
-      {/* ---------- What is on the calendar ---------- */}
+      {/* ---------- What is on the calendar (hidden while the alliance is only recruiting and nothing is posted) ---------- */}
+      {(site.showSchedule || upcoming.length > 0 || results.length > 0) && (
       <section aria-labelledby="game-schedule" className="mx-auto max-w-7xl px-4 pb-24 md:px-6">
         <div className="flex items-end justify-between gap-6 border-b border-line pb-3">
           <h2 id="game-schedule" className="display text-2xl">
@@ -257,6 +258,7 @@ export default async function GamePage({ params, searchParams }: Props) {
           </>
         )}
       </section>
+      )}
 
       <div className="pb-24">
         <JoinCTA />

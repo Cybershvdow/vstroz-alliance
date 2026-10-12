@@ -25,7 +25,7 @@ export default async function GamesPage() {
         <SectionHeading
           eyebrow="Games"
           title="Pick a game."
-          text="Every game we play has its own page: the videos tagged with it, the members who play it, and what is on the calendar. Membership is about the people, not one game."
+          text="Every game we play has its own page: the videos tagged with it, the members who play it, and anything on the calendar. Membership is about the people, not one game."
         />
       </section>
 
@@ -48,7 +48,7 @@ export default async function GamesPage() {
                   <h2 className="display mt-3 text-3xl xl:text-4xl">{g.name}</h2>
                   <p className="mt-1 text-sm text-muted">{g.genre}</p>
                   <p className="mt-4 text-sm leading-relaxed text-muted">{g.desc}</p>
-                  <dl className="mt-5 grid grid-cols-3 gap-3 border-t border-line pt-4">
+                  <dl className={`mt-5 grid gap-3 border-t border-line pt-4 ${site.showSchedule || counts.upcoming > 0 ? "grid-cols-3" : "grid-cols-2"}`}>
                     <div>
                       <dt className="label">Players</dt>
                       <dd className="display display-gold mt-1 text-2xl">{counts.players}</dd>
@@ -57,10 +57,12 @@ export default async function GamesPage() {
                       <dt className="label">Videos</dt>
                       <dd className="display mt-1 text-2xl">{counts.videos}</dd>
                     </div>
-                    <div>
-                      <dt className="label">Upcoming</dt>
-                      <dd className="display mt-1 text-2xl">{counts.upcoming}</dd>
-                    </div>
+                    {(site.showSchedule || counts.upcoming > 0) && (
+                      <div>
+                        <dt className="label">Upcoming</dt>
+                        <dd className="display mt-1 text-2xl">{counts.upcoming}</dd>
+                      </div>
+                    )}
                   </dl>
                   <p className="mt-auto pt-6 font-display text-[0.72rem] font-bold uppercase tracking-[0.2em] text-gold transition group-hover:text-gold-bright">
                     Open {g.short ?? g.name} →

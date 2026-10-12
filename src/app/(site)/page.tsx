@@ -1,5 +1,6 @@
 import { Hero, Marquee, Pillars, UpcomingMatches, Milestones, JoinCTA } from "@/components/site/Sections";
 import { TeamsGrid, CommunityTiles, LatestContent, Command } from "@/components/site/HomeSections";
+import { site } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export default function HomePage() {
     <>
       <Hero />
       <Marquee />
-      <UpcomingMatches />
+      {site.showSchedule && <UpcomingMatches />}
       <CommunityTiles />
       <TeamsGrid />
       <LatestContent />

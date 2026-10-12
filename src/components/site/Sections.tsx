@@ -76,7 +76,7 @@ export async function Hero() {
           {!film && <LogoFull className="mx-auto mb-8 h-64 w-64 drop-shadow-[0_0_70px_rgba(155,77,255,0.5)] md:h-80 md:w-80" />}
           <div className="panel panel-accent cut relative p-6 md:p-8">
             <div className="flex items-center justify-between">
-              <p className="eyebrow">Next match</p>
+              <p className="eyebrow">{nextMatch || site.showSchedule ? "Next match" : "Recruiting"}</p>
               {nextMatch && <Badge tone="accent">{MATCH_TYPE_LABEL[nextMatch.type as MatchType] ?? nextMatch.type}</Badge>}
             </div>
             {nextMatch ? (
@@ -100,8 +100,15 @@ export async function Hero() {
               </>
             ) : (
               <>
-                <h2 className="display mt-4 text-3xl">Schedule opens soon</h2>
-                <p className="mt-2 text-sm text-muted">Officers post sieges, scrims, and training here.</p>
+                <h2 className="display mt-4 text-3xl">{site.showSchedule ? "Schedule opens soon" : "We are recruiting"}</h2>
+                <p className="mt-2 text-sm text-muted">
+                  {site.showSchedule ? "Officers post sieges, scrims, and training here." : "Make an account, pick the games you play, and find your squad in the Discord."}
+                </p>
+                {!site.showSchedule && (
+                  <div className="mt-5">
+                    <ButtonLink href="/register">Join the alliance</ButtonLink>
+                  </div>
+                )}
               </>
             )}
           </div>

@@ -4,6 +4,8 @@ export const site = {
   name: "Vstroz Alliance",
   legionName: "Vstroz Legion", // the guild inside Aion that members apply to; an account alone makes someone an alliance member
   legionGame: "Aion",
+  /** The alliance is only recruiting for now. Set to true to bring back the Schedule tab and the match sections. */
+  showSchedule: false,
   /** Homepage intro film (files in public/video). Set to null to fall back to the still hero. */
   introVideo: {
     src: "/video/vstroz-intro-1080.mp4?v=2",
@@ -35,7 +37,7 @@ export const nav = [
   { href: "/games", label: "Games" },
   { href: "/media", label: "Media" },
   { href: "/roster", label: "Roster" },
-  { href: "/schedule", label: "Schedule" },
+  ...(site.showSchedule ? [{ href: "/schedule", label: "Schedule" }] : []),
   { href: "/rules", label: "Rules" },
   { href: "/recruit", label: "Recruit" },
 ];
@@ -222,7 +224,6 @@ export const membershipPath = [
   { n: "02", title: "Member", text: "Show up consistently and an officer promotes you to Member." },
   { n: "03", title: "Veteran", text: "Voted in by the alliance. Officers can veto." },
   { n: "04", title: "Elite", text: "The competitive roster. Voted in by the alliance; officers can veto." },
-  { n: "+", title: "Play Aion?", text: "Optional at any rank, and separate from it. Join the Vstroz Legion in-game, then apply from your account. An officer replies within 48 hours. Approval unlocks match signups and guild roles. Every other game needs no application." },
 ];
 
 /* Rules & The Round Table */
