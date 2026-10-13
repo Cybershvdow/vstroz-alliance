@@ -33,6 +33,14 @@ try {
       fs.writeFileSync(marker2, `${new Date().toISOString()} set ${more.count} existing accounts to Member\n`);
       console.log(`[bootstrap] members as of 2026-10-12: ${more.count} existing accounts set to Member`);
     }
+    // Aion guild (2026-10-12, owner): Cybershvdow leads the guild; Nugget does not play Aion, so is not in it. Runs once.
+    const marker3 = path.join(path.dirname(marker), ".fixup-aion-guild-2026-10-12");
+    if (!fs.existsSync(marker3)) {
+      const lead = await db.user.updateMany({ where: { username: "cybershvdow" }, data: { guildRank: "LEADER" } });
+      const out = await db.user.updateMany({ where: { username: "nugget" }, data: { status: "PENDING", appliedAt: null, reviewedAt: null, guildRank: null, title: "Faction Owner" } });
+      fs.writeFileSync(marker3, `${new Date().toISOString()} guild leader ${lead.count}, removed from guild ${out.count}\n`);
+      console.log(`[bootstrap] Aion guild: leader set on ${lead.count}, removed from the guild ${out.count}`);
+    }
   }
   // Accounts reviewed before the legion flow existed count as applied. Never touches unreviewed accounts.
   const backfilled = await db.$executeRawUnsafe(
