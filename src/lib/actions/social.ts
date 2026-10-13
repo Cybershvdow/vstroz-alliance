@@ -104,3 +104,53 @@ export async function cancelPlaySessionAction(formData: FormData) {
   await db.playSession.delete({ where: { id: sessionId } });
   revalidatePath("/", "layout");
 }
+
+/* ---------------- Vote questions: a member asks, an officer approves, the bot posts a timed poll in Discord ---------------- */
+
+const POLL_HOURS = [24, 48, 72, 168];
+
+export async function requestPollAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const me = await requireUser();
+  if (me.discordLeftAt) return { ok: false, message: "Your account is hidden." };
+  const question = clean(formData.get("question")).trim().slice(0, 300);
+  const options = formData
+    .getAll("option")
+    .map((o) => (typeof o === "string" ? o.trim().slice(0, 55) : ""))
+    .filter(Boolean);
+  const hours = Number(clean(formData.get("hours")));
+  if (question.length < 8) return { ok: false, errors: { question: ["Write the question out (8+ characters)"] } };
+  if (options.length < 2) return { ok: false, errors: { option: ["Give at least two answers"] } };
+  if (new Set(options.map((o) => o.toLowerCase())).size !== options.length) return { ok: false, errors: { option: ["Two answers are the same"] } };
+  if (!POLL_HOURS.includes(hours)) return { ok: false, errors: { hours: ["Pick how long it runs"] } };
+  const waiting = await db.pollRequest.count({ where: { userId: me.id, status: "PENDING" } });
+  if (waiting >= 3) return { ok: false, message: "You already have three questions waiting for an officer." };
+
+  const row = await db.pollRequest.create({ data: { userId: me.id, question, options: JSON.stringify(options), hours } });
+  revalidatePath("/", "layout");
+  // Officers do not need a second officer: theirs goes straight to Discord.
+  if (me.role !== "MEMBER") {
+    const sent = await sendPoll(row.id, me.id);
+    return sent ? { ok: true, message: "Posted in Discord. The timer is running." } : { ok: false, message: "Saved, but Discord did not accept the poll. Press Approve on it to try again." };
+  }
+  return { ok: true, message: "Sent. An officer will approve it and it gets posted in Discord." };
+}
+
+async function sendPoll(id: string, officerId: string) {
+  const { postPoll } = await import("@/lib/feed");
+  const row = await db.pollRequest.findUnique({ where: { id }, include: { user: { select: { displayName: true } } } });
+  if (!row || row.status !== "PENDING") return false;
+  const messageId = await postPoll({ question: row.question, options: JSON.parse(row.options) as string[], hours: row.hours, askedBy: row.user.displayName });
+  if (!messageId) return false;
+  await db.pollRequest.update({ where: { id }, data: { status: "POSTED", messageId, postedAt: new Date(), decidedById: officerId } });
+  return true;
+}
+
+export async function reviewPollAction(formData: FormData) {
+  const me = await requireUser();
+  if (me.role === "MEMBER" || me.discordLeftAt) return;
+  const id = clean(formData.get("id"));
+  const mode = clean(formData.get("mode")); // approve | deny
+  if (mode === "approve") await sendPoll(id, me.id);
+  else if (mode === "deny") await db.pollRequest.updateMany({ where: { id, status: "PENDING" }, data: { status: "DENIED", decidedById: me.id } });
+  revalidatePath("/", "layout");
+}

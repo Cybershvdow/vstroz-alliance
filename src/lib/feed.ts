@@ -132,3 +132,29 @@ export async function welcomeNewDiscordMembers(members: { user: { id: string; bo
   if (fresh.length) console.log(`[feed] welcomed ${sent} of ${fresh.length} new Discord members`);
   return sent;
 }
+
+/** Posts a timed poll in the votes channel. Returns the Discord message id, or null if Discord refused it. */
+export async function postPoll(p: { question: string; options: string[]; hours: number; askedBy: string }) {
+  const channel = site.discordVotesChannelId;
+  if (!channel || !discordSyncConfigured()) return null;
+  try {
+    const res = await fetch(`https://discord.com/api/v10/channels/${channel}/messages`, {
+      method: "POST",
+      headers: { Authorization: `Bot ${discordConfig().botToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content: `Vote requested by ${p.askedBy}.`,
+        allowed_mentions: { parse: [] },
+        poll: { question: { text: p.question.slice(0, 300) }, answers: p.options.slice(0, 10).map((o) => ({ poll_media: { text: o.slice(0, 55) } })), duration: Math.min(768, Math.max(1, p.hours)), allow_multiselect: false },
+      }),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      console.error(`[feed] Discord refused the poll (${res.status}) ${(await res.text()).slice(0, 200)}`);
+      return null;
+    }
+    return ((await res.json()) as { id: string }).id;
+  } catch (e) {
+    console.error("[feed] poll failed", e);
+    return null;
+  }
+}

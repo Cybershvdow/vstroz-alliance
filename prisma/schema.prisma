@@ -75,6 +75,7 @@ model User {
   mediaComments    MediaComment[]
   playSessions     PlaySession[]
   playJoins        PlayJoin[]
+  pollRequests     PollRequest[]
 
   @@index([discordId])
 }
@@ -304,4 +305,20 @@ model PlayJoin {
   user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, userId])
+}
+
+// A vote question a member asked for. Once an officer approves it, the bot posts it in Discord as a timed poll.
+model PollRequest {
+  id          String    @id @default(cuid())
+  userId      String
+  question    String
+  options     String    // JSON array of 2-5 answers
+  hours       Int       @default(48) // how long the vote stays open
+  status      String    @default("PENDING") // PENDING | POSTED | DENIED
+  messageId   String?   // the Discord poll message
+  createdAt   DateTime  @default(now())
+  postedAt    DateTime?
+  decidedById String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

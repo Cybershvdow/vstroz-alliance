@@ -16,6 +16,8 @@ export const site = {
   discordFeedChannelId: "1559393203738906696", // #alliance-feed
   /** Discord channel where the bot welcomes everyone who joins the server. Empty turns the welcome off. */
   discordWelcomeChannelId: "1264749850214273046", // #welcome
+  /** Discord channel where approved vote questions are posted as timed polls. Empty turns it off. */
+  discordVotesChannelId: "1559412675124142150", // #the-senate
   /** Discord channel for official news: every announcement an officer posts on the website is posted here by the bot. */
   discordNewsChannelId: "1559376668013887558", // #announcements
   /** Homepage intro film (files in public/video). Set to null to fall back to the still hero. */

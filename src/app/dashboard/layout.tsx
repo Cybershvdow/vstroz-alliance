@@ -21,6 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       : []),
     { href: "/dashboard/table", label: "The Round Table" },
     { href: "/dashboard/votes", label: "Rank votes" },
+    { href: "/dashboard/polls", label: "Vote questions" },
     { href: "/dashboard/play", label: "Who is playing" },
     { href: "/dashboard/media", label: "Post content" },
     { href: "/dashboard/profile", label: "Profile" },
