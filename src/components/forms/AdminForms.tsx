@@ -97,7 +97,7 @@ export function AnnouncementForm() {
       </Field>
       <label className="flex items-center gap-3 text-sm text-muted">
         <input type="checkbox" name="pinned" className="h-4 w-4 accent-[#9b4dff]" />
-        Pin to the top of the portal
+        Important: pin to the top of the portal and mark it IMPORTANT in Discord
       </label>
       <SubmitButton pendingText="Posting…">Post announcement</SubmitButton>
     </form>

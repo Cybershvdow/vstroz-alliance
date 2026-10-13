@@ -15,14 +15,13 @@ const base = () => (process.env.APP_URL || "https://vstrozalliance.com").replace
 export const siteUrl = (p: string) => `${base()}${p}`;
 
 /** Post a line to the feed channel. Mentions are switched off so a name can never ping anyone. */
-export async function announce(text: string) {
-  const channel = site.discordFeedChannelId;
+export async function announce(text: string, channel: string = site.discordFeedChannelId) {
   if (!channel || !discordSyncConfigured()) return false;
   try {
     const res = await fetch(`https://discord.com/api/v10/channels/${channel}/messages`, {
       method: "POST",
       headers: { Authorization: `Bot ${discordConfig().botToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ content: text.slice(0, 1900), allowed_mentions: { parse: [] } }),
+      body: JSON.stringify({ content: text.slice(0, 1950), allowed_mentions: { parse: [] } }),
       cache: "no-store",
     });
     if (!res.ok) console.error(`[feed] Discord refused the post (${res.status}) ${(await res.text()).slice(0, 160)}`);
@@ -73,4 +72,16 @@ export async function announceFeedLive() {
   const ok = await announce(`The alliance feed is live. New members, clips, promotions and play sessions from the website show up here.\n${siteUrl("/")}`);
   console.log(`[feed] first post ${ok ? "sent" : "FAILED: the bot cannot post in the feed channel"}`);
   if (ok) fs.writeFileSync(marker, new Date().toISOString());
+}
+
+/** Official news: an announcement posted on the website goes to the news channel, word for word. Pinned ones are marked important. */
+export async function announceNews(a: { title: string; body: string; pinned: boolean }, author: string) {
+  const head = `${a.pinned ? "IMPORTANT: " : ""}**${a.title}**`;
+  const tail = `
+
+Posted by ${author} on ${siteUrl("/dashboard")}`;
+  const room = 1950 - head.length - tail.length - 2;
+  const body = a.body.length > room ? `${a.body.slice(0, room - 1)}…` : a.body;
+  return announce(`${head}
+${body}${tail}`, site.discordNewsChannelId);
 }

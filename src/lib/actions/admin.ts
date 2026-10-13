@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { db } from "@/lib/db";
 import { notifyDecision } from "@/lib/email";
+import { announceNews } from "@/lib/feed";
 import { site } from "@/lib/site";
 import { requireOfficer, requireLeader } from "@/lib/auth";
 import { GUILD_RANKS, MATCH_STATUS, SIGNUP_STATUS, SPECIALTIES, USER_ROLE } from "@/lib/constants";
@@ -243,9 +244,10 @@ export async function createAnnouncementAction(_prev: ActionState, formData: For
     pinned: formData.get("pinned") === "on",
   });
   if (!parsed.success) return { ok: false, errors: flattenErrors(parsed.error) };
-  await db.announcement.create({
+  const posted = await db.announcement.create({
     data: { title: parsed.data.title, body: parsed.data.body, pinned: parsed.data.pinned ?? false, authorId: officer.id },
   });
+  after(() => announceNews(posted, officer.displayName));
   revalidateAll();
   return { ok: true, message: "Posted." };
 }
