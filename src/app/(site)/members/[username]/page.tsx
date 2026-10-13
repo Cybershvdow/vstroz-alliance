@@ -12,6 +12,7 @@ import { SOCIAL_PLATFORMS, parseSocials, socialHandle } from "@/lib/social";
 import { Avatar, Badge, ButtonLink } from "@/components/ui";
 import { ArrowIcon, DiscordIcon } from "@/components/site/Icons";
 import { MediaPlayer } from "@/components/site/MediaPlayer";
+import { badgesFor } from "@/lib/badges";
 import { toItems } from "@/components/site/MediaFolders";
 import { GameStats } from "@/components/site/GameStats";
 import { GameTag } from "@/components/site/GameTag";
@@ -88,7 +89,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
   }
 
   // Live stats: refreshed on view when stale (Apex 15 min, Steam 30 min); failures fall back to the last snapshot.
-  const [apex, steam] = await Promise.all([refreshApexStats(user), refreshSteamStats(user)]);
+  const [apex, steam, badges] = await Promise.all([refreshApexStats(user), refreshSteamStats(user), badgesFor(user)]);
 
   // The rank belongs to the alliance; the legion is a separate tag.
   const rank = allianceRank(user);
@@ -150,6 +151,15 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
                   <GameTag key={t} game={t} link />
                 ))}
               </div>
+              {badges.length > 0 && (
+                <ul aria-label="Badges" className="mt-2 flex flex-wrap gap-1.5">
+                  {badges.map((b) => (
+                    <li key={b.key} title={b.how}>
+                      <Badge tone={b.tone}>★ {b.label}</Badge>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
           {mine && (

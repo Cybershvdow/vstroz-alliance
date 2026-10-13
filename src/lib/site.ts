@@ -12,6 +12,8 @@ export const site = {
   discordRoleSyncOnly: [] as string[],
   /** Also set each matched member's server nickname to their website display name. Off until the owner confirms. */
   discordRenameMembers: false,
+  /** Discord channel the bot posts site activity into (new members, clips, promotions, play sessions). Empty turns it off. */
+  discordFeedChannelId: "1559393203738906696", // #alliance-feed
   /** Homepage intro film (files in public/video). Set to null to fall back to the still hero. */
   introVideo: {
     src: "/video/vstroz-intro-1080.mp4?v=2",

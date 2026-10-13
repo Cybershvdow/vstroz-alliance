@@ -94,7 +94,7 @@ export async function createDiscordAccount(du: DiscordUser) {
   if (await db.user.findUnique({ where: { email }, select: { id: true } })) email = placeholder;
 
   const passwordHash = await bcrypt.hash(crypto.randomBytes(24).toString("base64url"), 12);
-  return db.user.create({
+  const created = await db.user.create({
     data: {
       username,
       tier: "MEMBER", // see registerAction: a website account starts as a Member
@@ -109,6 +109,10 @@ export async function createDiscordAccount(du: DiscordUser) {
       role: "MEMBER",
     },
   });
+  // Loaded lazily: the feed module imports this one.
+  void import("@/lib/feed").then((f) => f.announce(`${created.displayName} just joined the Vstroz Alliance.
+${f.siteUrl(`/members/${encodeURIComponent(created.username)}`)}`)).catch(() => undefined);
+  return created;
 }
 
 /** All member ids in the server, read with the bot (needs the Server Members Intent). */

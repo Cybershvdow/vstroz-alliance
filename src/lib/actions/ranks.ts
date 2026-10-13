@@ -1,10 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { db } from "@/lib/db";
 import { requireUser, requireOfficer, requireLeader } from "@/lib/auth";
 import { TIERS, VOTED_TIERS, VOTE_RULES, VOTE_CHOICES, canVoteOn, tierRank, type Tier } from "@/lib/constants";
 import { tally } from "@/lib/ranks";
+import { allianceRank } from "@/lib/constants";
+import { announce, siteUrl } from "@/lib/feed";
 import type { ActionState } from "@/lib/validation";
 
 function clean(v: FormDataEntryValue | null) {
@@ -15,6 +18,14 @@ function revalidateAll() {
 }
 
 /* ---------------- Officer: set a non-voted tier directly ---------------- */
+
+/** One line in Discord when someone moves up a rank. */
+async function announcePromotion(userId: string) {
+  const u = await db.user.findUnique({ where: { id: userId }, select: { displayName: true, username: true, role: true, tier: true, discordLeftAt: true } });
+  if (!u || u.discordLeftAt) return;
+  await announce(`${u.displayName} was promoted to ${allianceRank(u).full}. Congrats.
+${siteUrl(`/members/${encodeURIComponent(u.username)}`)}`);
+}
 
 export async function setTierAction(formData: FormData) {
   const officer = await requireOfficer();
@@ -31,6 +42,7 @@ export async function setTierAction(formData: FormData) {
     if (target.role !== "MEMBER" || isVoted(tier) || isVoted(target.tier)) return;
   }
   await db.user.update({ where: { id: userId }, data: { tier } });
+  if (tierRank(tier) > tierRank(target.tier)) after(() => announcePromotion(userId));
   revalidateAll();
 }
 
@@ -122,5 +134,6 @@ export async function finalizeNominationAction(formData: FormData) {
     db.nomination.update({ where: { id: nominationId }, data: { status, decidedAt: new Date(), decidedById: officer.id } }),
     ...(t.passing ? [db.user.updateMany({ where: { id: nom.userId, discordLeftAt: null, tier: { in: TIERS.slice(0, tierRank(nom.tier)) as string[] } }, data: { tier: nom.tier } })] : []),
   ]);
+  if (t.passing) after(() => announcePromotion(nom.userId));
   revalidateAll();
 }

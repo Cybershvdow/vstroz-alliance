@@ -23,6 +23,11 @@ export async function register() {
   const run = () =>
     reconcileDiscord()
       .then(roles)
+      .then(async () => {
+        const feed = await import("@/lib/feed");
+        await feed.announceFeedLive();
+        await feed.announceClipOfTheWeek();
+      })
       .catch((e) => console.error("[discord] sync failed", e));
   setTimeout(run, 20_000);
   g.__vztDiscordTimer = setInterval(run, 5 * 60_000);

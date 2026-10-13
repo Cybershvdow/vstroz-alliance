@@ -71,6 +71,10 @@ model User {
   nominations      Nomination[] @relation("Nominee")
   nominationsMade  Nomination[] @relation("Nominator")
   votes            Vote[]
+  mediaLikes       MediaLike[]
+  mediaComments    MediaComment[]
+  playSessions     PlaySession[]
+  playJoins        PlayJoin[]
 
   @@index([discordId])
 }
@@ -247,4 +251,57 @@ model MediaPost {
   createdAt   DateTime @default(now())
 
   postedBy User @relation(fields: [postedById], references: [id], onDelete: Cascade)
+  likes    MediaLike[]
+  comments MediaComment[]
+}
+
+// Reactions on clips: a like (one per member per clip) and comments.
+model MediaLike {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post MediaPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model MediaComment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+
+  post MediaPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+// "Who's playing tonight": a member says what and when, others tap "I'm in".
+model PlaySession {
+  id        String   @id @default(cuid())
+  hostId    String
+  game      String
+  startsAt  DateTime
+  note      String   @default("")
+  createdAt DateTime @default(now())
+
+  host  User       @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  joins PlayJoin[]
+}
+
+model PlayJoin {
+  id        String   @id @default(cuid())
+  sessionId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  session PlaySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
 }

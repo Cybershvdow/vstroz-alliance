@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { db } from "@/lib/db";
 import { requireUser, requireApproved, requireOfficer } from "@/lib/auth";
 import { LEGION_GAMES, canAddressTable } from "@/lib/constants";
 import { parseMediaUrl } from "@/lib/media";
+import { announce, siteUrl } from "@/lib/feed";
 import type { ActionState } from "@/lib/validation";
 
 function clean(v: FormDataEntryValue | null) {
@@ -101,14 +103,24 @@ export async function submitMediaAction(_prev: ActionState, formData: FormData):
   const isOfficer = me.role !== "MEMBER";
   // Only officers can post as the alliance; everyone else posts into their own folder.
   const official = isOfficer && clean(formData.get("official")) === "1";
-  await db.mediaPost.create({
+  const post = await db.mediaPost.create({
     data: { title, url, provider: parsed.provider, embedId: parsed.embedId, kind: parsed.kind, description, game, postedById: me.id, approved: isOfficer, official },
   });
+  if (post.approved) after(() => announceClip(post.id));
   revalidateAll();
   return {
     ok: true,
     message: official ? "Posted to the Vstroz Alliance folder." : isOfficer ? "Posted to your folder on the Media page." : "Submitted. An officer will approve it before it appears in your folder.",
   };
+}
+
+/** One line in Discord when a clip goes live on the site. */
+async function announceClip(id: string) {
+  const p = await db.mediaPost.findUnique({ where: { id }, include: { postedBy: { select: { displayName: true, username: true } } } });
+  if (!p || !p.approved) return;
+  const href = p.official ? `/media/alliance?v=${p.id}` : `/members/${encodeURIComponent(p.postedBy.username)}?v=${p.id}`;
+  await announce(`New clip from ${p.official ? "Vstroz Alliance" : p.postedBy.displayName}: "${p.title}"${p.game ? ` (${p.game})` : ""}. Drop a like or a comment.
+${siteUrl(href)}`);
 }
 
 export async function reviewMediaAction(formData: FormData) {
@@ -117,7 +129,11 @@ export async function reviewMediaAction(formData: FormData) {
   const mode = clean(formData.get("mode")); // approve | unapprove | feature | unfeature | official | personal | delete
   if (!id) return;
   if (mode === "delete") await db.mediaPost.delete({ where: { id } });
-  else if (mode === "approve") await db.mediaPost.update({ where: { id }, data: { approved: true } });
+  else if (mode === "approve") {
+    // Only the first approval is news.
+    const flipped = await db.mediaPost.updateMany({ where: { id, approved: false }, data: { approved: true } });
+    if (flipped.count === 1) after(() => announceClip(id));
+  }
   else if (mode === "unapprove") await db.mediaPost.update({ where: { id }, data: { approved: false, featured: false } });
   else if (mode === "feature") await db.mediaPost.update({ where: { id }, data: { featured: true, approved: true } });
   else if (mode === "unfeature") await db.mediaPost.update({ where: { id }, data: { featured: false } });

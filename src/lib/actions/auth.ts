@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { db } from "@/lib/db";
 import { notifyNewApplication } from "@/lib/email";
+import { announce, siteUrl } from "@/lib/feed";
 import { createSession, deleteSession } from "@/lib/session";
 import { getCurrentUser } from "@/lib/auth";
 import {
@@ -69,6 +70,8 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
     },
   });
 
+  after(() => announce(`${user.displayName} just joined the Vstroz Alliance.
+${siteUrl(`/members/${encodeURIComponent(user.username)}`)}`));
   await createSession(user.id);
   // The account alone makes them an alliance member; they pick their games on the profile page next.
   redirect("/dashboard/profile?welcome=1");

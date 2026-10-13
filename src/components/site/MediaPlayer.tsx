@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { embedSrc, thumbnailFor } from "@/lib/media";
+import { ClipReactions } from "./ClipReactions";
 
 export type MediaItem = {
   id: string;
@@ -44,6 +45,7 @@ export function MediaPlayer({ items, parent, initialId }: { items: MediaItem[]; 
           </div>
           <h2 className="display mt-2 text-2xl md:text-3xl">{current.title}</h2>
           {current.description && <p className="mt-2 max-w-2xl text-sm text-muted">{current.description}</p>}
+          <ClipReactions postId={current.id} />
         </div>
       </div>
 
