@@ -105,6 +105,29 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
   const idOf = (name: string) => byName.get(name.toLowerCase())?.id;
   const managedIds = new Set(managedNames.map(idOf).filter((x): x is string => !!x));
 
+  /* ---- order: rank roles sit right under the bot's own role, highest rank first, so the member sidebar groups by rank ---- */
+  if (apply) {
+    const me = await api<{ id: string }>("/users/@me");
+    const mine = me.data ? await api<{ roles: string[] }>(`/guilds/${c.guildId}/members/${me.data.id}`) : null;
+    const fresh = await api<Role[]>(`/guilds/${c.guildId}/roles`);
+    if (mine?.data && fresh.data) {
+      const pos = new Map(fresh.data.map((r) => [r.id, r.position]));
+      const botTop = Math.max(0, ...mine.data.roles.map((r) => pos.get(r) ?? 0));
+      const ordered = [...rankNames, ...specialtyNames].map(idOf).filter((x): x is string => !!x);
+      // Roles that sit between the bot and our roles keep everyone grouped under them instead of under a rank.
+      const blockers = fresh.data.filter((r) => !ordered.includes(r.id) && r.position < botTop && r.position > Math.min(...ordered.map((id) => pos.get(id) ?? 0)) && r.name !== "@everyone");
+      const want = ordered.map((id, i) => ({ id, position: botTop - 1 - i }));
+      const already = blockers.length === 0 && want.every((w, i) => i === 0 || (pos.get(want[i - 1].id) ?? 0) > (pos.get(w.id) ?? 0));
+      if (botTop <= ordered.length) {
+        out.skipped.push("Rank roles could not be moved up: the bot's own role is too low. In Server Settings > Roles, drag the Vstroz Alliance bot role to the top.");
+      } else if (!already) {
+        const moved = await api(`/guilds/${c.guildId}/roles`, { method: "PATCH", body: JSON.stringify(want) });
+        if (moved.ok) out.changes.push(`role order: moved ${ordered.length} rank and specialty roles to the top, under the bot's role`);
+        else out.skipped.push(`Rank roles could not be moved up (${moved.status}) ${moved.text}`);
+      }
+    }
+  }
+
   /* ---- members ---- */
   const members: Member[] = [];
   let after = "0";
