@@ -19,7 +19,7 @@ export default async function MembersPage() {
 
   return (
     <>
-      <PageHeader title="Alliance members" text={`${members.length} in the alliance. ${isLeader ? "As a Legatus you appoint Tribunes and Centurions and hand out specialty roles." : "Only a Legatus can appoint command or hand out specialty roles. Ladder ranks are managed on the Ranks page."}`} />
+      <PageHeader title="Alliance members" text={`${members.length} in the alliance. ${isLeader ? "As a General (Legatus) you appoint Lieutenants (Tribunes) and Captains (Centurions) and hand out specialty roles." : "Only a General (Legatus) can appoint command or hand out specialty roles. Ladder ranks are managed on the Ranks page."}`} />
 
       <ul className="panel divide-y divide-line">
         {members.map((u) => {
@@ -36,7 +36,7 @@ export default async function MembersPage() {
                     <Badge tone={rank.tone}>{rank.full}</Badge>
                     {specialtiesOf(u).map((s) => (
                       <Badge key={s.key} tone="cyan">
-                        {s.label}
+                        {s.plain} ({s.label})
                       </Badge>
                     ))}
                     {u.status === "APPROVED" && (
@@ -112,7 +112,7 @@ export default async function MembersPage() {
                   {SPECIALTIES.map((s) => (
                     <label key={s.key} className="flex items-center gap-2 text-sm text-muted">
                       <input type="checkbox" name="specialty" value={s.key} defaultChecked={specialtiesOf(u).some((x) => x.key === s.key)} className="h-4 w-4 accent-[#9b4dff]" />
-                      {s.label} <span className="text-dim">({s.plain})</span>
+                      {s.plain} <span className="text-dim">({s.label})</span>
                     </label>
                   ))}
                   <Button type="submit" size="sm" variant="secondary">

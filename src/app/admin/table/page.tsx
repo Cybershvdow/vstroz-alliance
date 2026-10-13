@@ -46,7 +46,7 @@ export default async function AdminTablePage() {
                 <p className="mt-3 whitespace-pre-line text-sm text-muted">{d.details}</p>
               </div>
               {d.level === "TABLE" && !isGeneral ? (
-                <p className="text-sm text-muted">This sits at The Round Table. A Tribune or a Legatus records the decision.</p>
+                <p className="text-sm text-muted">This sits at The Round Table. A Lieutenant (Tribune) or a General (Legatus) records the decision.</p>
               ) : (
               <div className="flex flex-col gap-3">
               <form action={resolveDisputeAction} className="flex flex-col gap-2">
@@ -97,7 +97,7 @@ export default async function AdminTablePage() {
                     <Badge tone={statusTone(t.status)}>{t.status}</Badge>
                   </div>
                   <p className="text-xs text-muted">
-                    {allianceRank(t.user).label} · {t.user.gameClass ?? "—"} · {t.user.discord ?? "no discord"} · {formatDate(t.createdAt)}
+                    {allianceRank(t.user).full} · {t.user.gameClass ?? "—"} · {t.user.discord ?? "no discord"} · {formatDate(t.createdAt)}
                   </p>
                   <p className="mt-2 text-sm text-muted">{t.message}</p>
                 </div>

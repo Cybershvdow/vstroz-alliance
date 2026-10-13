@@ -1,7 +1,7 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { discordConfig, discordSyncConfigured } from "@/lib/discord";
-import { ALL_RANKS, ENABLED_GAMES, SPECIALTIES, allianceRank, playedGamesOf, specialtiesOf } from "@/lib/constants";
+import { ALL_RANKS, ENABLED_GAMES, GUILD_RANKS, SPECIALTIES, allianceRank, guildRankOf, playedGamesOf, specialtiesOf } from "@/lib/constants";
 import { site } from "@/lib/site";
 
 /*
@@ -82,13 +82,30 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
   const rolesRes = await api<Role[]>(`/guilds/${c.guildId}/roles`);
   if (!rolesRes.ok || !rolesRes.data) return done({ ...out, error: `Could not read the server's roles (${rolesRes.status}). Is the bot in the server?` });
   const roles = rolesRes.data;
-  const rankNames = ALL_RANKS.map((r) => r.label);
+  // Role names read English first with the Latin in parentheses, e.g. "General (Legatus)" (owner's rule, 2026-10-12).
+  const specialtyName = (s: { label: string; plain: string }) => `${s.plain} (${s.label})`;
+  const guildRoleName = (r: { label: string }) => `${site.legionGame} ${r.label}`;
+  const rankNames = ALL_RANKS.map((r) => r.full);
+  const guildNames = GUILD_RANKS.map(guildRoleName);
   const gameNames = ENABLED_GAMES.map((x) => x.name);
-  const specialtyNames = SPECIALTIES.map((s) => s.label as string);
+  const specialtyNames = SPECIALTIES.map(specialtyName);
   const legionName = site.legionName;
-  const managedNames = [...rankNames, ...specialtyNames, legionName, ...gameNames];
+  const managedNames = [...rankNames, ...guildNames, ...specialtyNames, legionName, ...gameNames];
+  // The Latin-only names these roles were first created with: renamed in place so nobody loses a role.
+  const oldNames = new Map<string, string>([...ALL_RANKS.map((r) => [r.full, r.label] as [string, string]), ...SPECIALTIES.map((s) => [specialtyName(s), s.label] as [string, string])]);
+  const colorOf = (name: string) => RANK_COLORS[oldNames.get(name) ?? ""];
   const byName = new Map<string, Role>();
   for (const r of roles) if (!r.managed && !byName.has(r.name.toLowerCase())) byName.set(r.name.toLowerCase(), r);
+
+  for (const [name, old] of oldNames) {
+    const existing = byName.get(old.toLowerCase());
+    if (byName.has(name.toLowerCase()) || !existing) continue;
+    out.changes.push(`${apply ? "" : "would "}rename role "${old}" to "${name}"`);
+    byName.set(name.toLowerCase(), existing);
+    if (!apply) continue;
+    const renamed = await api<Role>(`/guilds/${c.guildId}/roles/${existing.id}`, { method: "PATCH", body: JSON.stringify({ name }) });
+    if (!renamed.ok) return done({ ...out, error: `Could not rename the role "${old}" (${renamed.status}): ${renamed.text}` });
+  }
 
   for (const name of managedNames) {
     if (byName.has(name.toLowerCase())) continue;
@@ -97,7 +114,7 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
     const isRank = rankNames.includes(name);
     const made = await api<Role>(`/guilds/${c.guildId}/roles`, {
       method: "POST",
-      body: JSON.stringify({ name, hoist: isRank, mentionable: !isRank, permissions: "0", ...(RANK_COLORS[name] ? { color: RANK_COLORS[name] } : {}) }),
+      body: JSON.stringify({ name, hoist: isRank, mentionable: !isRank, permissions: "0", ...(colorOf(name) ? { color: colorOf(name) } : {}) }),
     });
     if (!made.ok || !made.data) return done({ ...out, error: `Could not create the role "${name}" (${made.status}): ${made.text}. The bot needs Manage Roles.` });
     byName.set(name.toLowerCase(), made.data);
@@ -113,16 +130,16 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
     if (mine?.data && fresh.data) {
       const pos = new Map(fresh.data.map((r) => [r.id, r.position]));
       const botTop = Math.max(0, ...mine.data.roles.map((r) => pos.get(r) ?? 0));
-      const ordered = [...rankNames, ...specialtyNames].map(idOf).filter((x): x is string => !!x);
+      const ordered = [...rankNames, ...guildNames, ...specialtyNames].map(idOf).filter((x): x is string => !!x);
       // Roles that sit between the bot and our roles keep everyone grouped under them instead of under a rank.
       const blockers = fresh.data.filter((r) => !ordered.includes(r.id) && r.position < botTop && r.position > Math.min(...ordered.map((id) => pos.get(id) ?? 0)) && r.name !== "@everyone");
       const want = ordered.map((id, i) => ({ id, position: botTop - 1 - i }));
       const already = blockers.length === 0 && want.every((w, i) => i === 0 || (pos.get(want[i - 1].id) ?? 0) > (pos.get(w.id) ?? 0));
       if (botTop <= ordered.length) {
-        out.skipped.push("Rank roles could not be moved up: the bot's own role is too low. In Server Settings > Roles, drag the Vstroz Alliance bot role to the top.");
+        out.skipped.push(`Rank roles could not be moved up: the bot role is too low (position ${botTop}, needs more than ${ordered.length}). In Server Settings > Roles, drag the Vstroz Alliance bot role to the top.`);
       } else if (!already) {
         const moved = await api(`/guilds/${c.guildId}/roles`, { method: "PATCH", body: JSON.stringify(want) });
-        if (moved.ok) out.changes.push(`role order: moved ${ordered.length} rank and specialty roles to the top, under the bot's role`);
+        if (moved.ok) out.changes.push(`role order: moved ${ordered.length} rank, guild and specialty roles to the top, under the bot's role`);
         else out.skipped.push(`Rank roles could not be moved up (${moved.status}) ${moved.text}`);
       }
     }
@@ -143,7 +160,7 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
 
   const users = await db.user.findMany({
     where: { discordLeftAt: null },
-    select: { id: true, username: true, displayName: true, discord: true, discordId: true, discordUsername: true, role: true, tier: true, status: true, game: true, playedGames: true, specialties: true },
+    select: { id: true, username: true, displayName: true, discord: true, discordId: true, discordUsername: true, role: true, tier: true, status: true, guildRank: true, game: true, playedGames: true, specialties: true },
   });
   const guild = await api<{ owner_id: string }>(`/guilds/${c.guildId}`);
   const ownerId = guild.data?.owner_id;
@@ -175,9 +192,11 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
 
     if (u) {
       out.matched++;
-      add(allianceRank(u).label);
+      add(allianceRank(u).full);
+      const guildRank = guildRankOf(u); // only for members of the guild; separate from the alliance rank
+      if (guildRank) add(guildRoleName(guildRank));
+      for (const s of specialtiesOf(u)) add(specialtyName(s));
       for (const game of playedGamesOf(u)) add(game);
-      for (const s of specialtiesOf(u)) add(s.label);
       if (u.status === "APPROVED") add(legionName);
     } else {
       // No website account: they are in the Discord community but not in the alliance, so they hold no alliance

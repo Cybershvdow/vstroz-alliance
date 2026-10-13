@@ -233,10 +233,10 @@ export async function Command() {
                 <div className="relative">
                   <div className="flex items-start justify-between">
                     <Avatar name={l.displayName} size="lg" tone={rank.tone} src={avatarUrl(l)} />
-                    <Badge tone={rank.tone}>{rank.label}</Badge>
+                    <Badge tone={rank.tone}>{rank.full}</Badge>
                   </div>
                   <h3 className="display mt-5 text-3xl">{l.displayName}</h3>
-                  <p className="mt-1 text-sm text-text">{l.title ?? rank.label}</p>
+                  <p className="mt-1 text-sm text-text">{l.title ?? rank.full}</p>
                   {(tags.length > 0 || l.gameClass) && (
                     <div className="mt-4 flex flex-wrap gap-1.5 border-t border-line pt-4">
                       {tags.map((t) => (

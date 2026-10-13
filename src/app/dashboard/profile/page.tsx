@@ -143,7 +143,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
               <div>
                 <dt className="label">Alliance rank</dt>
                 <dd className="mt-1">
-                  <Badge tone={rank.tone}>{rank.label}</Badge>
+                  <Badge tone={rank.tone}>{rank.full}</Badge>
                 </dd>
               </div>
               {showLegion && (

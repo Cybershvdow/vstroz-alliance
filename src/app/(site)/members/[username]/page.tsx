@@ -138,7 +138,7 @@ export default async function MemberProfilePage({ params, searchParams }: Props)
                 <Badge tone={rank.tone}>{rank.full}</Badge>
                 {specialtiesOf(user).map((s) => (
                   <Badge key={s.key} tone="cyan">
-                    {s.label} · {s.plain}
+                    {s.plain} ({s.label})
                   </Badge>
                 ))}
                 {inLegion && (

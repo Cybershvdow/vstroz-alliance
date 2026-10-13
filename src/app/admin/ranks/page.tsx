@@ -73,7 +73,7 @@ export default async function AdminRanksPage() {
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="display text-lg">{m.displayName}</p>
-                      <Badge tone={m.rank.tone}>{m.rank.label}</Badge>
+                      <Badge tone={m.rank.tone}>{m.rank.full}</Badge>
                       {/* Command sits above the ladder, but the buttons on this page edit the tier, so it is shown here. */}
                       {m.role !== "MEMBER" && <Badge tone="neutral">Ladder: {TIER_LABEL[m.tier as Tier] ?? m.tier}</Badge>}
                       {m.status === "APPROVED" && <Badge tone="success">{site.legionName}</Badge>}

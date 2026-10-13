@@ -34,8 +34,8 @@ export default async function TablePage() {
               {command
                 ? "Captains and Generals bring matters straight to The Round Table. A General records the decision."
                 : canTable
-                  ? `As ${rank.label === "Elite" ? "an" : "a"} ${rank.label} you can go to a Captain or straight to The Round Table. Start with a Captain when you can.`
-                  : `As a ${rank.label} your first stop is a Captain. They answer it or send it up to The Round Table. Veterans and Elite can go to The Round Table directly.`}
+                  ? `As ${rank.plain === "Elite" ? "an" : "a"} ${rank.full} you can go to a Captain or straight to The Round Table. Start with a Captain when you can.`
+                  : `As a ${rank.full} your first stop is a Captain. They answer it or send it up to The Round Table. Veterans and Elite can go to The Round Table directly.`}
             </p>
             <DisputeForm members={members} canTable={canTable} commandOnly={command} />
           </Card>

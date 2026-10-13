@@ -68,15 +68,15 @@ export default function RulesPage() {
               ))}
             </ul>
             <h3 className="display mt-10 text-2xl">Specialty roles</h3>
-            <p className="mt-2 text-sm text-muted">A job someone holds on top of their rank. A Legatus hands them out.</p>
+            <p className="mt-2 text-sm text-muted">A job someone holds on top of their rank. A General (Legatus) hands them out.</p>
             <ul className="mt-4 divide-y divide-line border-y border-line">
               {SPECIALTIES.map((s) => (
                 <li key={s.key} className="flex items-start gap-4 py-3">
                   <Badge tone="cyan" className="mt-0.5 w-44 shrink-0 justify-center">
-                    {s.label}
+                    {s.plain} ({s.label})
                   </Badge>
                   <span className="text-sm text-muted">
-                    <span className="text-text">{s.plain}.</span> {s.does}
+                    {s.does}
                   </span>
                 </li>
               ))}
@@ -87,7 +87,7 @@ export default function RulesPage() {
                 <span className="text-text">The Discord.</span> Anyone who joins the server is part of the community. No rank.
               </li>
               <li className="py-3">
-                <span className="text-text">The alliance.</span> Make an account here and you join as a Tiro. Alliance ranks are the same in every game.
+                <span className="text-text">The alliance.</span> Make an account here and you join as a Recruit (Tiro). Alliance ranks are the same in every game.
               </li>
               <li className="py-3">
                 <span className="text-text">A game&apos;s guild.</span> Today that is the {site.legionName} in {site.legionGame}. You apply to it separately and it has its own ranks:{" "}

@@ -138,7 +138,7 @@ export function tierRank(t: string) {
  * Recruit). The ladder is alliance-wide: every account starts as a Recruit, whatever they play. The legion is separate.
  */
 export type Rank = { label: string; plain: string; full: string; order: number; tone: "gold" | "accent" | "neutral"; command: boolean };
-const rank = (label: string, order: number, tone: Rank["tone"], command = false): Rank => ({ label, plain: RANK_PLAIN[label] ?? label, full: `${label} · ${RANK_PLAIN[label] ?? label}`, order, tone, command });
+const rank = (label: string, order: number, tone: Rank["tone"], command = false): Rank => ({ label, plain: RANK_PLAIN[label] ?? label, full: RANK_PLAIN[label] ? `${RANK_PLAIN[label]} (${label})` : label, order, tone, command });
 
 /** Two tracks: command is appointed (Legatus, Tribune, Centurion); the ladder is earned (Evocatus down to Tiro). */
 export function allianceRank(u: { role: string; tier: string }): Rank {
@@ -338,13 +338,13 @@ export const CHAIN_LEVEL_LABEL: Record<string, string> = { CAPTAIN: "With the Ca
 
 /** The chain of command, highest first. Shown on the Rules page and in the portal. */
 export const CHAIN_OF_COMMAND: { rank: string; tone: "gold" | "accent" | "neutral"; does: string; goesTo: string }[] = [
-  { rank: "Legatus · General", tone: "gold", does: "Runs the alliance and sits at the head of The Round Table. Final say. Can veto or override.", goesTo: "The other Legati" },
-  { rank: "Tribune · Lieutenant", tone: "gold", does: "Second to the Legati. Runs things day to day and decides what reaches The Round Table, so the Legati are not asked to do everything.", goesTo: "A Legatus" },
-  { rank: "Centurion · Captain", tone: "accent", does: "The first stop for the ranks. Answers questions, settles day-to-day issues, and sends up only what needs The Round Table.", goesTo: "A Tribune, at The Round Table" },
-  { rank: "Evocatus · Elite", tone: "gold", does: "Senior rank, voted in. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Centurion, or The Round Table directly" },
-  { rank: "Veteranus · Veteran", tone: "accent", does: "Senior rank, voted in. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Centurion, or The Round Table directly" },
-  { rank: "Socius · Member", tone: "neutral", does: "Trusted regular. Takes questions and issues to a Centurion, who answers or sends it up.", goesTo: "A Centurion" },
-  { rank: "Tiro · Recruit", tone: "neutral", does: "New to the alliance. Takes questions and issues to a Centurion, who answers or sends it up.", goesTo: "A Centurion" },
+  { rank: "General (Legatus)", tone: "gold", does: "Runs the alliance and sits at the head of The Round Table. Final say. Can veto or override.", goesTo: "The other Generals" },
+  { rank: "Lieutenant (Tribune)", tone: "gold", does: "Second to the Generals. Runs things day to day and decides what reaches The Round Table, so the Generals are not asked to do everything.", goesTo: "A General" },
+  { rank: "Captain (Centurion)", tone: "accent", does: "The first stop for the ranks. Answers questions, settles day-to-day issues, and sends up only what needs The Round Table.", goesTo: "A Lieutenant, at The Round Table" },
+  { rank: "Elite (Evocatus)", tone: "gold", does: "Senior rank, voted in. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Captain, or The Round Table directly" },
+  { rank: "Veteran (Veteranus)", tone: "accent", does: "Senior rank, voted in. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Captain, or The Round Table directly" },
+  { rank: "Member (Socius)", tone: "neutral", does: "Trusted regular. Takes questions and issues to a Captain, who answers or sends it up.", goesTo: "A Captain" },
+  { rank: "Recruit (Tiro)", tone: "neutral", does: "New to the alliance. Takes questions and issues to a Captain, who answers or sends it up.", goesTo: "A Captain" },
 ];
 
 /* ---------- Guild ranks: inside one game's guild only (today: the Vstroz Legion in Aion) ---------- */

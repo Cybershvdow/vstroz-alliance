@@ -42,7 +42,7 @@ export function PortalShell({
             <div className="min-w-0">
               <p className="truncate font-display text-lg font-bold uppercase leading-tight">{user.displayName}</p>
               <div className="flex flex-wrap gap-1">
-                <Badge tone={rank.tone}>{rank.label}</Badge>
+                <Badge tone={rank.tone}>{rank.full}</Badge>
                 {user.status === "APPROVED" && <Badge tone="success">Legion</Badge>}
               </div>
               <Link href="/dashboard/profile#profile-picture" className="inline-block py-2 text-xs text-muted underline-offset-4 hover:text-text hover:underline">

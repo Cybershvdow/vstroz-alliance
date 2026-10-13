@@ -36,7 +36,7 @@ export default async function VotesPage() {
         text={
           hidden
             ? "Rejoin the Discord to vote on promotions."
-            : `Your rank is ${rank.label}. Every alliance member votes on promotions into Veteran and Elite. Officers can veto or override.`
+            : `Your rank is ${rank.full}. Every alliance member votes on promotions into Veteran and Elite. Officers can veto or override.`
         }
       />
 
@@ -45,7 +45,7 @@ export default async function VotesPage() {
           <div key={t} className={`panel p-4 ${onLadder && t === myTier ? "border-gold/50" : ""}`}>
             <div className="flex items-center justify-between">
               <span className="display text-xl">
-                {TIER_LABEL[t]} <span className="font-sans text-xs font-normal normal-case tracking-normal text-muted">{RANK_PLAIN[TIER_LABEL[t]]}</span>
+                {RANK_PLAIN[TIER_LABEL[t]]} <span className="font-sans text-xs font-normal normal-case tracking-normal text-muted">({TIER_LABEL[t]})</span>
               </span>
               <span className="flex items-center gap-2">
                 {(VOTED_TIERS as readonly string[]).includes(t) && <Badge tone="gold">Voted</Badge>}

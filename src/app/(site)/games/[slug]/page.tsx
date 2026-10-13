@@ -185,7 +185,7 @@ export default async function GamePage({ params, searchParams }: Props) {
                     <Avatar name={m.displayName} size="sm" tone={m.guild.tone} src={avatarUrl(m)} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-display font-bold uppercase tracking-wider">{m.displayName}</span>
-                      <span className="block truncate text-xs text-muted">{[m.ign, m.gameClass].filter(Boolean).join(" · ") || `Alliance rank: ${m.rank.label}`}</span>
+                      <span className="block truncate text-xs text-muted">{[m.ign, m.gameClass].filter(Boolean).join(" · ") || `Alliance rank: ${m.rank.full}`}</span>
                     </span>
                     <Badge tone={m.guild.tone}>{m.guild.label}</Badge>
                   </Link>
@@ -232,7 +232,7 @@ export default async function GamePage({ params, searchParams }: Props) {
                     <span className="block truncate font-display font-bold uppercase tracking-wider">{m.displayName}</span>
                     {m.title && <span className="block truncate text-xs text-muted">{m.title}</span>}
                   </span>
-                  <Badge tone={m.rank.tone}>{m.rank.label}</Badge>
+                  <Badge tone={m.rank.tone}>{m.rank.full}</Badge>
                 </Link>
               </li>
             ))}
