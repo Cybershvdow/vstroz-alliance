@@ -14,14 +14,14 @@ import { site } from "@/lib/site";
 const base = () => (process.env.APP_URL || "https://vstrozalliance.com").replace(/\/$/, "");
 export const siteUrl = (p: string) => `${base()}${p}`;
 
-/** Post a line to the feed channel. Mentions are switched off so a name can never ping anyone. */
-export async function announce(text: string, channel: string = site.discordFeedChannelId) {
+/** Post a line to a channel (the feed by default). Nobody is pinged unless the caller names exactly who. */
+export async function announce(text: string, channel: string = site.discordFeedChannelId, ping: { users?: string[]; roles?: string[] } = {}) {
   if (!channel || !discordSyncConfigured()) return false;
   try {
     const res = await fetch(`https://discord.com/api/v10/channels/${channel}/messages`, {
       method: "POST",
       headers: { Authorization: `Bot ${discordConfig().botToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ content: text.slice(0, 1950), allowed_mentions: { parse: [] } }),
+      body: JSON.stringify({ content: text.slice(0, 1950), allowed_mentions: { parse: [], users: ping.users ?? [], roles: ping.roles ?? [] } }),
       cache: "no-store",
     });
     if (!res.ok) console.error(`[feed] Discord refused the post (${res.status}) ${(await res.text()).slice(0, 160)}`);
@@ -84,4 +84,51 @@ Posted by ${author} on ${siteUrl("/dashboard")}`;
   const body = a.body.length > room ? `${a.body.slice(0, room - 1)}…` : a.body;
   return announce(`${head}
 ${body}${tail}`, site.discordNewsChannelId);
+}
+
+/**
+ * Welcomes people who joined the Discord since the last check: one message each in the welcome channel, with what to
+ * do next, and a ping to the Recruiters so a person follows up. The time of the last check is kept next to the
+ * database, so nobody is welcomed twice and nobody who was already in the server gets a late welcome.
+ */
+export async function welcomeNewDiscordMembers(members: { user: { id: string; bot?: boolean }; joined_at: string }[], recruiterRoleId?: string) {
+  const channel = site.discordWelcomeChannelId;
+  const dbFile = (process.env.DATABASE_URL || "").replace(/^file:/, "");
+  if (!channel || !dbFile) return 0;
+  const marker = path.join(path.dirname(path.isAbsolute(dbFile) ? dbFile : path.resolve("prisma", dbFile)), ".discord-welcome-since");
+  const now = new Date();
+  if (!fs.existsSync(marker)) {
+    fs.writeFileSync(marker, now.toISOString()); // first run: start from now
+    return 0;
+  }
+  const since = new Date(fs.readFileSync(marker, "utf8").trim());
+  if (Number.isNaN(since.getTime())) {
+    fs.writeFileSync(marker, now.toISOString());
+    return 0;
+  }
+  const fresh = members.filter((m) => !m.user.bot && new Date(m.joined_at) > since).sort((a, b) => a.joined_at.localeCompare(b.joined_at));
+  let sent = 0;
+  let upTo = since;
+  for (const m of fresh.slice(0, 10)) {
+    const text =
+      `Welcome to the Vstroz Alliance, <@${m.user.id}>. You're in as a Recruit.
+
+` +
+      `1. Say hi and tell us what you play.
+` +
+      `2. Want to be a Member? Make an account at ${siteUrl("/register")} and use the same name you have here.
+` +
+      `3. Play Aion? Apply for the guild from your account after you sign up.
+
+` +
+      (recruiterRoleId ? `<@&${recruiterRoleId}> come say hello.` : "Someone from the team will say hello soon.");
+    const ok = await announce(text, channel, { users: [m.user.id], roles: recruiterRoleId ? [recruiterRoleId] : [] });
+    if (!ok) break; // try again on the next check rather than skipping someone
+    sent++;
+    upTo = new Date(m.joined_at);
+  }
+  // Everyone welcomed (or nobody new): move the line up to now. Otherwise only as far as we got.
+  fs.writeFileSync(marker, (sent === Math.min(fresh.length, 10) && fresh.length <= 10 ? now : upTo).toISOString());
+  if (fresh.length) console.log(`[feed] welcomed ${sent} of ${fresh.length} new Discord members`);
+  return sent;
 }

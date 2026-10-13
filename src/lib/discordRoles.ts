@@ -157,6 +157,11 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
   }
   const people = members.filter((m) => !m.user.bot);
   out.members = people.length;
+  if (apply) {
+    // Greet anyone who joined since the last check, and call the Recruiters over.
+    const { welcomeNewDiscordMembers } = await import("@/lib/feed");
+    await welcomeNewDiscordMembers(people, idOf(specialtyName(SPECIALTIES[0]))).catch((e) => console.error("[feed] welcome failed", e));
+  }
 
   const users = await db.user.findMany({
     where: { discordLeftAt: null },
