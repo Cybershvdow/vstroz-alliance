@@ -202,7 +202,10 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
       // No website account: they are in the Discord community but not in the alliance, so they hold no alliance
       // rank (owner's rule, 2026-10-12). Joining the alliance means making a website account, which starts at Tiro.
       // Whatever roles they already have are left exactly as they are.
-      for (const r of m.roles) if (managedIds.has(r)) want.add(r);
+      // Rule changed the same day: everyone in the Discord without a website account is a Recruit (Tiro).
+      // A website account makes them a Member. Nothing else of theirs is touched.
+      for (const r of m.roles) if (managedIds.has(r) && !rankNames.some((n) => idOf(n) === r)) want.add(r);
+      add(ALL_RANKS[ALL_RANKS.length - 1].full);
     }
 
     const adding = [...want].filter((r) => !current.has(r));

@@ -111,10 +111,10 @@ export const TIER_LABEL: Record<Tier, string> = {
 };
 
 export const TIER_BLURB: Record<Tier, string> = {
-  RECRUIT: "Where everyone starts. New to the alliance, proving reliability and attitude.",
+  RECRUIT: "Everyone in the Discord who has not made a website account yet.",
   MEMBER: "Trusted regular. Promoted by an officer after showing up consistently.",
-  VETERAN: "Backbone of the crew. Voted in by the alliance; officers can veto.",
-  ELITE: "The competitive roster. Voted in by the alliance; officers can veto. Plays the professional matches.",
+  VETERAN: "Backbone of the crew. Voted in by the alliance; a General has the last say.",
+  ELITE: "The competitive roster. Voted in by the alliance; a General has the last say. Plays the professional matches.",
 };
 
 /** Tiers that require a member vote instead of an officer decision. */
@@ -344,7 +344,7 @@ export const CHAIN_OF_COMMAND: { rank: string; tone: "gold" | "accent" | "neutra
   { rank: "Elite (Evocatus)", tone: "gold", does: "Senior rank, voted in. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Captain, or The Round Table directly" },
   { rank: "Veteran (Veteranus)", tone: "accent", does: "Senior rank, voted in. Can bring a matter straight to The Round Table. Expected to help the ranks below before it gets that far.", goesTo: "A Captain, or The Round Table directly" },
   { rank: "Member (Socius)", tone: "neutral", does: "Trusted regular. Takes questions and issues to a Captain, who answers or sends it up.", goesTo: "A Captain" },
-  { rank: "Recruit (Tiro)", tone: "neutral", does: "New to the alliance. Takes questions and issues to a Captain, who answers or sends it up.", goesTo: "A Captain" },
+  { rank: "Recruit (Tiro)", tone: "neutral", does: "In the Discord, no website account yet. Takes questions and issues to a Captain, who answers or sends it up.", goesTo: "A Captain" },
 ];
 
 /* ---------- Guild ranks: inside one game's guild only (today: the Vstroz Legion in Aion) ---------- */

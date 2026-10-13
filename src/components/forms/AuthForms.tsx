@@ -103,7 +103,7 @@ export function RegisterForm() {
       </Button>
 
       <p className="text-center text-xs text-muted">
-        Your account makes you a Recruit in the alliance. Once you are signed in you can add a profile picture and pick your games.
+        Your account makes you a Member of the alliance. Once you are signed in you can add a profile picture and pick your games.
       </p>
       <p className="text-center text-sm text-muted">
         Already have an account?{" "}

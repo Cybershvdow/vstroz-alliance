@@ -226,10 +226,10 @@ export const requirements = [
 ];
 
 export const membershipPath = [
-  { n: "01", title: "Recruit (Tiro)", text: "Create your Vstroz Alliance account. You join the alliance as a Recruit, whatever you play. Pick your games, post content, vote, and get a public profile and a place on the roster." },
-  { n: "02", title: "Member (Socius)", text: "Show up consistently and an officer promotes you to Member." },
-  { n: "03", title: "Veteran (Veteranus)", text: "Voted in by the alliance. Officers can veto." },
-  { n: "04", title: "Elite (Evocatus)", text: "The competitive roster. Voted in by the alliance; officers can veto." },
+  { n: "01", title: "Recruit (Tiro)", text: "Everyone in the Discord. You are part of the community and you can see what is going on." },
+  { n: "02", title: "Member (Socius)", text: "Create your Vstroz Alliance account and you are a Member, whatever you play. Pick your games, post content, vote, and get a public profile and a place on the roster." },
+  { n: "03", title: "Veteran (Veteranus)", text: "Voted in by the alliance. Every member and officer votes; a General has the last say." },
+  { n: "04", title: "Elite (Evocatus)", text: "The competitive roster. Voted in by the alliance; a General has the last say." },
 ];
 
 /* Rules & The Round Table */
@@ -258,9 +258,9 @@ export const rules = {
     {
       title: "Ranks",
       items: [
-        "Every account starts as a Recruit. Ranks belong to the alliance, not to one game.",
-        "Recruit → Member is decided by officers after consistent attendance and attitude.",
-        "Veteran and Elite are decided by a vote of the alliance. Officers and leaders can veto or override.",
+        "Everyone in the Discord is a Recruit. Make an account on the website and you are a Member. Ranks belong to the alliance, not to one game.",
+        "Each game faction has its own application. Right now that is Aion.",
+        "Veteran and Elite are decided by a vote of the alliance. Every member and officer votes. A General has the last say.",
         "Elite is the competitive roster. A spot is earned by vote and can be lost.",
         "Captain and General are command ranks above the ladder.",
         "The Vstroz Legion is our Aion guild. Joining it unlocks match signups and guild roles. It does not change your rank.",

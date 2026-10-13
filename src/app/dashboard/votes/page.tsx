@@ -36,7 +36,7 @@ export default async function VotesPage() {
         text={
           hidden
             ? "Rejoin the Discord to vote on promotions."
-            : `Your rank is ${rank.full}. Every alliance member votes on promotions into Veteran and Elite. Officers can veto or override.`
+            : `Your rank is ${rank.full}. Every alliance member votes on promotions into Veteran and Elite. Officers vote too. A General has the last say.`
         }
       />
 

@@ -87,7 +87,7 @@ export default function RulesPage() {
                 <span className="text-text">The Discord.</span> Anyone who joins the server is part of the community. No rank.
               </li>
               <li className="py-3">
-                <span className="text-text">The alliance.</span> Make an account here and you join as a Recruit (Tiro). Alliance ranks are the same in every game.
+                <span className="text-text">The alliance.</span> Everyone in the Discord is a Recruit (Tiro). Make an account here and you are a Member (Socius). Alliance ranks are the same in every game.
               </li>
               <li className="py-3">
                 <span className="text-text">A game&apos;s guild.</span> Today that is the {site.legionName} in {site.legionGame}. You apply to it separately and it has its own ranks:{" "}
@@ -95,9 +95,9 @@ export default function RulesPage() {
               </li>
             </ul>
             <p className="mt-4 text-sm text-muted">
-              The alliance runs like a business. You take a question or an issue to the level above you, not straight to the top. A Centurion
-              answers it or sends it up. Veterans and Elite have earned a direct line to The Round Table. Recruit to Member is an officer
-              decision; Veteran and Elite are voted in by the alliance.
+              The alliance runs like a business. You take a question or an issue to the level above you, not straight to the top. A Captain
+              answers it or sends it up. Veterans and Elite have earned a direct line to The Round Table. Making a website account makes you a Member;
+              Veteran and Elite are voted in by the alliance, and a General has the last say.
             </p>
           </div>
         </div>

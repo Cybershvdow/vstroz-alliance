@@ -42,6 +42,9 @@ try {
       console.log(`[bootstrap] Aion guild: leader set on ${lead.count}, removed from the guild ${out.count}`);
     }
   }
+  // Owner's rule (2026-10-12): a website account is a Member; Recruit means "in the Discord, no account". Safe on every start.
+  const lifted = await db.user.updateMany({ where: { tier: "RECRUIT" }, data: { tier: "MEMBER" } });
+  if (lifted.count) console.log(`[bootstrap] ${lifted.count} accounts moved from Recruit to Member`);
   // Accounts reviewed before the legion flow existed count as applied. Never touches unreviewed accounts.
   const backfilled = await db.$executeRawUnsafe(
     'UPDATE "User" SET "appliedAt" = COALESCE("reviewedAt", "createdAt") WHERE "appliedAt" IS NULL AND "reviewedAt" IS NOT NULL',

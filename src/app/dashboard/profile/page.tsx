@@ -49,7 +49,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           <ClearDraft names={["register"]} scope="anon" />
           <div className="panel mb-6 flex flex-col gap-3 border-accent/50 p-4 text-sm md:flex-row md:items-center md:justify-between">
             <p>
-              <span className="font-semibold">Welcome to the alliance, {me.displayName}.</span> You start as a Recruit. Add a profile picture and a banner below, then tick the games you play. They show as tags on your profile and list you on each game&apos;s page.
+              <span className="font-semibold">Welcome to the alliance, {me.displayName}.</span> You are a Member. Add a profile picture and a banner below, then tick the games you play. They show as tags on your profile and list you on each game&apos;s page.
             </p>
             <div className="flex shrink-0 flex-wrap gap-2">
               <ButtonLink href="#player-profile" size="sm">

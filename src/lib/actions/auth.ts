@@ -59,6 +59,7 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
   const user = await db.user.create({
     data: {
       username: d.username,
+      tier: "MEMBER", // a website account makes you a Member; Recruit is everyone in the Discord without one (owner, 2026-10-12)
       email,
       displayName: d.displayName,
       passwordHash,

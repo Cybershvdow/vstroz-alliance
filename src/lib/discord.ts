@@ -97,6 +97,7 @@ export async function createDiscordAccount(du: DiscordUser) {
   return db.user.create({
     data: {
       username,
+      tier: "MEMBER", // see registerAction: a website account starts as a Member
       email,
       passwordHash,
       displayName: (du.global_name || du.username || "Member").slice(0, 32),

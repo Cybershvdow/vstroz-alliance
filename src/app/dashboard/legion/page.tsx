@@ -147,7 +147,7 @@ export default async function LegionPage({ searchParams }: { searchParams: Promi
             <p className="eyebrow">Alliance vs legion</p>
             <ul className="mt-2 space-y-2 text-sm text-muted">
               <li>
-                <span className="text-text">Alliance</span>: everyone with a Vstroz Alliance account, whatever they play. Everyone starts as a Recruit and earns rank here. Pick your games, post content, vote, bring disputes.
+                <span className="text-text">Alliance</span>: everyone with a Vstroz Alliance account, whatever they play. Everyone with an account is a Member and earns rank from there. Pick your games, post content, vote, bring disputes.
               </li>
               <li>
                 <span className="text-text">{site.legionName}</span>: our guild in {site.legionGame} only. Join it in-game, then apply here; officers approve. Unlocks match signups and guild roles. It does not change your rank.

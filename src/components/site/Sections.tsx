@@ -262,8 +262,8 @@ export function JoinCTA() {
               Earn the <span className="display-gold">banner.</span>
             </h2>
             <p className="mt-4 max-w-xl text-muted">
-              Create an account and you join the alliance as a Recruit: pick your games, post content, vote, build your profile. Show up
-              and an officer promotes you to Member. Veteran and Elite are voted in by the alliance.
+              Create an account and you are a Member of the alliance: pick your games, post content, vote, build your profile. Veteran and Elite
+              are voted in by the alliance, and a General has the last say.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
