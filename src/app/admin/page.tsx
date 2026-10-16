@@ -6,6 +6,8 @@ import { avatarUrl } from "@/lib/avatar";
 import { Avatar, Badge, Button, ButtonLink, Card, EmptyState, PageHeader, Stat } from "@/components/ui";
 import { syncDiscordAction } from "@/lib/actions/discord";
 import { discordConfigured, discordSyncConfigured, lastDiscordSync } from "@/lib/discord";
+import { lastRoleSync } from "@/lib/discordRoles";
+import { allianceRank } from "@/lib/constants";
 import { ENABLED_GAMES, playedGamesOf } from "@/lib/constants";
 
 export default async function AdminOverview({ searchParams }: { searchParams: Promise<{ discord?: string; removed?: string; restored?: string }> }) {
@@ -34,6 +36,10 @@ export default async function AdminOverview({ searchParams }: { searchParams: Pr
   }
   const gamesPlayed = ENABLED_GAMES.map((g) => ({ game: g.name, n: tagCounts.get(g.name) ?? 0 }));
   const otherGames = [...otherCounts.values()].sort((a, b) => b.n - a.n).slice(0, 12);
+  // Who on the website the last Discord check found in the server, and who it could not.
+  const roleSync = lastRoleSync();
+  const found = new Set(roleSync?.ok ? roleSync.matchedIds : []);
+  const everyone = sync ? await db.user.findMany({ where: { discordLeftAt: null }, orderBy: { createdAt: "asc" }, select: { id: true, displayName: true, username: true, discord: true, discordUsername: true, role: true, tier: true } }) : [];
   const discordMsg =
     discord === "synced" ? `Sync done: ${removed ?? 0} removed, ${restored ?? 0} restored.` : discord === "error" ? "Sync failed. Check the server logs." : discord === "off" ? "Discord sync is not configured." : undefined;
   const now = new Date();
@@ -72,6 +78,34 @@ export default async function AdminOverview({ searchParams }: { searchParams: Pr
             </form>
           )}
         </div>
+        {sync && everyone.length > 0 && (
+          <div className="mt-6 border-t border-line pt-4">
+            <p className="label">
+              Website profiles in Discord{roleSync ? ` · checked ${formatDateTime(roleSync.at)}` : " · not checked yet since the last restart, press Sync now"}
+            </p>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {everyone.map((u) => {
+                const ok = found.has(u.id);
+                return (
+                  <li key={u.id} className="flex items-center justify-between gap-3 border border-line px-3 py-2 text-sm">
+                    <span className="min-w-0">
+                      <Link href={`/members/${encodeURIComponent(u.username)}`} className="block truncate font-semibold hover:text-gold">
+                        {u.displayName}
+                      </Link>
+                      <span className="block truncate text-xs text-muted">
+                        {allianceRank(u).full} · Discord: {u.discordUsername ?? u.discord ?? "none on profile"}
+                      </span>
+                    </span>
+                    {roleSync && <Badge tone={ok ? "success" : "warning"}>{ok ? "Synced" : "Not found"}</Badge>}
+                  </li>
+                );
+              })}
+            </ul>
+            {roleSync && everyone.some((u) => !found.has(u.id)) && (
+              <p className="mt-3 text-xs text-muted">Not found means they have not joined the Discord, or the Discord name on their profile does not match. They can fix it by signing in with Discord or typing their exact Discord username on their profile.</p>
+            )}
+          </div>
+        )}
       </Card>
 
       <Card className="mt-8">

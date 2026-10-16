@@ -28,6 +28,8 @@ export type RoleSyncResult = {
   at: Date;
   members: number;
   matched: number;
+  /** Website accounts that were found in the Discord on this run. */
+  matchedIds: string[];
   rolesCreated: string[];
   changes: string[];
   skipped: string[];
@@ -72,7 +74,7 @@ const norm = (s: string | null | undefined) => (s ?? "").trim().replace(/^@/, ""
  */
 export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: string[]): Promise<RoleSyncResult> {
   const at = new Date();
-  const out: RoleSyncResult = { ok: false, mode, at, members: 0, matched: 0, rolesCreated: [], changes: [], skipped: [] };
+  const out: RoleSyncResult = { ok: false, mode, at, members: 0, matched: 0, matchedIds: [], rolesCreated: [], changes: [], skipped: [] };
   const done = (r: RoleSyncResult) => (g.__vztLastRoleSync = r);
   if (mode === "off" || !discordSyncConfigured()) return done({ ...out, error: "Discord role sync is off or the bot is not configured." });
   const c = discordConfig();
@@ -197,6 +199,7 @@ export async function syncDiscordRoles(mode: RoleSyncMode, onlyDiscordIds?: stri
 
     if (u) {
       out.matched++;
+      out.matchedIds.push(u.id);
       add(allianceRank(u).full);
       const guildRank = guildRankOf(u); // only for members of the guild; separate from the alliance rank
       if (guildRank) add(guildRoleName(guildRank));
