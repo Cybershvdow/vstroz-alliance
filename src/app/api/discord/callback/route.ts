@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       where: { id: session.userId },
       data: { discordId: du.id, discordUsername: du.username, discordLinkedAt: new Date(), discordLeftAt: null, discord: du.username },
     });
-    return NextResponse.redirect(new URL("/dashboard/profile?discord=linked", base));
+    return NextResponse.redirect(new URL("/dashboard/profile?discord=linked&welcome=1", base));
   }
 
   let user = existing;

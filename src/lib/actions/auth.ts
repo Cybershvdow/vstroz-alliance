@@ -73,8 +73,9 @@ export async function registerAction(_prev: ActionState, formData: FormData): Pr
   after(() => announce(`${user.displayName} just joined the Vstroz Alliance.
 ${siteUrl(`/members/${encodeURIComponent(user.username)}`)}`));
   await createSession(user.id);
-  // The account alone makes them an alliance member; they pick their games on the profile page next.
-  redirect("/dashboard/profile?welcome=1");
+  // Straight on to Discord: linking by Discord account means the bot finds them whatever name they chose here
+  // (owner, 2026-10-17). They keep the display name they picked. Without Discord set up, go to the profile.
+  redirect(discordConfigured() ? "/api/discord/login?link=1" : "/dashboard/profile?welcome=1");
 }
 
 /**

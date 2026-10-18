@@ -7,6 +7,7 @@ import { MATCH_TYPE_LABEL, allianceRank, playedGamesOf, type MatchType } from "@
 import { Badge, ButtonLink, Card, EmptyState, PageHeader, Stat, statusTone } from "@/components/ui";
 import { Countdown } from "@/components/site/Countdown";
 import { GameTag } from "@/components/site/GameTag";
+import { DiscordButton } from "@/components/site/DiscordButton";
 
 export default async function DashboardPage() {
   const me = await requireUser();
@@ -34,6 +35,18 @@ export default async function DashboardPage() {
         text={[allianceRank(me).label, me.playerType, playedGamesOf(me).join(" · ") || null, `With the alliance since ${formatDate(me.createdAt)}`].filter(Boolean).join(" · ")}
         actions={inLegion ? <ButtonLink href="/dashboard/matches">Match signups</ButtonLink> : <ButtonLink href="/dashboard/profile#player-profile">{myGames.length ? "Edit your games" : "Pick your games"}</ButtonLink>}
       />
+
+      {!me.discordId && (
+        <Card accent className="mb-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="display text-xl">Connect your Discord</h2>
+              <p className="mt-1 max-w-xl text-sm text-muted">One click. It links this account to your Discord so your rank and game tags show up in the server, whatever name you use on either. Your name here stays the same.</p>
+            </div>
+            <DiscordButton href="/api/discord/login?link=1">Connect Discord</DiscordButton>
+          </div>
+        </Card>
+      )}
 
       {!me.avatarAt && (
         <Card className="mb-6">
