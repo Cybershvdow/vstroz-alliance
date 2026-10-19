@@ -33,6 +33,15 @@ try {
       fs.writeFileSync(marker2, `${new Date().toISOString()} set ${more.count} existing accounts to Member\n`);
       console.log(`[bootstrap] members as of 2026-10-12: ${more.count} existing accounts set to Member`);
     }
+    // Owner approved kriegg into the Aion guild (Vstroz Legion) on 2026-10-18. Runs once.
+    const marker4 = path.join(path.dirname(marker), ".fixup-kriegg-legion-2026-10-18");
+    if (!fs.existsSync(marker4)) {
+      const now = new Date();
+      const k = await db.user.findUnique({ where: { username: "kriegg1970" }, select: { appliedAt: true } });
+      const r = k ? await db.user.updateMany({ where: { username: "kriegg1970" }, data: { status: "APPROVED", reviewedAt: now, appliedAt: k.appliedAt ?? now } }) : { count: 0 };
+      fs.writeFileSync(marker4, `${now.toISOString()} approved ${r.count}\n`);
+      console.log(`[bootstrap] kriegg approved into the Vstroz Legion: ${r.count}`);
+    }
     // Aion guild (2026-10-12, owner): Cybershvdow leads the guild; Nugget does not play Aion, so is not in it. Runs once.
     const marker3 = path.join(path.dirname(marker), ".fixup-aion-guild-2026-10-12");
     if (!fs.existsSync(marker3)) {
